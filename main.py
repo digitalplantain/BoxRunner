@@ -17,8 +17,8 @@ from tqdm import tqdm
 NEW_SOURCE_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/26.txt"
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS = 25       
-TIMEOUT = 10           
+MAX_WORKERS = 40       
+TIMEOUT = 1           
 API_RETRIES = 2
 
 # Secrets
@@ -393,3 +393,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
