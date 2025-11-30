@@ -17,7 +17,8 @@ from tqdm import tqdm
 NEW_SOURCE_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/26.txt"
 XRAY_PATH = "./xray"
 
-MAX_WORKERS = 30       # Xray ест больше памяти, ставим 30-40
+# Xray требует ресурсов, ставим разумное число потоков
+MAX_WORKERS = 25       
 TIMEOUT = 10           
 API_RETRIES = 2
 
@@ -30,18 +31,18 @@ PROJ_ID = os.environ.get("PROJ_ID")
 GIST_FILENAME = "gistfile1.txt"
 ENV_KEY = "GIST_URL"
 
-# API
-# Используем ip-api, так как он был в рабочем коде и он надежен
+# API (ip-api.com более надежен для скриптов)
 IP_API_URL = "http://ip-api.com/json/?fields=status,country,countryCode,city,isp,org"
 TEST_URL = "http://www.gstatic.com/generate_204"
 
-# Фильтры
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo)"
+# Фильтры (Регулярка для "плохих" провайдеров)
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|amazon|google|microsoft|oracle)"
 
+# Списки стран
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
-# ================= 2. ФУНКЦИИ =================
+# ================= 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -62,7 +63,7 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= 3. ЛОГИКА XRAY (ИЗ ТВОЕГО РАБОЧЕГО СКРИПТА) =================
+# ================= 3. ЛОГИКА XRAY =================
 
 def parse_proxy_link(link):
     try:
@@ -74,7 +75,9 @@ def parse_proxy_link(link):
         parsed = urllib.parse.urlparse(link)
         protocol = parsed.scheme
         
-        if protocol == 'ss': return {'protocol': 'shadowsocks'} # Маркер для фильтрации
+        # Маркер для фильтрации Shadowsocks
+        if protocol == 'ss': return {'protocol': 'shadowsocks'} 
+        
         if protocol not in ['vless', 'trojan']: return None
 
         data = {'protocol': protocol, 'address': parsed.hostname, 'port': parsed.port}
@@ -94,7 +97,8 @@ def generate_xray_config(proxy_data, local_port):
         "inbounds": [{"port": local_port,"listen": "127.0.0.1","protocol": "socks","settings": {"auth": "noauth", "udp": True}}],
         "outbounds": [{"protocol": protocol, "settings": {}, "streamSettings": {}}]
     }
-    out, setts, stream = config['outbounds'][0], config['outbounds'][0]['settings'], config['outbounds'][0]['streamSettings']
+    setts = config['outbounds'][0]['settings']
+    stream = config['outbounds'][0]['streamSettings']
     
     port = int(proxy_data.get('port', 443))
     
@@ -126,10 +130,9 @@ def generate_xray_config(proxy_data, local_port):
     return json.dumps(config)
 
 def rebuild_link(original_link, data, new_name):
-    # Простая замена имени через URL Fragment
+    # Обновляем имя в ссылке
     if original_link.startswith('vmess://'):
         try:
-            # Для vmess декодируем, меняем ps, кодируем
             b64 = original_link[8:]
             conf = json.loads(safe_base64_decode(b64).decode('utf-8'))
             conf['ps'] = new_name
@@ -137,14 +140,13 @@ def rebuild_link(original_link, data, new_name):
             return f"vmess://{new_b64}"
         except: pass
     
-    # Для остальных
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
 # ================= 4. ЗАГРУЗКА ИСТОЧНИКОВ =================
 
 def fetch_links(url, is_gist=False):
-    print(f"Fetching {url}...")
+    print(f"Downloading: {url}...")
     headers = {'User-Agent': 'Mozilla/5.0'}
     if is_gist and GH_TOKEN: headers['Authorization'] = f'token {GH_TOKEN}'
     
@@ -158,17 +160,23 @@ def fetch_links(url, is_gist=False):
             r = requests.get(url, headers=headers); r.raise_for_status()
             content = r.text
         
-        # Попытка 1: Просто текст
+        # Сначала пробуем просто разбить по строкам
         links = [l.strip() for l in content.splitlines() if l.strip()]
         valid = [l for l in links if l.startswith(('vmess://', 'vless://', 'trojan://'))]
-        if valid: return valid
         
-        # Попытка 2: Base64
+        if len(valid) > 0:
+            print(f"  -> Found {len(valid)} links (Text)")
+            return valid
+        
+        # Если не вышло, пробуем Base64
+        print("  -> Trying Base64 decode...")
         decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
-        return [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
+        links_b64 = [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
+        print(f"  -> Found {len(links_b64)} links (Base64)")
+        return links_b64
         
     except Exception as e:
-        print(f"Error fetching: {e}")
+        print(f"  -> Error: {e}")
         return []
 
 # ================= 5. ПРОВЕРКА =================
@@ -183,15 +191,17 @@ def check_proxy(link):
         if not data: return None
         
         # === FILTERS ===
-        if data.get('protocol') in ['shadowsocks', 'ss']: return None # NO SS
+        if data.get('protocol') in ['shadowsocks', 'ss']: return None 
         
         addr = data.get('address') or data.get('add')
         port = data.get('port')
         identifier = f"{addr}:{port}"
+        
+        # Проверка на дубликаты
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
-        # XRAY Config
+        # Config
         local_port = get_free_port()
         conf_str = generate_xray_config(data, local_port)
         
@@ -201,19 +211,19 @@ def check_proxy(link):
 
         # Start Xray
         proc = subprocess.Popen([XRAY_PATH, "run", "-c", config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(1) # Ждем старта
+        time.sleep(1.5) # Даем время на старт
         if proc.poll() is not None: return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # 1. PING
+        # 1. PING (Google Gen204)
         st = time.time()
         try:
             requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
             ping = int((time.time() - st) * 1000)
         except: return None
 
-        # 2. GEO & ISP (IP-API)
+        # 2. GEO & ISP (ip-api.com)
         info = {}
         for _ in range(API_RETRIES):
             try:
@@ -227,10 +237,10 @@ def check_proxy(link):
         if not info: return None
         
         cc = info.get('countryCode', 'XX')
-        if cc == 'RU' or cc == 'XX': return None # NO RU
+        if cc == 'RU' or cc == 'XX': return None # Filter RU
         
         isp = info.get('isp') or info.get('org') or 'Unknown'
-        if re.search(BANNED_ISP_REGEX, isp): return None # NO BAD HOSTING
+        if re.search(BANNED_ISP_REGEX, isp): return None # Filter Bad ISP
 
         # 3. Rename
         flag = country_flag(cc)
@@ -239,6 +249,7 @@ def check_proxy(link):
         gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         
+        # Формат имени
         name = f"{flag} {cc} - {city} ◈ {isp} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico}"
         new_link = rebuild_link(link, data, name)
         
@@ -257,73 +268,93 @@ def check_proxy(link):
 
 def deploy(content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
-        print("Secrets missing.")
+        print("Secrets missing, skipping deploy.")
         return
 
-    # Gist
+    # Gist Update
     print("Updating Gist...")
     try:
         r = requests.patch(
             f'https://api.github.com/gists/{GIST_ID}',
             headers={'Authorization': f'token {GH_TOKEN}'},
-            json={'files': {GIST_FILENAME: {'content': content}}, 'description': f'Xray Updated: {time.strftime("%H:%M UTC")}'}
+            json={'files': {GIST_FILENAME: {'content': content}}, 'description': f'Xray Updated: {time.strftime("%Y-%m-%d %H:%M UTC")}'}
         )
         r.raise_for_status()
-        raw_url = r.json()['files'][GIST_FILENAME]['raw_url'] + f"?t={int(time.time())}"
-        print("Gist OK.")
-    except Exception as e: print(f"Gist Fail: {e}"); return
+        raw_url = r.json()['files'][GIST_FILENAME]['raw_url']
+        # Add timestamp to bypass caching
+        final_url = f"{raw_url}?t={int(time.time())}"
+        print("Gist updated successfully.")
+    except Exception as e:
+        print(f"Gist Error: {e}")
+        return
 
-    # Vercel
+    # Vercel Update
     print("Triggering Vercel...")
     h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
     try:
-        # Env
+        # Update Env
         envs = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env", headers=h).json().get('envs', [])
         eid = next((e['id'] for e in envs if e['key'] == ENV_KEY), None)
-        body = {"value": raw_url, "target": ["production"], "type": "plain"}
+        
+        body = {"value": final_url, "target": ["production", "preview", "development"], "type": "plain"}
+        
         if eid: requests.patch(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env/{eid}", headers=h, json=body)
-        else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
+        else: 
+            body['key'] = ENV_KEY
+            requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
 
-        # Deploy
+        # Trigger Deploy
         proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
         payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
+        
         if 'link' in proj and 'repoId' in proj['link']:
             payload['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
+            
         requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload)
-        print("Deploy OK.")
-    except Exception as e: print(f"Vercel Fail: {e}")
+        print("Vercel deploy triggered.")
+    except Exception as e: 
+        print(f"Vercel Error: {e}")
 
 
 def main():
     if not os.path.exists(XRAY_PATH):
-        print("Xray not found!")
+        print("Xray executable not found!")
         sys.exit(1)
     
-    # 1. Fetch
+    # 1. Загрузка ссылок
     links_new = fetch_links(NEW_SOURCE_URL)
     links_old = []
     if GIST_ID:
         links_old = fetch_links(f"https://api.github.com/gists/{GIST_ID}", is_gist=True)
     
-    all_links = list(set(links_new + links_old))
-    print(f"Total links: {len(all_links)}")
+    # Объединение и удаление явных дублей ссылок (по тексту)
+    all_raw_links = list(set(links_new + links_old))
+    print(f"Total unique raw links: {len(all_raw_links)}")
     
-    # 2. Check
+    if not all_raw_links:
+        print("No links found.")
+        return
+
+    # 2. Проверка
     results = []
+    seen_proxies.clear()
+    
+    # Используем меньше потоков для Xray, чтобы не убить runner и API
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
-        futures = {exe.submit(check_proxy, l): l for l in all_links}
-        for f in tqdm(as_completed(futures), total=len(all_links)):
+        futures = {exe.submit(check_proxy, l): l for l in all_raw_links}
+        for f in tqdm(as_completed(futures), total=len(all_raw_links), desc="Checking"):
             res = f.result()
             if res: results.append(res)
     
-    print(f"Working: {len(results)}")
+    print(f"\nWorking proxies found: {len(results)}")
     
-    # 3. Deploy
+    # 3. Деплой
     if results:
-        results.sort(key=lambda x: x[0])
-        deploy("\n".join([r[1] for r in results]))
+        results.sort(key=lambda x: x[0]) # Сортировка по пингу
+        final_content = "\n".join([r[1] for r in results])
+        deploy(final_content)
     else:
-        print("No working proxies.")
+        print("No working proxies passed filters.")
 
 if __name__ == "__main__":
     main()
