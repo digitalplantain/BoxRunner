@@ -2,8 +2,8 @@ name: Xray Proxy Updater
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+    - cron: '*/15 * * * *'  # Запуск каждые 15 минут
+  workflow_dispatch:        # Кнопка ручного запуска
 
 jobs:
   run-update:
@@ -23,18 +23,15 @@ jobs:
 
     - name: Download Xray-core
       run: |
-        # Скачиваем официальный релиз Xray
+        # Скачиваем архив
         wget https://github.com/XTLS/Xray-core/releases/download/v1.8.24/Xray-linux-64.zip
+        # Распаковываем (файлы появятся в текущей папке)
         unzip Xray-linux-64.zip
-        mv xray Xray-linux-64/ # иногда xray выпадает в корень, иногда нет, но unzip обычно плоский
-        # Проще найти бинарник
-        if [ -f "xray" ]; then
-          chmod +x xray
-        else
-          # Если он внутри папки после распаковки (зависит от версии релиза)
-          find . -name "xray" -type f -exec mv {} . \;
-          chmod +x xray
-        fi
+        # Удаляем лишнее
+        rm Xray-linux-64.zip
+        # Делаем исполняемым
+        chmod +x xray
+        # Проверяем версию (для логов)
         ./xray version
 
     - name: Run Logic
