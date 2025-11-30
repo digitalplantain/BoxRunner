@@ -1,9 +1,9 @@
-name: Xray Proxy Updater
+name: SingBox Proxy Updater
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Запуск каждые 15 минут
-  workflow_dispatch:        # Кнопка ручного запуска
+    - cron: '*/15 * * * *'  # Каждые 15 минут
+  workflow_dispatch:
 
 jobs:
   run-update:
@@ -21,18 +21,15 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Download Xray-core
+    - name: Download Sing-box
       run: |
-        # Скачиваем архив
-        wget https://github.com/XTLS/Xray-core/releases/download/v1.8.24/Xray-linux-64.zip
-        # Распаковываем (файлы появятся в текущей папке)
-        unzip Xray-linux-64.zip
-        # Удаляем лишнее
-        rm Xray-linux-64.zip
-        # Делаем исполняемым
-        chmod +x xray
-        # Проверяем версию (для логов)
-        ./xray version
+        # Скачиваем v1.12.12
+        wget https://github.com/SagerNet/sing-box/releases/download/v1.12.12/sing-box-1.12.12-linux-amd64.tar.gz
+        tar -xzf sing-box-1.12.12-linux-amd64.tar.gz
+        # Достаем бинарник из вложенной папки
+        mv sing-box-1.12.12-linux-amd64/sing-box ./sing-box
+        chmod +x sing-box
+        ./sing-box version
 
     - name: Run Logic
       env:
