@@ -31,11 +31,11 @@ PROJ_ID = os.environ.get("PROJ_ID")
 GIST_FILENAME = "gistfile1.txt"
 ENV_KEY = "GIST_URL"
 
-# API (ip-api.com более надежен для скриптов)
+# API
 IP_API_URL = "http://ip-api.com/json/?fields=status,country,countryCode,city,isp,org"
 TEST_URL = "http://www.gstatic.com/generate_204"
 
-# Фильтры (Регулярка для "плохих" провайдеров)
+# Фильтры
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|amazon|google|microsoft|oracle)"
 
 # Списки стран
@@ -75,9 +75,7 @@ def parse_proxy_link(link):
         parsed = urllib.parse.urlparse(link)
         protocol = parsed.scheme
         
-        # Маркер для фильтрации Shadowsocks
         if protocol == 'ss': return {'protocol': 'shadowsocks'} 
-        
         if protocol not in ['vless', 'trojan']: return None
 
         data = {'protocol': protocol, 'address': parsed.hostname, 'port': parsed.port}
@@ -93,7 +91,7 @@ def parse_proxy_link(link):
 def generate_xray_config(proxy_data, local_port):
     protocol = proxy_data['protocol']
     config = {
-        "log": {"loglevel": "none"},
+        "log": {"loglevel": "error"}, # Логируем ошибки
         "inbounds": [{"port": local_port,"listen": "127.0.0.1","protocol": "socks","settings": {"auth": "noauth", "udp": True}}],
         "outbounds": [{"protocol": protocol, "settings": {}, "streamSettings": {}}]
     }
@@ -130,7 +128,6 @@ def generate_xray_config(proxy_data, local_port):
     return json.dumps(config)
 
 def rebuild_link(original_link, data, new_name):
-    # Обновляем имя в ссылке
     if original_link.startswith('vmess://'):
         try:
             b64 = original_link[8:]
@@ -160,7 +157,6 @@ def fetch_links(url, is_gist=False):
             r = requests.get(url, headers=headers); r.raise_for_status()
             content = r.text
         
-        # Сначала пробуем просто разбить по строкам
         links = [l.strip() for l in content.splitlines() if l.strip()]
         valid = [l for l in links if l.startswith(('vmess://', 'vless://', 'trojan://'))]
         
@@ -168,8 +164,6 @@ def fetch_links(url, is_gist=False):
             print(f"  -> Found {len(valid)} links (Text)")
             return valid
         
-        # Если не вышло, пробуем Base64
-        print("  -> Trying Base64 decode...")
         decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
         links_b64 = [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
         print(f"  -> Found {len(links_b64)} links (Base64)")
@@ -182,26 +176,25 @@ def fetch_links(url, is_gist=False):
 # ================= 5. ПРОВЕРКА =================
 
 seen_proxies = set()
+error_counter = 0
 
 def check_proxy(link):
+    global error_counter
     proc = None
     config_file = None
     try:
         data = parse_proxy_link(link)
         if not data: return None
         
-        # === FILTERS ===
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
         
         addr = data.get('address') or data.get('add')
         port = data.get('port')
         identifier = f"{addr}:{port}"
         
-        # Проверка на дубликаты
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
-        # Config
         local_port = get_free_port()
         conf_str = generate_xray_config(data, local_port)
         
@@ -209,21 +202,22 @@ def check_proxy(link):
         config_file.write(conf_str)
         config_file.close()
 
-        # Start Xray
+        # Запускаем Xray
         proc = subprocess.Popen([XRAY_PATH, "run", "-c", config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(1.5) # Даем время на старт
-        if proc.poll() is not None: return None
+        time.sleep(1.5)
+        
+        if proc.poll() is not None:
+            # Если Xray упал сразу, это проблема конфига
+            return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # 1. PING (Google Gen204)
+        # 1. PING
         st = time.time()
-        try:
-            requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
-            ping = int((time.time() - st) * 1000)
-        except: return None
+        requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
+        ping = int((time.time() - st) * 1000)
 
-        # 2. GEO & ISP (ip-api.com)
+        # 2. GEO
         info = {}
         for _ in range(API_RETRIES):
             try:
@@ -237,25 +231,28 @@ def check_proxy(link):
         if not info: return None
         
         cc = info.get('countryCode', 'XX')
-        if cc == 'RU' or cc == 'XX': return None # Filter RU
+        if cc == 'RU' or cc == 'XX': return None
         
         isp = info.get('isp') or info.get('org') or 'Unknown'
-        if re.search(BANNED_ISP_REGEX, isp): return None # Filter Bad ISP
+        if re.search(BANNED_ISP_REGEX, isp): return None
 
-        # 3. Rename
         flag = country_flag(cc)
         city = info.get('city', 'Unknown')
         
         gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         
-        # Формат имени
         name = f"{flag} {cc} - {city} ◈ {isp} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico}"
         new_link = rebuild_link(link, data, name)
         
         return (ping, new_link)
 
-    except: return None
+    except Exception as e:
+        # ЛОГИРУЕМ ОШИБКУ (только первые 5 раз)
+        if error_counter < 5:
+            print(f"\n[ERROR DEBUG] Link failed: {e}")
+            error_counter += 1
+        return None
     finally:
         if proc: 
             try: proc.terminate(); proc.wait(timeout=1)
@@ -271,7 +268,6 @@ def deploy(content):
         print("Secrets missing, skipping deploy.")
         return
 
-    # Gist Update
     print("Updating Gist...")
     try:
         r = requests.patch(
@@ -281,29 +277,23 @@ def deploy(content):
         )
         r.raise_for_status()
         raw_url = r.json()['files'][GIST_FILENAME]['raw_url']
-        # Add timestamp to bypass caching
         final_url = f"{raw_url}?t={int(time.time())}"
         print("Gist updated successfully.")
     except Exception as e:
         print(f"Gist Error: {e}")
         return
 
-    # Vercel Update
     print("Triggering Vercel...")
     h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
     try:
-        # Update Env
         envs = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env", headers=h).json().get('envs', [])
         eid = next((e['id'] for e in envs if e['key'] == ENV_KEY), None)
         
         body = {"value": final_url, "target": ["production", "preview", "development"], "type": "plain"}
         
         if eid: requests.patch(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env/{eid}", headers=h, json=body)
-        else: 
-            body['key'] = ENV_KEY
-            requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
+        else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
 
-        # Trigger Deploy
         proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
         payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
         
@@ -321,25 +311,19 @@ def main():
         print("Xray executable not found!")
         sys.exit(1)
     
-    # 1. Загрузка ссылок
     links_new = fetch_links(NEW_SOURCE_URL)
     links_old = []
     if GIST_ID:
         links_old = fetch_links(f"https://api.github.com/gists/{GIST_ID}", is_gist=True)
     
-    # Объединение и удаление явных дублей ссылок (по тексту)
     all_raw_links = list(set(links_new + links_old))
     print(f"Total unique raw links: {len(all_raw_links)}")
     
-    if not all_raw_links:
-        print("No links found.")
-        return
+    if not all_raw_links: return
 
-    # 2. Проверка
     results = []
     seen_proxies.clear()
     
-    # Используем меньше потоков для Xray, чтобы не убить runner и API
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
         futures = {exe.submit(check_proxy, l): l for l in all_raw_links}
         for f in tqdm(as_completed(futures), total=len(all_raw_links), desc="Checking"):
@@ -348,9 +332,8 @@ def main():
     
     print(f"\nWorking proxies found: {len(results)}")
     
-    # 3. Деплой
     if results:
-        results.sort(key=lambda x: x[0]) # Сортировка по пингу
+        results.sort(key=lambda x: x[0])
         final_content = "\n".join([r[1] for r in results])
         deploy(final_content)
     else:
