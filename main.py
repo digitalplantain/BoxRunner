@@ -30,8 +30,8 @@ PROJ_ID = os.environ.get("PROJ_ID")
 GIST_FILENAME = "gistfile1.txt"
 ENV_KEY = "GIST_URL"
 
-# API
-IP_API_URL = "http://ip-api.com/json/?fields=status,country,countryCode,city,isp,org"
+# === ВЕРНУЛИ IPINFO ===
+IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 
 # Фильтры
@@ -69,7 +69,6 @@ def parse_proxy_link(link):
         if link.startswith('vmess://'):
             data = json.loads(safe_base64_decode(link[8:]).decode('utf-8'))
             data['protocol'] = 'vmess'
-            # Стандартизация полей
             data['uuid'] = data.get('id')
             data['server'] = data.get('add')
             data['port'] = int(data.get('port'))
@@ -84,7 +83,7 @@ def parse_proxy_link(link):
         parsed = urllib.parse.urlparse(link)
         protocol = parsed.scheme
         
-        if protocol == 'ss': return {'protocol': 'shadowsocks'} # Фильтруем позже
+        if protocol == 'ss': return {'protocol': 'shadowsocks'}
         if protocol not in ['vless', 'trojan']: return None
 
         data = {
@@ -98,14 +97,12 @@ def parse_proxy_link(link):
         query = urllib.parse.parse_qs(parsed.query)
         for k, v in query.items(): data[k.lower()] = v[0]
         
-        # Стандартизация полей из query
         data['network'] = data.get('type', 'tcp')
         data['sni'] = data.get('sni') or data.get('host')
         return data
     except: return None
 
 def generate_singbox_config(data, local_port):
-    # Основная структура
     config = {
         "log": {"disabled": True},
         "inbounds": [{
@@ -125,66 +122,42 @@ def generate_singbox_config(data, local_port):
         "server_port": int(data['port'])
     }
 
-    # === Настройки протокола ===
     if data['protocol'] == 'vmess':
         outbound["uuid"] = data['uuid']
         outbound["alter_id"] = int(data.get('alter_id', 0))
         outbound["security"] = data.get('security', 'auto')
-    
     elif data['protocol'] == 'vless':
         outbound["uuid"] = data['uuid']
         if data.get('flow'): outbound["flow"] = data['flow']
-    
     elif data['protocol'] == 'trojan':
         outbound["password"] = data['password']
 
-    # === TLS ===
-    security = data.get('security', '')
-    # В Sing-box TLS настраивается в объекте tls, если security='tls' или 'reality'
-    # Но для vless/trojan security часто приходит как параметр
-    
-    # Определяем, включен ли TLS
+    # TLS
     tls_enabled = False
     if data['protocol'] == 'vmess' and data.get('tls') == 'tls': tls_enabled = True
     if data.get('security') in ['tls', 'reality']: tls_enabled = True
     
     if tls_enabled:
-        tls_conf = {
-            "enabled": True,
-            "server_name": data.get('sni', ''),
-            "insecure": True, # Разрешаем самоподписанные сертификаты для проверки
-        }
-        
-        # Reality
+        tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": True}
         if data.get('security') == 'reality':
-            tls_conf["reality"] = {
-                "enabled": True,
-                "public_key": data.get('pbk', ''),
-                "short_id": data.get('sid', '')
-            }
-        
-        # Fingerprint
+            tls_conf["reality"] = {"enabled": True, "public_key": data.get('pbk', ''), "short_id": data.get('sid', '')}
         if data.get('fp'):
             tls_conf["utls"] = {"enabled": True, "fingerprint": data['fp']}
-            
         outbound["tls"] = tls_conf
 
-    # === Transport (WS / GRPC) ===
+    # Transport
     transport = {}
     net = data.get('network', 'tcp')
-    
     if net == 'ws':
         transport["type"] = "ws"
         transport["path"] = data.get('path', '/')
         if data.get('host') or data.get('sni'):
             transport["headers"] = {"Host": data.get('host') or data.get('sni')}
-            
     elif net == 'grpc':
         transport["type"] = "grpc"
         transport["service_name"] = data.get('serviceName', '')
 
-    if transport:
-        outbound["transport"] = transport
+    if transport: outbound["transport"] = transport
 
     config["outbounds"].append(outbound)
     return json.dumps(config)
@@ -198,7 +171,6 @@ def rebuild_link(original_link, data, new_name):
             new_b64 = base64.b64encode(json.dumps(conf).encode('utf-8')).decode('utf-8')
             return f"vmess://{new_b64}"
         except: pass
-    
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
@@ -208,7 +180,6 @@ def fetch_links(url, is_gist=False):
     print(f"Downloading: {url}...")
     headers = {'User-Agent': 'Mozilla/5.0'}
     if is_gist and GH_TOKEN: headers['Authorization'] = f'token {GH_TOKEN}'
-    
     try:
         if is_gist and 'api.github.com' in url:
             r = requests.get(url, headers=headers); r.raise_for_status()
@@ -224,12 +195,10 @@ def fetch_links(url, is_gist=False):
         if valid: 
             print(f"  -> Found {len(valid)} links (Text)")
             return valid
-        
         decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
         links_b64 = [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
         print(f"  -> Found {len(links_b64)} links (Base64)")
         return links_b64
-        
     except Exception as e:
         print(f"  -> Error: {e}")
         return []
@@ -260,13 +229,10 @@ def check_proxy(link):
         config_file.write(conf_str)
         config_file.close()
 
-        # Sing-box Run
         proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(1.5)
         
-        if proc.poll() is not None:
-            # Если упал - конфиг кривой
-            return None
+        if proc.poll() is not None: return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
@@ -275,32 +241,37 @@ def check_proxy(link):
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
-        # 2. GEO
-        info = {}
+        # 2. GEO (IPINFO)
+        api_data = {}
         for _ in range(API_RETRIES):
             try:
                 r = requests.get(IP_API_URL, proxies=proxies, timeout=TIMEOUT)
-                if r.status_code == 200 and r.json().get('status') == 'success':
-                    info = r.json()
-                    break
+                if r.status_code == 200:
+                    api_data = r.json()
+                    if 'ip' in api_data: # Проверка что ответ валидный
+                        break
             except: pass
             time.sleep(1)
         
-        if not info: return None
+        if not api_data: return None
         
-        cc = info.get('countryCode', 'XX')
+        # ipinfo fields: country, org (ISP)
+        cc = api_data.get('country', 'XX')
         if cc == 'RU' or cc == 'XX': return None
         
-        isp = info.get('isp') or info.get('org') or 'Unknown'
-        if re.search(BANNED_ISP_REGEX, isp): return None
+        isp = api_data.get('org', 'Unknown ISP')
+        # Убираем AS номер из начала (например "AS12345 Google LLC" -> "Google LLC")
+        isp_clean = re.sub(r'^AS\d+\s+', '', isp)
+        
+        if re.search(BANNED_ISP_REGEX, isp_clean): return None
 
         flag = country_flag(cc)
-        city = info.get('city', 'Unknown')
+        city = api_data.get('city', 'Unknown')
         
         gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         
-        name = f"{flag} {cc} - {city} ◈ {isp} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico}"
+        name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico}"
         new_link = rebuild_link(link, data, name)
         
         return (ping, new_link)
@@ -393,4 +364,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
