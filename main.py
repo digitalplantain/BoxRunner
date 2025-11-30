@@ -18,7 +18,7 @@ NEW_SOURCE_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/
 SING_BOX_PATH = "./sing-box"
 
 MAX_WORKERS = 40       
-TIMEOUT = 1           
+TIMEOUT = 0.5           
 API_RETRIES = 2
 
 # Secrets
@@ -364,3 +364,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
