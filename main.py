@@ -7,8 +7,8 @@ import subprocess
 import tempfile
 import time
 import urllib.parse
-import hashlib
 import sys
+import hashlib  # <--- Добавлено для хэширования
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
@@ -29,7 +29,7 @@ VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
 PROJ_ID = os.environ.get("PROJ_ID")
 
 GIST_FILENAME = "gistfile1.txt"
-PING_FILENAME = "pings.json"
+PING_FILENAME = "pings.json"     # <--- Файл для пингов
 ENV_KEY = "GIST_URL"
 
 IP_API_URL = "http://ipinfo.io/json"
@@ -39,8 +39,6 @@ BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|ama
 
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
-
-# ================= 2. HELPERS =================
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -61,16 +59,7 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# Вычисляем MD5 хэш от "чистой" ссылки (без фрагмента #name)
-def get_link_hash(link):
-    try:
-        # Убираем имя после #
-        base = link.split('#')[0]
-        # Берем первые 8 символов MD5 - этого достаточно для уникальности в рамках списка
-        return hashlib.md5(base.encode('utf-8')).hexdigest()[:8]
-    except: return "00000000"
-
-# ================= 3. SING-BOX LOGIC =================
+# ================= ПАРСИНГ =================
 
 def parse_proxy_link(link):
     try:
@@ -93,8 +82,11 @@ def parse_proxy_link(link):
         if protocol not in ['vless', 'trojan']: return None
 
         data = {
-            'protocol': protocol, 'server': parsed.hostname, 'port': parsed.port,
-            'uuid': parsed.username, 'password': parsed.username
+            'protocol': protocol,
+            'server': parsed.hostname,
+            'port': parsed.port,
+            'uuid': parsed.username,
+            'password': parsed.username
         }
         query = urllib.parse.parse_qs(parsed.query)
         for k, v in query.items(): data[k.lower()] = v[0]
@@ -109,17 +101,16 @@ def generate_singbox_config(data, local_port):
         "inbounds": [{"type": "mixed","tag": "in","listen": "127.0.0.1","listen_port": local_port,"set_system_proxy": False}],
         "outbounds": []
     }
-    outbound = {"tag": "proxy","type": data['protocol'],"server": data['server'],"server_port": int(data['port'])}
+    outbound = {"tag": "proxy", "type": data['protocol'], "server": data['server'], "server_port": int(data['port'])}
 
     if data['protocol'] == 'vmess':
         outbound.update({"uuid": data['uuid'], "alter_id": int(data.get('alter_id', 0)), "security": data.get('security', 'auto')})
     elif data['protocol'] == 'vless':
-        outbound["uuid"] = data['uuid']
+        outbound["uuid"] = data['uuid']; 
         if data.get('flow'): outbound["flow"] = data['flow']
     elif data['protocol'] == 'trojan':
         outbound["password"] = data['password']
 
-    # TLS
     tls_enabled = False
     if data['protocol'] == 'vmess' and data.get('tls') == 'tls': tls_enabled = True
     if data.get('security') in ['tls', 'reality']: tls_enabled = True
@@ -131,7 +122,6 @@ def generate_singbox_config(data, local_port):
         if data.get('fp'): tls_conf["utls"] = {"enabled": True, "fingerprint": data['fp']}
         outbound["tls"] = tls_conf
 
-    # Transport
     transport = {}
     net = data.get('network', 'tcp')
     if net == 'ws':
@@ -139,8 +129,8 @@ def generate_singbox_config(data, local_port):
         if data.get('host') or data.get('sni'): transport["headers"] = {"Host": data.get('host') or data.get('sni')}
     elif net == 'grpc':
         transport = {"type": "grpc", "service_name": data.get('serviceName', '')}
-    
     if transport: outbound["transport"] = transport
+
     config["outbounds"].append(outbound)
     return json.dumps(config)
 
@@ -156,7 +146,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 4. FETCH =================
+# ================= ЗАГРУЗКА =================
 
 def fetch_links(url, is_gist=False):
     print(f"Downloading: {url}...")
@@ -166,7 +156,7 @@ def fetch_links(url, is_gist=False):
         if is_gist and 'api.github.com' in url:
             r = requests.get(url, headers=headers); r.raise_for_status()
             files = r.json().get('files', {})
-            # Читаем существующий список конфигов
+            # Читаем только gistfile1.txt из гиста
             content = files.get(GIST_FILENAME, {}).get('content', '')
         else:
             r = requests.get(url, headers=headers); r.raise_for_status()
@@ -175,18 +165,16 @@ def fetch_links(url, is_gist=False):
         links = [l.strip() for l in content.splitlines() if l.strip()]
         valid = [l for l in links if l.startswith(('vmess://', 'vless://', 'trojan://'))]
         if valid: 
-            print(f"  -> Found {len(valid)} links (Text)")
+            print(f"  -> Found {len(valid)} links")
             return valid
-        
+        # Base64 fallback
         decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
-        links_b64 = [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
-        print(f"  -> Found {len(links_b64)} links (Base64)")
-        return links_b64
+        return [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
     except Exception as e:
         print(f"  -> Error: {e}")
         return []
 
-# ================= 5. CHECKER =================
+# ================= ПРОВЕРКА =================
 
 seen_proxies = set()
 error_counter = 0
@@ -198,7 +186,6 @@ def check_proxy(link):
     try:
         data = parse_proxy_link(link)
         if not data: return None
-        
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
         
         identifier = f"{data.get('server')}:{data.get('port')}"
@@ -218,19 +205,17 @@ def check_proxy(link):
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # 1. PING
         st = time.time()
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
-        # 2. GEO
         api_data = {}
         for _ in range(API_RETRIES):
             try:
                 r = requests.get(IP_API_URL, proxies=proxies, timeout=TIMEOUT)
-                if r.status_code == 200:
+                if r.status_code == 200 and 'ip' in r.json():
                     api_data = r.json()
-                    if 'ip' in api_data: break
+                    break
             except: pass
             time.sleep(1)
         
@@ -239,22 +224,21 @@ def check_proxy(link):
         cc = api_data.get('country', 'XX')
         if cc == 'RU' or cc == 'XX': return None
         
-        isp = api_data.get('org', 'Unknown ISP')
+        isp = api_data.get('org', 'Unknown')
         isp_clean = re.sub(r'^AS\d+\s+', '', isp)
         if re.search(BANNED_ISP_REGEX, isp_clean): return None
 
         flag = country_flag(cc)
         city = api_data.get('city', 'Unknown')
-        
         gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         
-        # В имени НЕТ пинга (он в JSON)
+        # ИМЯ БЕЗ ПИНГА
         name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico}"
         new_link = rebuild_link(link, data, name)
         
-        # Считаем хэш
-        link_hash = get_link_hash(link)
+        # Генерируем ХЭШ для маппинга
+        link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
         
         return (ping, new_link, link_hash)
 
@@ -271,47 +255,51 @@ def check_proxy(link):
             try: os.remove(config_file.name)
             except: pass
 
-# ================= 6. DEPLOY =================
+# ================= DEPLOY =================
 
-def deploy(links_list, pings_map):
+def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
         return
 
-    print("Uploading Gist (Config + Pings)...")
+    print("Updating Gist (Links + Pings)...")
     try:
-        # Обновляем ДВА файла в одном запросе
-        r = requests.patch(
-            f'https://api.github.com/gists/{GIST_ID}',
-            headers={'Authorization': f'token {GH_TOKEN}'},
-            json={
-                'files': {
-                    GIST_FILENAME: {'content': links_list},
-                    PING_FILENAME: {'content': json.dumps(pings_map)}
-                }, 
-                'description': f'Updated: {time.strftime("%Y-%m-%d %H:%M UTC")}'
-            }
-        )
+        payload = {
+            'files': {
+                GIST_FILENAME: {'content': links_content},
+                PING_FILENAME: {'content': pings_content}
+            },
+            'description': f'SingBox Updated: {time.strftime("%Y-%m-%d %H:%M UTC")}'
+        }
+        r = requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers={'Authorization': f'token {GH_TOKEN}'}, json=payload)
         r.raise_for_status()
         
-        # Получаем Raw URL для Vercel Env (берем ссылку на конфиг)
-        raw_url = r.json()['files'][GIST_FILENAME]['raw_url']
-        final_url = f"{raw_url}?t={int(time.time())}"
-        print("Gist updated.")
-        
-        # Обновляем ENV в Vercel (чтобы фронтенд знал, что данные обновились, если он читает Env)
-        # Хотя HTML страница сама ходит в Gist, обновление Env полезно как сигнал
-        h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
+        raw_url_links = r.json()['files'][GIST_FILENAME]['raw_url']
+        final_url = f"{raw_url_links}?t={int(time.time())}"
+        print("Gist OK.")
+    except Exception as e: print(f"Gist Error: {e}"); return
+
+    # Trigger Vercel
+    print("Triggering Vercel...")
+    h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
+    try:
         envs = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env", headers=h).json().get('envs', [])
         eid = next((e['id'] for e in envs if e['key'] == ENV_KEY), None)
-        body = {"value": final_url, "target": ["production", "preview", "development"], "type": "plain"}
+        body = {"value": final_url, "target": ["production"], "type": "plain"}
         
         if eid: requests.patch(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env/{eid}", headers=h, json=body)
         else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
+
+        proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
+        payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
         
-        print("Vercel Env updated (No Redeploy).")
-        
-    except Exception as e: print(f"Deploy Error: {e}")
+        if 'link' in proj and 'repoId' in proj['link']:
+            payload['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
+            
+        requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload)
+        print("Vercel OK.")
+    except Exception as e: print(f"Vercel Error: {e}")
+
 
 def main():
     if not os.path.exists(SING_BOX_PATH):
@@ -325,7 +313,6 @@ def main():
     
     all_raw = list(set(links_new + links_old))
     print(f"Total links: {len(all_raw)}")
-    
     if not all_raw: return
 
     results = []
@@ -340,16 +327,16 @@ def main():
     print(f"\nWorking: {len(results)}")
     
     if results:
-        # Сортируем по пингу
         results.sort(key=lambda x: x[0])
         
-        # Формируем список конфигов (индекс 1)
-        final_content = "\n".join([r[1] for r in results])
+        # 1. Собираем конфиги
+        links_str = "\n".join([r[1] for r in results])
         
-        # Формируем карту пингов {hash: ping} (индекс 2 и 0)
+        # 2. Собираем маппинг пингов {hash: ping}
         pings_map = {r[2]: r[0] for r in results}
+        pings_json = json.dumps(pings_map)
         
-        deploy(final_content, pings_map)
+        deploy(links_str, pings_json)
     else:
         print("No working proxies.")
 
