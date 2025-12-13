@@ -151,7 +151,7 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet)"
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers)"
 RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
 RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
 
@@ -521,4 +521,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
