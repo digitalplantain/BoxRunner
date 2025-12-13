@@ -13,9 +13,8 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# ================= 1. ИСТОЧНИКИ ПРОКСИ (SCRAPER CONFIG) =================
+# ================= 1. ИСТОЧНИКИ (SCRAPER CONFIG) =================
 
-# --- ВЗЯТО ИЗ ВАШЕГО ИСХОДНОГО КОДА ---
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -128,15 +127,15 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
     "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
 ]
-# --- КОНЕЦ ИСХОДНОГО БЛОКА ССЫЛОК ---
 
+# ================= 2. КОНФИГУРАЦИЯ =================
 
-# ================= 2. КОНФИГУРАЦИЯ И КОНСТАНТЫ =================
-SING_BOX_PATH = "./sing-box"  # Путь для Linux (GitHub Actions)
-MAX_WORKERS = 200       
+SING_BOX_PATH = "./sing-box"
+
+MAX_WORKERS_CHECK = 30  # Потоки для проверки прокси
+MAX_WORKERS_SCRAPE = 20 # Потоки для скачивания списков
 TIMEOUT = 10           
 API_RETRIES = 2
-API_RETRY_DELAY = 1
 
 # Secrets
 GH_TOKEN = os.environ.get("GH_TOKEN")
@@ -154,25 +153,8 @@ OPENAI_URL = "https://api.openai.com/v1/models"
 
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|amazon|google|microsoft|oracle)"
 
-# Списки стран (для Gemini/YT)
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
-YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
-
-VALID_PROTOCOLS = ('vmess://', 'vless://', 'ss://', 'trojan://', 'ssr://', 'hysteria://', 'hy2://', 'hysteria2://', 'wireguard://', 'tuic://')
-seen_proxies = set()
-
-
-# ================= 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
-
-def safe_base64_decode(s):
-    if not s: return b""
-    s = s.strip().replace('\n', '').replace('\r', '')
-    missing_padding = len(s) % 4
-    if missing_padding: s += '=' * (4 - missing_padding)
-    try: return base64.urlsafe_b64decode(s)
-    except:
-        try: return base64.b64decode(s)
-        except: return b""
+YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -183,238 +165,182 @@ def country_flag(code):
     if not code or len(code) != 2: return "🏁"
     return "".join(chr(0x1F1E6 + ord(char.upper()) - ord('A')) for char in code)
 
-# ================= 4. ФУНКЦИИ ПАРСИНГА ИЗ ЭТАЛОННОГО СКРИПТА =================
+def safe_base64_decode(s):
+    if not s: return b""
+    s = s.strip().replace('\n', '').replace('\r', '')
+    pad = len(s) % 4
+    if pad: s += '=' * (4 - pad)
+    try: return base64.urlsafe_b64decode(s)
+    except: 
+        try: return base64.b64decode(s)
+        except: return b""
 
-def parse_vmess(link):
-    try:
-        b64 = link[8:]
-        conf = json.loads(safe_base64_decode(b64).decode('utf-8', errors='ignore'))
-        return {
-            'type': 'vmess', 'name': conf.get('ps', 'vmess'), 'server': conf.get('add'), 'port': int(conf.get('port')),
-            'uuid': conf.get('id'), 'alterId': int(conf.get('aid', 0)), 'security': conf.get('scy', 'auto'),
-            'network': conf.get('net', 'tcp'), 'tls': conf.get('tls', ''), 'sni': conf.get('sni', '') or conf.get('host', ''),
-            'path': conf.get('path', ''), 'host': conf.get('host', ''), 'fp': conf.get('fp', ''),
-            'serviceName': conf.get('serviceName', ''), 'original_conf': conf
-        }
-    except: return None
+# ================= 3. СКРАПЕР =================
 
-def parse_vless_trojan(link, protocol):
+def fetch_url_content(url):
     try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        return r.text
+    except:
+        return None
+
+def scrape_all_sources():
+    print("Starting scraper...")
+    all_proxies = set()
+    
+    # 1. Plaintext Sources
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in PLAINTEXT_URLS}
+        for f in tqdm(as_completed(futures), total=len(PLAINTEXT_URLS), desc="Plaintext"):
+            content = f.result()
+            if content:
+                # Cleanup HTML breaks if any
+                content = content.replace('<br/>', '\n').replace('<br>', '\n')
+                for line in content.splitlines():
+                    l = line.strip()
+                    if l and l.startswith(('vmess://', 'vless://', 'trojan://')):
+                        all_proxies.add(l)
+
+    # 2. Base64 Sources
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in BASE64_URLS}
+        for f in tqdm(as_completed(futures), total=len(BASE64_URLS), desc="Base64"):
+            content = f.result()
+            if content:
+                try:
+                    decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
+                    for line in decoded.splitlines():
+                        l = line.strip()
+                        if l and l.startswith(('vmess://', 'vless://', 'trojan://')):
+                            all_proxies.add(l)
+                except: pass
+
+    # 3. Existing Gist (Preserve old working ones)
+    if GIST_ID and GH_TOKEN:
+        try:
+            print("Fetching existing Gist...")
+            r = requests.get(f"https://api.github.com/gists/{GIST_ID}", headers={'Authorization': f'token {GH_TOKEN}'})
+            files = r.json().get('files', {})
+            content = files.get(GIST_FILENAME, {}).get('content', '')
+            for line in content.splitlines():
+                l = line.strip()
+                if l: all_proxies.add(l)
+        except Exception as e: print(f"Gist fetch warning: {e}")
+
+    print(f"Total unique raw links: {len(all_proxies)}")
+    return list(all_proxies)
+
+# ================= 4. ПАРСИНГ И КОНФИГ =================
+
+def parse_proxy_link(link):
+    try:
+        if link.startswith('vmess://'):
+            data = json.loads(safe_base64_decode(link[8:]).decode('utf-8'))
+            data['protocol'] = 'vmess'
+            data['uuid'] = data.get('id')
+            data['server'] = data.get('add')
+            data['port'] = int(data.get('port'))
+            data['alter_id'] = int(data.get('aid', 0))
+            data['security'] = data.get('scy', 'auto')
+            data['network'] = data.get('net', 'tcp')
+            data['sni'] = data.get('host') or data.get('sni')
+            data['path'] = data.get('path')
+            return data
+        
         parsed = urllib.parse.urlparse(link)
-        params = urllib.parse.parse_qs(parsed.query)
+        protocol = parsed.scheme
+        if protocol == 'ss': return {'protocol': 'shadowsocks'}
+        if protocol not in ['vless', 'trojan']: return None
+
         data = {
-            'type': protocol, 'server': parsed.hostname, 'port': parsed.port, 'uuid': parsed.username, 'password': parsed.username,
-            'name': urllib.parse.unquote(parsed.fragment), 'network': params.get('type', ['tcp'])[0],
-            'security': params.get('security', [''])[0], 'sni': params.get('sni', [''])[0],
-            'pbk': params.get('pbk', [''])[0], 'sid': params.get('sid', [''])[0], 'fp': params.get('fp', [''])[0],
-            'path': params.get('path', [''])[0], 'host': params.get('host', [''])[0], 'serviceName': params.get('serviceName', [''])[0],
-            'flow': params.get('flow', [''])[0]
+            'protocol': protocol,
+            'server': parsed.hostname,
+            'port': parsed.port,
+            'uuid': parsed.username,
+            'password': parsed.username
         }
-        if not data['server'] or not data['port']: return None
+        query = urllib.parse.parse_qs(parsed.query)
+        for k, v in query.items(): data[k.lower()] = v[0]
+        data['network'] = data.get('type', 'tcp')
+        data['sni'] = data.get('sni') or data.get('host')
         return data
     except: return None
 
-def parse_tuic(link):
-    try:
-        parsed = urllib.parse.urlparse(link)
-        params = urllib.parse.parse_qs(parsed.query)
-        return {
-            'type': 'tuic', 'server': parsed.hostname, 'port': parsed.port, 'uuid': parsed.username, 'password': parsed.password,
-            'congestion_control': params.get('congestion_control', ['bbr'])[0], 'sni': params.get('sni', [''])[0],
-            'alpn': params.get('alpn', ['h3'])[0], 'allow_insecure': params.get('allow_insecure', ['0'])[0] == '1',
-            'name': urllib.parse.unquote(parsed.fragment)
-        }
-    except: return None
-
-def parse_hysteria2(link):
-    try:
-        parsed = urllib.parse.urlparse(link)
-        params = urllib.parse.parse_qs(parsed.query)
-        return {
-            'type': 'hysteria2', 'server': parsed.hostname, 'port': parsed.port, 'password': parsed.username or '',
-            'sni': params.get('sni', [''])[0], 'insecure': params.get('insecure', ['0'])[0] == '1',
-            'obfs': params.get('obfs', [''])[0], 'obfs_password': params.get('obfs-password', [''])[0],
-            'name': urllib.parse.unquote(parsed.fragment)
-        }
-    except: return None
-
-def parse_link(link):
-    link = link.strip()
-    if not link: return None
-    try:
-        if link.startswith('vmess://'): return parse_vmess(link)
-        if link.startswith('vless://'): return parse_vless_trojan(link, 'vless')
-        if link.startswith('trojan://'): return parse_vless_trojan(link, 'trojan')
-        if link.startswith('tuic://'): return parse_tuic(link)
-        if link.startswith('hysteria2://') or link.startswith('hy2://'): return parse_hysteria2(link)
-        # Игнорируем SS/SSR/Wireguard в этом скрипте
-    except: return None
-    return None
-
 def generate_singbox_config(data, local_port):
-    # Адаптировано из Скрипта A
     config = {
         "log": {"disabled": True},
         "inbounds": [{"type": "mixed","tag": "in","listen": "127.0.0.1","listen_port": local_port,"set_system_proxy": False}],
         "outbounds": []
     }
-    outbound = {"tag": "proxy", "type": data['type']}
+    outbound = {"tag": "proxy", "type": data['protocol'], "server": data['server'], "server_port": int(data['port'])}
 
-    if data['type'] == 'vmess':
-        outbound.update({
-            "server": data['server'], "server_port": data['port'], "uuid": data['uuid'], "security": data['security'],
-            "alter_id": data['alterId'], "transport": {}
-        })
-        if data['network'] == 'ws': outbound['transport'] = {'type': 'ws', 'path': data.get('path', '/'), 'headers': {'Host': data.get('host', '') or data.get('sni', '')}}
-        elif data['network'] == 'grpc': outbound['transport'] = {'type': 'grpc', 'service_name': data.get('serviceName', '') or data.get('path', '')}
-        if data.get('tls') == 'tls': outbound['tls'] = {"enabled": True, "server_name": data.get('sni', ''), "insecure": True}
+    if data['protocol'] == 'vmess':
+        outbound.update({"uuid": data['uuid'], "alter_id": int(data.get('alter_id', 0)), "security": data.get('security', 'auto')})
+    elif data['protocol'] == 'vless':
+        outbound["uuid"] = data['uuid']; 
+        if data.get('flow'): outbound["flow"] = data['flow']
+    elif data['protocol'] == 'trojan':
+        outbound["password"] = data['password']
 
-    elif data['type'] == 'vless':
-        outbound.update({ "server": data['server'], "server_port": data['port'], "uuid": data['uuid'], "flow": data.get('flow', ''), "tls": {"enabled": False}, "transport": {} })
-        security = data.get('security', '')
-        if security in ['tls', 'reality']:
-            tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": True}
-            if data.get('fp'): tls_conf['utls'] = {"enabled": True, "fingerprint": data['fp']}
-            if security == 'reality': tls_conf['reality'] = {"enabled": True, "public_key": data.get('pbk', ''), "short_id": data.get('sid', '')}
-            outbound['tls'] = tls_conf
-        if data['network'] == 'ws': outbound['transport'] = {'type': 'ws', 'path': data.get('path', '/'), 'headers': {'Host': data.get('host', '')}}
-        elif data['network'] == 'grpc': outbound['transport'] = {'type': 'grpc', 'service_name': data.get('serviceName', '')}
-
-    elif data['type'] == 'trojan':
-        outbound.update({ "server": data['server'], "server_port": data['port'], "password": data['password'], "tls": {"enabled": True, "server_name": data.get('sni', ''), "insecure": True} })
-        if data.get('network') == 'ws': outbound['transport'] = {'type': 'ws', 'path': data.get('path', '/')}
-        elif data.get('network') == 'grpc': outbound['transport'] = {'type': 'grpc', 'service_name': data.get('serviceName', '')}
+    tls_enabled = False
+    if data['protocol'] == 'vmess' and data.get('tls') == 'tls': tls_enabled = True
+    if data.get('security') in ['tls', 'reality']: tls_enabled = True
     
-    elif data['type'] == 'tuic':
-        outbound.update({ "server": data['server'], "server_port": data['port'], "uuid": data['uuid'], "password": data['password'], "congestion_control": data.get('congestion_control', 'bbr'),
-            "tls": {"enabled": True, "server_name": data.get('sni', ''), "alpn": [data.get('alpn', 'h3')], "insecure": data.get('allow_insecure', True)} })
-    elif data['type'] == 'hysteria2':
-        outbound.update({ "server": data['server'], "server_port": data['port'], "password": data['password'], "tls": {"enabled": True, "server_name": data.get('sni', ''), "insecure": data.get('insecure', True)} })
-        if data.get('obfs'): outbound['obfs'] = {"type": data['obfs'], "password": data.get('obfs_password', '')}
-    
-    else: return None
+    if tls_enabled:
+        tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": True}
+        if data.get('security') == 'reality':
+            tls_conf["reality"] = {"enabled": True, "public_key": data.get('pbk', ''), "short_id": data.get('sid', '')}
+        if data.get('fp'): tls_conf["utls"] = {"enabled": True, "fingerprint": data['fp']}
+        outbound["tls"] = tls_conf
 
-    config['outbounds'].append(outbound)
+    transport = {}
+    net = data.get('network', 'tcp')
+    if net == 'ws':
+        transport = {"type": "ws", "path": data.get('path', '/')}
+        if data.get('host') or data.get('sni'): transport["headers"] = {"Host": data.get('host') or data.get('sni')}
+    elif net == 'grpc':
+        transport = {"type": "grpc", "service_name": data.get('serviceName', '')}
+    if transport: outbound["transport"] = transport
+
+    config["outbounds"].append(outbound)
     return json.dumps(config)
 
 def rebuild_link(original_link, data, new_name):
-    # Адаптировано из Скрипта A
-    try:
-        if data['type'] == 'vmess':
-            conf = data.get('original_conf', {})
+    if original_link.startswith('vmess://'):
+        try:
+            b64 = original_link[8:]
+            conf = json.loads(safe_base64_decode(b64).decode('utf-8'))
             conf['ps'] = new_name
             new_b64 = base64.b64encode(json.dumps(conf).encode('utf-8')).decode('utf-8')
             return f"vmess://{new_b64}"
-        else:
-            parsed = urllib.parse.urlparse(original_link)
-            query = urllib.parse.parse_qs(parsed.query)
-            for key in ['note', 'alias', 'remarks', 'des']:
-                if key in query: del query[key]
-            new_query = urllib.parse.urlencode(query, doseq=True)
-            new_link = parsed._replace(query=new_query, fragment=urllib.parse.quote(new_name)).geturl()
-            return new_link
-    except:
-        base = original_link.split('#')[0]
-        return f"{base}#{urllib.parse.quote(new_name)}"
+        except: pass
+    base = original_link.split('#')[0]
+    return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ЛОГИКА СБОРА ИСТОЧНИКОВ =================
+# ================= 5. ПРОВЕРКА =================
 
-def fetch_content(url, url_type):
-    # Адаптировано из Скрипта A
-    try:
-        # Убираем refs/heads/ для корректной работы raw.github
-        clean_url = re.sub(r'/refs/heads/', '/', url)
-        response = requests.get(clean_url, timeout=15)
-        response.raise_for_status()
-        return response.text, url_type
-    except requests.RequestException:
-        return None, url_type
-
-def process_content(content, url_type):
-    # Адаптировано из Скрипта A
-    links = []
-    if not content: return []
-    
-    if url_type == 'plaintext':
-        content = content.replace('<br/>', '\n').replace('<br>', '\n')
-        links = content.splitlines()
-    elif url_type == 'base64':
-        try:
-            decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
-            decoded = decoded.replace('<br/>', '\n').replace('<br>', '\n')
-            links = decoded.splitlines()
-        except:
-            pass
-    
-    valid_links = []
-    for link in links:
-        link = link.strip()
-        # Фильтруем только нужные протоколы
-        if link and link.startswith(('vmess://', 'vless://', 'trojan://', 'tuic://', 'hysteria2://', 'hy2://')):
-            valid_links.append(link)
-    return valid_links
-
-def scrape_all_proxies_from_sources():
-    print(f"Starting scraper for {len(PLAINTEXT_URLS) + len(BASE64_URLS)} sources...")
-    all_proxies = set()
-    
-    tasks = [(url, 'plaintext') for url in PLAINTEXT_URLS] + [(url, 'base64') for url in BASE64_URLS]
-    
-    # Используем 20 потоков для быстрого скачивания
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        future_to_url = {executor.submit(fetch_content, url, url_type): (url, url_type) for url, url_type in tasks}
-        
-        for future in tqdm(as_completed(future_to_url), total=len(tasks), desc="Scraping Sources"):
-            content, url_type = future.result()
-            links = process_content(content, url_type)
-            all_proxies.update(links)
-            
-    print(f"Scraping finished. Found {len(all_proxies)} unique links.")
-    return list(all_proxies)
-
-# ================= 6. ЗАГРУЗКА ТЕКУЩЕГО GIST =================
-
-def fetch_gist_links(gist_id):
-    # Адаптировано из Скрипта B (для чтения Gist)
-    if not GIST_TOKEN: return []
-    gist_url = f"https://api.github.com/gists/{gist_id}"
-    headers = {'Authorization': f'token {GIST_TOKEN}', 'Accept': 'application/vnd.github.v3+json'}
-    try:
-        r = requests.get(gist_url, headers=headers, timeout=15)
-        r.raise_for_status()
-        files = r.json().get('files', {})
-        content = files.get(GIST_FILENAME, {}).get('content', '')
-        
-        links = [l.strip() for l in content.splitlines() if l.strip()]
-        valid = [l for l in links if l.startswith(('vmess://', 'vless://', 'trojan://', 'tuic://', 'hysteria2://', 'hy2://'))]
-        print(f"Fetched {len(valid)} links from existing Gist.")
-        return valid
-    except Exception as e:
-        print(f"Error fetching Gist: {e}")
-        return []
-
-# ================= 7. ЛОГИКА ПРОВЕРКИ И ФИЛЬТРАЦИИ =================
+seen_proxies = set()
+error_counter = 0
 
 def check_proxy(link):
+    global error_counter
     proc = None
     config_file = None
     try:
-        data = parse_link(link)
+        data = parse_proxy_link(link)
         if not data: return None
+        if data.get('protocol') in ['shadowsocks', 'ss']: return None 
         
-        # Пропускаем, если не VLESS/VMESS/Trojan/TUIC/Hysteria
-        if data.get('type') in ['shadowsocks', 'shadowsocksr', 'wireguard']: return None
-
         identifier = f"{data.get('server')}:{data.get('port')}"
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
         local_port = get_free_port()
-        config_content = generate_singbox_config(data, local_port)
-        if not config_content: return None
-
-        config_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.json', delete=False)
-        config_file.write(config_content)
+        conf_str = generate_singbox_config(data, local_port)
+        
+        config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        config_file.write(conf_str)
         config_file.close()
 
         proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -423,86 +349,73 @@ def check_proxy(link):
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # 1. PING (Google)
-        start_time = time.time()
-        try:
-            requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
-            ping = int((time.time() - start_time) * 1000)
-        except: return None 
+        # 1. PING
+        st = time.time()
+        requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
+        ping = int((time.time() - st) * 1000)
 
-        # 2. CHATGPT CHECK (New)
+        # 2. GPT
         gpt_ok = False
         try:
             gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
-            # 401 Unauthorized или 200 OK
-            if gpt_r.status_code in [200, 401]:
-                gpt_ok = True
-        except:
-            pass
+            if gpt_r.status_code in [200, 401]: gpt_ok = True
+        except: pass
 
-        # 3. GEO (ipinfo.io)
+        # 3. GEO
         api_data = {}
-        for attempt in range(API_RETRIES):
+        for _ in range(API_RETRIES):
             try:
                 r = requests.get(IP_API_URL, proxies=proxies, timeout=TIMEOUT)
                 if r.status_code == 200 and 'ip' in r.json():
                     api_data = r.json()
                     break
             except: pass
-            time.sleep(API_RETRY_DELAY)
+            time.sleep(1)
         
         if not api_data: return None
         
         cc = api_data.get('country', 'XX')
-        city = api_data.get('city', 'Unknown')
-        isp = api_data.get('org', 'Unknown ISP')
-
-        # Фильтрация RU и Banned ISP
         if cc == 'RU' or cc == 'XX': return None
+        
+        isp = api_data.get('org', 'Unknown')
         isp_clean = re.sub(r'^AS\d+\s+', '', isp)
         if re.search(BANNED_ISP_REGEX, isp_clean): return None
 
-        # 4. Ренейминг
         flag = country_flag(cc)
-        gemini_ok = cc in GEMINI_ALLOWED
-        yt_music_ok = cc in YT_MUSIC_ALLOWED
+        city = api_data.get('city', 'Unknown')
         
-        gemini_ico = '✅' if gemini_ok else '❌'
-        yt_ico = '✅' if yt_music_ok else '❌'
+        gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
+        yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
         
         name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
+        new_link = rebuild_link(link, data, name)
+        link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
         
-        # 5. Пересборка и хэширование
-        final_link = rebuild_link(link, data, name)
-        link_hash = hashlib.md5(final_link.encode('utf-8')).hexdigest()
-        
-        return (ping, final_link, link_hash)
+        return (ping, new_link, link_hash)
 
-    except Exception:
-        # print(f"Error checking {link}: {e}")
+    except Exception as e:
+        if error_counter < 5:
+            print(f"\n[ERROR] Link failed: {e}")
+            error_counter += 1
         return None
     finally:
-        if proc:
-            proc.terminate()
-            try: proc.wait(timeout=1)
+        if proc: 
+            try: proc.terminate(); proc.wait(timeout=1)
             except: proc.kill()
         if config_file and os.path.exists(config_file.name):
             try: os.remove(config_file.name)
             except: pass
 
-# ================= 8. ДЕПЛОЙ =================
+# ================= DEPLOY =================
 
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
         return
 
-    print("Updating Gist (Links + Pings)...")
+    print("Updating Gist...")
     try:
-        # Получаем время обновления Gist
-        gist_info_r = requests.get(f'https://api.github.com/gists/{GIST_ID}', headers={'Authorization': f'token {GH_TOKEN}'}).json()
-        
         payload = {
             'files': {
                 GIST_FILENAME: {'content': links_content},
@@ -512,13 +425,11 @@ def deploy(links_content, pings_content):
         }
         r = requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers={'Authorization': f'token {GH_TOKEN}'}, json=payload)
         r.raise_for_status()
-        
         raw_url = r.json()['files'][GIST_FILENAME]['raw_url']
         final_url = f"{raw_url}?t={int(time.time())}"
         print("Gist OK.")
     except Exception as e: print(f"Gist Error: {e}"); return
 
-    # Trigger Vercel
     print("Triggering Vercel...")
     h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
     try:
@@ -530,62 +441,45 @@ def deploy(links_content, pings_content):
         else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
 
         proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
-        payload_deploy = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
+        payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
         
         if 'link' in proj and 'repoId' in proj['link']:
-            payload_deploy['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
+            payload['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
             
-        requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload_deploy)
+        requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload)
         print("Vercel OK.")
     except Exception as e: print(f"Vercel Error: {e}")
 
 
-# ================= 9. MAIN =================
-
 def main():
-    print("Cleaning up old processes...")
-    if os.name == 'nt':
-        os.system('taskkill /F /IM sing-box.exe >nul 2>&1')
-    else:
-        os.system('pkill -9 sing-box >/dev/null 2>&1')
-
     if not os.path.exists(SING_BOX_PATH):
-        print(f"ERROR: Sing-box executable not found at: {SING_BOX_PATH}")
+        print("Sing-box not found!")
         sys.exit(1)
-
-    # 1. Сборка ссылок из всех внешних источников
-    links_scraped = scrape_all_proxies_from_sources()
     
-    # 2. Загрузка текущих ссылок из Gist
-    links_from_gist = fetch_gist_links(GIST_ID)
-    
-    # 3. Объединение и дедупликация
-    all_raw_links = list(set(links_scraped + links_from_gist))
-    print(f"Total unique links to check: {len(all_raw_links)}")
-    if not all_raw_links: return
+    # 1. Scrape
+    all_raw = scrape_all_sources()
+    if not all_raw: return
 
-    # 4. Проверка
+    # 2. Check
     results = []
     seen_proxies.clear()
     
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(check_proxy, link): link for link in all_raw_links}
-        for future in tqdm(as_completed(futures), total=len(all_raw_links), desc="Checking & Renaming"):
-            res = future.result()
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
+        futures = {exe.submit(check_proxy, l): l for l in all_raw}
+        for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
+            res = f.result()
             if res: results.append(res)
-
-    print(f"\nWorking proxies found: {len(results)}")
+    
+    print(f"\nWorking: {len(results)}")
     
     if results:
         results.sort(key=lambda x: x[0])
-        
         links_str = "\n".join([r[1] for r in results])
         pings_map = {r[2]: r[0] for r in results}
         pings_json = json.dumps(pings_map)
-        
         deploy(links_str, pings_json)
     else:
-        print("No working proxies found.")
+        print("No working proxies.")
 
 if __name__ == "__main__":
     main()
