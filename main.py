@@ -219,10 +219,14 @@ def is_ip_blocked(ip):
 
 def fetch_url_content(url):
     try:
-        r = requests.get(url, timeout=10)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+        r = requests.get(url, headers=headers, timeout=5)
         r.raise_for_status()
         return r.text
-    except: return None
+    except:
+        return None
 
 def scrape_all_sources():
     print("Starting scraper...")
@@ -539,4 +543,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
