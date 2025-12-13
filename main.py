@@ -13,7 +13,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# ================= 1. ИСТОЧНИКИ =================
+# ================= 1. ИСТОЧНИКИ (MASSIVE LIST) =================
 
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
@@ -132,8 +132,8 @@ BASE64_URLS = [
 
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS_CHECK = 200  
-MAX_WORKERS_SCRAPE = 30 
+MAX_WORKERS_CHECK = 30  
+MAX_WORKERS_SCRAPE = 15 
 TIMEOUT = 10           
 API_RETRIES = 2
 
@@ -151,9 +151,8 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-# === ОСЛАБЛЕННЫЙ ФИЛЬТР ISP ===
-# Разрешаем Oracle, Amazon, Google Cloud - там часто стоят Reality
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247)"
+# === МИНИМАЛЬНЫЙ БАН-ЛИСТ (Оставляем рабочие облака) ===
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet)"
 
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
@@ -313,7 +312,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА (С DPI ФИЛЬТРОМ) =================
+# ================= 5. ПРОВЕРКА (RF OPTIMIZED) =================
 
 seen_proxies = set()
 error_counter = 0
@@ -327,16 +326,29 @@ def check_proxy(link):
         if not data: return None
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
 
-        # --- ЖЕСТКИЙ DPI ФИЛЬТР ---
-        # Пропускаем только Reality, TLS или Vision. Обычный TCP банится в РФ.
-        is_reality = data.get('security') == 'reality'
-        is_tls = data.get('security') == 'tls' or data.get('tls') == 'tls'
-        is_vision = 'vision' in data.get('flow', '')
+        # === ⚔️ РФ ФИЛЬТР: ТОЛЬКО РАБОЧИЕ МЕТОДЫ ⚔️ ===
+        # Пропускаем только:
+        # 1. REALITY + VISION (Самый надежный)
+        # 2. WebSocket (WS) (Маскировка под веб)
+        # 3. gRPC (Иногда работает)
+        # 4. Trojan (Всегда TLS)
+        # Обычный TCP без Reality и без TLS выбрасываем сразу.
         
-        # Если это VLESS/Trojan/VMess но без TLS/Reality/Vision -> МУСОР
-        if not (is_reality or is_tls or is_vision): return None
-        # ---------------------------
-        
+        prot = data.get('protocol')
+        net = data.get('network', 'tcp')
+        sec = data.get('security', '')
+        flow = data.get('flow', '')
+        is_tls = sec == 'tls' or data.get('tls') == 'tls'
+
+        is_reality_vision = (sec == 'reality' and 'vision' in flow)
+        is_ws = (net == 'ws')
+        is_grpc = (net == 'grpc')
+        is_trojan = (prot == 'trojan') # Trojan всегда в TLS
+
+        if not (is_reality_vision or is_ws or is_grpc or is_trojan or is_tls):
+            return None
+        # =================================================
+
         identifier = f"{data.get('server')}:{data.get('port')}"
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
@@ -482,7 +494,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
