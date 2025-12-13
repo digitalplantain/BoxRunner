@@ -18,11 +18,10 @@ from tqdm import tqdm
 NEW_SOURCE_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/26.txt"
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS = 20       # Чуть меньше, так как делаем больше запросов
+MAX_WORKERS = 20
 TIMEOUT = 10           
 API_RETRIES = 2
 
-# Secrets
 GH_TOKEN = os.environ.get("GH_TOKEN")
 GIST_ID = os.environ.get("GIST_ID")
 VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
@@ -34,7 +33,6 @@ ENV_KEY = "GIST_URL"
 
 IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
-# Ссылка для проверки ChatGPT (API отвечает 401 если IP чистый, 403 если грязный)
 OPENAI_URL = "https://api.openai.com/v1/models"
 
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|amazon|google|microsoft|oracle)"
@@ -249,8 +247,7 @@ def check_proxy(link):
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
         
-        # ДОБАВЛЕН ТЕГ 🤖GPT
-        name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖GPT{gpt_ico}"
+        name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
         new_link = rebuild_link(link, data, name)
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
         
@@ -349,3 +346,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
