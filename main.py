@@ -13,15 +13,131 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# ================= 1. КОНФИГУРАЦИЯ =================
+# ================= 1. ИСТОЧНИКИ (MASSIVE LIST) =================
 
-NEW_SOURCE_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/26.txt"
+PLAINTEXT_URLS = [
+    "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
+    "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
+    "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/all.txt",
+    "https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/master/collected-proxies/row-url/actives.txt",
+    "https://raw.githubusercontent.com/itsyebekhe/PSG/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/barry-far/V2ray-Config/refs/heads/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/Sub1.txt",
+    "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt",
+    "https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt",
+    "https://raw.githubusercontent.com/theGreatPeter/v2rayNodes/main/nodes.txt",
+    "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
+    "https://raw.githubusercontent.com/Barabama/FreeNodes/master/nodes/merged.txt",
+    "https://raw.githubusercontent.com/coldwater-10/V2Hub2/main/merged",
+    "https://raw.githubusercontent.com/Proxydaemitelegram/Proxydaemi44/refs/heads/main/Proxydaemi44",
+    "https://raw.githubusercontent.com/ndsphonemy/proxy-sub/refs/heads/main/speed.txt",
+    "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/Movaghat",
+    "https://raw.githubusercontent.com/tkamirparsa/Javid-shah/refs/heads/main/Sub.text",
+    "https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/all",
+    "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt",
+    "https://raw.githubusercontent.com/Surfboardv2ray/v2ray-worker-sub/refs/heads/master/providers/providers",
+    "https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/sub/v2rayng-wg.txt",
+    "https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/sub/SSTime",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
+    "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/refs/heads/main/sublinks/mix.txt",
+    "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
+    "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector_Py/refs/heads/main/sub/Mix/mix.txt",
+    "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/refs/heads/main/sub/mix",
+    "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt",
+    "https://raw.githubusercontent.com/shabane/kamaji/master/hub/merged.txt",
+    "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/main/output/base64/mix-uri",
+    "https://raw.githubusercontent.com/Rayan-Config/C-Sub/refs/heads/main/configs/proxy.txt",
+    "https://raw.githubusercontent.com/sinabigo/Xray/main/@sinavm",
+    "https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt",
+    "https://raw.githubusercontent.com/darkvpnapp/CloudflarePlus/refs/heads/main/proxy",
+    "https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt",
+    "https://raw.githubusercontent.com/sevcator/5ubscrpt10n/main/protocols/vl.txt",
+    "https://raw.githubusercontent.com/yitong2333/proxy-minging/refs/heads/main/v2ray.txt",
+    "https://raw.githubusercontent.com/miladtahanian/V2RayCFGDumper/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/miladtahanian/multi-proxy-config-fetcher/refs/heads/main/configs/proxy_configs.txt",
+    "https://raw.githubusercontent.com/YasserDivaR/pr0xy/refs/heads/main/ShadowSocks2021.txt",
+    "https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/vless.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt",
+    "https://github.com/Argh94/Proxy-List/raw/refs/heads/main/All_Config.txt",
+    "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS",
+    "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt",
+    "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt",
+    "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub.txt",
+    "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/Special/Telegram.txt",
+    "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt",
+    "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
+    "https://raw.githubusercontent.com/Everyday-VPN/Everyday-VPN/main/subscription/main.txt",
+    "https://raw.githubusercontent.com/Everyday-VPN/Everyday-VPN/main/subscription/test.txt",
+    "https://v2.alicivil.workers.dev/",
+    "https://robin.nscl.ir",
+    "https://vpn.fail/free-proxy/v2ray",
+    "https://weoknow.com/data/dayupdate/1/z.txt",
+    "https://igdux.top/~FREE2CONFIG,T,H",
+    "https://istanbulsydneyhotel.com/blogs/site/sni.php",
+    "https://hideshots.eu/sub.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Vmess.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Vless.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Tuic.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Trojan.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/ShadowSocksR.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/ShadowSocks.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/other.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/shadowsocks.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/trojan.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vless.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vmess.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/warp.txt"
+]
+
+BASE64_URLS = [
+    "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/main/mci/sub_1.txt",
+    "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt",
+    "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_1.txt",
+    "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt",
+    "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray",
+    "https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2",
+    "https://raw.githubusercontent.com/freefq/free/master/v2",
+    "https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub",
+    "https://raw.githubusercontent.com/ripaojiedian/freenode/main/sub",
+    "https://raw.githubusercontent.com/yebekhe/vpn-fail/refs/heads/main/sub-link",
+    "https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription_num",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/vless",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/hysteria2",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/a11",
+    "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
+    "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/all",
+    "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity",
+    "https://raw.githubusercontent.com/ssrsub/ssr/master/v2ray",
+    "https://raw.githubusercontent.com/MrPooyaX/VpnsFucking/main/BeVpn.txt",
+    "https://shadowmere.xyz/api/b64sub/",
+    "https://www.xrayvip.com/free.txt",
+    "https://raw.githubusercontent.com/ts-sf/fly/main/v2",
+    "https://a.nodeshare.xyz/uploads/2025/7/20250712.txt",
+    "https://v2rayshare.githubrowcontent.com/2025/07/20250712.txt",
+    "https://a.nodeshare.xyz/uploads/2025/7/20250712.txt",
+    "https://oneclash.githubrowcontent.com/2025/07/20250712.txt",
+    "https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/all",
+    "https://trojanvmess.pages.dev/cmcm?b64",
+    "https://shadowmere.xyz/api/b64sub/",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hy2",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hysteria2",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hysteria",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vless",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
+    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
+]
+
+# ================= 2. КОНФИГУРАЦИЯ =================
+
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS = 20
+MAX_WORKERS_CHECK = 30  # Потоки для проверки
+MAX_WORKERS_SCRAPE = 15 # Потоки для скачивания
 TIMEOUT = 10           
 API_RETRIES = 2
 
+# Secrets
 GH_TOKEN = os.environ.get("GH_TOKEN")
 GIST_ID = os.environ.get("GIST_ID")
 VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
@@ -35,7 +151,9 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|contabo|digitalocean|amazon|google|microsoft|oracle)"
+# === ИСПРАВЛЕННЫЙ ФИЛЬТР ISP ===
+# Убрали Amazon, Oracle, Microsoft, Google, так как там часто бывают рабочие VLESS Reality
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting)"
 
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
@@ -59,7 +177,59 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= ПАРСИНГ =================
+# ================= 3. МНОГОПОТОЧНЫЙ СКРАПЕР =================
+
+def fetch_url_content(url):
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        return r.text
+    except: return None
+
+def scrape_all_sources():
+    print("Starting scraper...")
+    all_proxies = set()
+    
+    # 1. Plaintext
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in PLAINTEXT_URLS}
+        for f in tqdm(as_completed(futures), total=len(PLAINTEXT_URLS), desc="Plaintext"):
+            content = f.result()
+            if content:
+                content = content.replace('<br/>', '\n').replace('<br>', '\n')
+                for line in content.splitlines():
+                    l = line.strip()
+                    if l.startswith(('vmess://', 'vless://', 'trojan://')): all_proxies.add(l)
+
+    # 2. Base64
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in BASE64_URLS}
+        for f in tqdm(as_completed(futures), total=len(BASE64_URLS), desc="Base64"):
+            content = f.result()
+            if content:
+                try:
+                    decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
+                    for line in decoded.splitlines():
+                        l = line.strip()
+                        if l.startswith(('vmess://', 'vless://', 'trojan://')): all_proxies.add(l)
+                except: pass
+
+    # 3. Existing Gist (History)
+    if GIST_ID and GH_TOKEN:
+        try:
+            print("Fetching existing Gist...")
+            r = requests.get(f"https://api.github.com/gists/{GIST_ID}", headers={'Authorization': f'token {GH_TOKEN}'})
+            files = r.json().get('files', {})
+            content = files.get(GIST_FILENAME, {}).get('content', '')
+            for line in content.splitlines():
+                l = line.strip()
+                if l: all_proxies.add(l)
+        except Exception as e: print(f"Gist fetch warning: {e}")
+
+    print(f"Total unique raw links: {len(all_proxies)}")
+    return list(all_proxies)
+
+# ================= 4. ПАРСИНГ =================
 
 def parse_proxy_link(link):
     try:
@@ -146,33 +316,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= ЗАГРУЗКА =================
-
-def fetch_links(url, is_gist=False):
-    print(f"Downloading: {url}...")
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    if is_gist and GH_TOKEN: headers['Authorization'] = f'token {GH_TOKEN}'
-    try:
-        if is_gist and 'api.github.com' in url:
-            r = requests.get(url, headers=headers); r.raise_for_status()
-            files = r.json().get('files', {})
-            content = files.get(GIST_FILENAME, {}).get('content', '')
-        else:
-            r = requests.get(url, headers=headers); r.raise_for_status()
-            content = r.text
-        
-        links = [l.strip() for l in content.splitlines() if l.strip()]
-        valid = [l for l in links if l.startswith(('vmess://', 'vless://', 'trojan://'))]
-        if valid: 
-            print(f"  -> Found {len(valid)} links")
-            return valid
-        decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
-        return [l.strip() for l in decoded.splitlines() if l.strip() and l.startswith(('vmess://', 'vless://', 'trojan://'))]
-    except Exception as e:
-        print(f"  -> Error: {e}")
-        return []
-
-# ================= ПРОВЕРКА =================
+# ================= 5. ПРОВЕРКА =================
 
 seen_proxies = set()
 error_counter = 0
@@ -203,24 +347,16 @@ def check_proxy(link):
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # 1. PING (Google)
         st = time.time()
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
-        # 2. CHATGPT CHECK
         gpt_ok = False
         try:
-            # 401 = Unauthorized (значит соединение есть и IP не в бане)
-            # 200 = OK
-            # 403 = Forbidden (IP в бане или Cloudflare)
             gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
-            if gpt_r.status_code in [200, 401]:
-                gpt_ok = True
-        except:
-            pass
+            if gpt_r.status_code in [200, 401]: gpt_ok = True
+        except: pass
 
-        # 3. GEO (IPINFO)
         api_data = {}
         for _ in range(API_RETRIES):
             try:
@@ -255,7 +391,7 @@ def check_proxy(link):
 
     except Exception as e:
         if error_counter < 5:
-            print(f"\n[ERROR] Link failed: {e}")
+            # print(f"\n[ERROR] Link failed: {e}") # Отладка
             error_counter += 1
         return None
     finally:
@@ -315,19 +451,16 @@ def main():
         print("Sing-box not found!")
         sys.exit(1)
     
-    links_new = fetch_links(NEW_SOURCE_URL)
-    links_old = []
-    if GIST_ID:
-        links_old = fetch_links(f"https://api.github.com/gists/{GIST_ID}", is_gist=True)
-    
-    all_raw = list(set(links_new + links_old))
-    print(f"Total links: {len(all_raw)}")
+    # 1. Scrape
+    all_raw = scrape_all_sources()
     if not all_raw: return
 
+    # 2. Check
     results = []
     seen_proxies.clear()
     
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
+    # Используем MAX_WORKERS_CHECK для проверки
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
         futures = {exe.submit(check_proxy, l): l for l in all_raw}
         for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
             res = f.result()
