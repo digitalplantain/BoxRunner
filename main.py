@@ -10,6 +10,7 @@ import urllib.parse
 import sys
 import hashlib
 import requests
+import ipaddress  # <--- Для работы с CIDR и IP
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
@@ -133,7 +134,7 @@ BASE64_URLS = [
 SING_BOX_PATH = "./sing-box"
 
 MAX_WORKERS_CHECK = 300  
-MAX_WORKERS_SCRAPE = 15 
+MAX_WORKERS_SCRAPE = 30
 TIMEOUT = 10           
 API_RETRIES = 2
 
@@ -151,11 +152,19 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-# === МИНИМАЛЬНЫЙ БАН-ЛИСТ (Оставляем рабочие облака) ===
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet)"
+# === АДРЕСА СПИСКОВ РКН (ANTIFILTER) ===
+ANTIFILTER_URLS = [
+    "https://antifilter.network/download/subnet.lst",
+    "https://antifilter.network/download/ipsum.lst"
+]
+# ========================================
 
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet)"
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
+
+# Глобальный список заблокированных подсетей
+BLOCKED_SUBNETS = []
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -176,7 +185,43 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= 3. СКРАПЕР =================
+# ================= 3. RKN FILTER (ANTIFILTER) =================
+
+def load_antifilter_lists():
+    """Скачивает списки подсетей РКН и сохраняет их в памяти."""
+    global BLOCKED_SUBNETS
+    print("Downloading Antifilter lists (RKN)...")
+    count = 0
+    for url in ANTIFILTER_URLS:
+        try:
+            r = requests.get(url, timeout=10)
+            if r.status_code == 200:
+                lines = r.text.splitlines()
+                for line in lines:
+                    line = line.strip()
+                    if not line or line.startswith('#'): continue
+                    try:
+                        # Создаем объект сети для быстрой проверки
+                        BLOCKED_SUBNETS.append(ipaddress.ip_network(line))
+                        count += 1
+                    except: pass
+        except Exception as e:
+            print(f"Error loading {url}: {e}")
+    print(f"Loaded {count} blocked subnets/IPs.")
+
+def is_ip_blocked(ip):
+    """Проверяет, входит ли IP в заблокированные подсети."""
+    if not BLOCKED_SUBNETS: return False
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        # Простой перебор (для 15-20k подсетей это достаточно быстро на C-уровне Python)
+        for net in BLOCKED_SUBNETS:
+            if ip_obj in net:
+                return True
+    except: pass
+    return False
+
+# ================= 4. СКРАПЕР =================
 
 def fetch_url_content(url):
     try:
@@ -225,7 +270,7 @@ def scrape_all_sources():
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
 
-# ================= 4. ПАРСИНГ =================
+# ================= 5. ПАРСИНГ =================
 
 def parse_proxy_link(link):
     try:
@@ -312,7 +357,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА (RF OPTIMIZED) =================
+# ================= 6. ПРОВЕРКА (С RKN BLOCKLIST) =================
 
 seen_proxies = set()
 error_counter = 0
@@ -326,14 +371,7 @@ def check_proxy(link):
         if not data: return None
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
 
-        # === ⚔️ РФ ФИЛЬТР: ТОЛЬКО РАБОЧИЕ МЕТОДЫ ⚔️ ===
-        # Пропускаем только:
-        # 1. REALITY + VISION (Самый надежный)
-        # 2. WebSocket (WS) (Маскировка под веб)
-        # 3. gRPC (Иногда работает)
-        # 4. Trojan (Всегда TLS)
-        # Обычный TCP без Reality и без TLS выбрасываем сразу.
-        
+        # 1. DPI Filter (Только рабочие протоколы)
         prot = data.get('protocol')
         net = data.get('network', 'tcp')
         sec = data.get('security', '')
@@ -343,16 +381,30 @@ def check_proxy(link):
         is_reality_vision = (sec == 'reality' and 'vision' in flow)
         is_ws = (net == 'ws')
         is_grpc = (net == 'grpc')
-        is_trojan = (prot == 'trojan') # Trojan всегда в TLS
+        is_trojan = (prot == 'trojan')
 
         if not (is_reality_vision or is_ws or is_grpc or is_trojan or is_tls):
             return None
-        # =================================================
+        
+        server_host = data.get('server')
+        
+        # 2. RKN FILTER: Проверяем IP на блокировку
+        try:
+            # Если это домен, резолвим в IP
+            ip_to_check = socket.gethostbyname(server_host)
+            if is_ip_blocked(ip_to_check):
+                # print(f"Skipping blocked IP: {ip_to_check} ({server_host})")
+                return None
+        except:
+            # Если не смогли зарезолвить DNS - возможно сервер мертв, пропускаем
+            return None
 
-        identifier = f"{data.get('server')}:{data.get('port')}"
+        # 3. Дедупликация
+        identifier = f"{server_host}:{data.get('port')}"
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
+        # 4. Проверка подключения (Sing-box)
         local_port = get_free_port()
         conf_str = generate_singbox_config(data, local_port)
         
@@ -467,6 +519,9 @@ def main():
         print("Sing-box not found!")
         sys.exit(1)
     
+    # 0. Загружаем списки РКН
+    load_antifilter_lists()
+
     # 1. Scrape
     all_raw = scrape_all_sources()
     if not all_raw: return
@@ -494,4 +549,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
