@@ -13,7 +13,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# ================= 1. ИСТОЧНИКИ (MASSIVE LIST) =================
+# ================= 1. ИСТОЧНИКИ =================
 
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
@@ -132,8 +132,8 @@ BASE64_URLS = [
 
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS_CHECK = 300  # Потоки для проверки
-MAX_WORKERS_SCRAPE = 30 # Потоки для скачивания
+MAX_WORKERS_CHECK = 30  
+MAX_WORKERS_SCRAPE = 15 
 TIMEOUT = 10           
 API_RETRIES = 2
 
@@ -151,8 +151,8 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-# === ИСПРАВЛЕННЫЙ ФИЛЬТР ISP ===
-# Убрали Amazon, Oracle, Microsoft, Google, так как там часто бывают рабочие VLESS Reality
+# === ОСЛАБЛЕННЫЙ ФИЛЬТР ISP ===
+# Разрешаем Oracle, Amazon, Google Cloud - там часто стоят Reality
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting)"
 
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
@@ -177,7 +177,7 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= 3. МНОГОПОТОЧНЫЙ СКРАПЕР =================
+# ================= 3. СКРАПЕР =================
 
 def fetch_url_content(url):
     try:
@@ -190,7 +190,6 @@ def scrape_all_sources():
     print("Starting scraper...")
     all_proxies = set()
     
-    # 1. Plaintext
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
         futures = {exe.submit(fetch_url_content, u): u for u in PLAINTEXT_URLS}
         for f in tqdm(as_completed(futures), total=len(PLAINTEXT_URLS), desc="Plaintext"):
@@ -201,7 +200,6 @@ def scrape_all_sources():
                     l = line.strip()
                     if l.startswith(('vmess://', 'vless://', 'trojan://')): all_proxies.add(l)
 
-    # 2. Base64
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
         futures = {exe.submit(fetch_url_content, u): u for u in BASE64_URLS}
         for f in tqdm(as_completed(futures), total=len(BASE64_URLS), desc="Base64"):
@@ -214,7 +212,6 @@ def scrape_all_sources():
                         if l.startswith(('vmess://', 'vless://', 'trojan://')): all_proxies.add(l)
                 except: pass
 
-    # 3. Existing Gist (History)
     if GIST_ID and GH_TOKEN:
         try:
             print("Fetching existing Gist...")
@@ -316,7 +313,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА =================
+# ================= 5. ПРОВЕРКА (С DPI ФИЛЬТРОМ) =================
 
 seen_proxies = set()
 error_counter = 0
@@ -329,6 +326,16 @@ def check_proxy(link):
         data = parse_proxy_link(link)
         if not data: return None
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
+
+        # --- ЖЕСТКИЙ DPI ФИЛЬТР ---
+        # Пропускаем только Reality, TLS или Vision. Обычный TCP банится в РФ.
+        is_reality = data.get('security') == 'reality'
+        is_tls = data.get('security') == 'tls' or data.get('tls') == 'tls'
+        is_vision = 'vision' in data.get('flow', '')
+        
+        # Если это VLESS/Trojan/VMess но без TLS/Reality/Vision -> МУСОР
+        if not (is_reality or is_tls or is_vision): return None
+        # ---------------------------
         
         identifier = f"{data.get('server')}:{data.get('port')}"
         if identifier in seen_proxies: return None
@@ -378,7 +385,6 @@ def check_proxy(link):
 
         flag = country_flag(cc)
         city = api_data.get('city', 'Unknown')
-        
         gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
@@ -390,9 +396,7 @@ def check_proxy(link):
         return (ping, new_link, link_hash)
 
     except Exception as e:
-        if error_counter < 5:
-            # print(f"\n[ERROR] Link failed: {e}") # Отладка
-            error_counter += 1
+        if error_counter < 5: error_counter += 1
         return None
     finally:
         if proc: 
@@ -459,7 +463,6 @@ def main():
     results = []
     seen_proxies.clear()
     
-    # Используем MAX_WORKERS_CHECK для проверки
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
         futures = {exe.submit(check_proxy, l): l for l in all_raw}
         for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
@@ -479,4 +482,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
