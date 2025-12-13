@@ -13,9 +13,9 @@ import ipaddress
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+from radix import Radix
 
-# ================= 1. ИСТОЧНИКИ =================
-
+# ================= 1. ИСТОЧНИКИ (Без изменений) =================
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -152,15 +152,13 @@ TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
 BANNED_ISP_REGEX = r"(?i)(hetzner|ponynet)" 
-
 RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
 RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
-RKN_BANNED_NETWORKS = set()
+
+RKN_BANNED_NETWORKS = Radix()
 
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
-
-# ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -184,31 +182,28 @@ def safe_base64_decode(s):
 # ================= РАБОТА С БЛОК-ЛИСТАМИ =================
 
 def load_rkn_lists():
-    """Скачивает и парсит списки заблокированных подсетей."""
     print("Downloading RKN block lists...")
     urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
+    count = 0
     for url in urls:
         try:
             r = requests.get(url, timeout=15)
             r.raise_for_status()
             for line in r.text.splitlines():
-                try:
-                    RKN_BANNED_NETWORKS.add(ipaddress.ip_network(line.strip()))
-                except ValueError:
-                    continue
+                if line.strip():
+                    node = RKN_BANNED_NETWORKS.add(line.strip())
+                    node.data['banned'] = True
+                    count += 1
         except Exception as e:
             print(f"Warning: Failed to load RKN list {url}: {e}")
-    print(f"Loaded {len(RKN_BANNED_NETWORKS)} banned networks from RKN lists.")
+    print(f"Loaded {count} banned networks into Radix tree.")
 
 def is_ip_banned(ip_str):
-    """Проверяет, входит ли IP в заблокированную подсеть."""
+    """Проверяет IP через Radix tree. Это очень быстро."""
     try:
-        ip = ipaddress.ip_address(ip_str)
-        for network in RKN_BANNED_NETWORKS:
-            if ip in network:
-                return True
-        return False
-    except ValueError:
+        node = RKN_BANNED_NETWORKS.search_best(ip_str)
+        return node is not None and 'banned' in node.data
+    except (ValueError, TypeError):
         return False
 
 # ================= 3. СКРАПЕР =================
@@ -362,16 +357,16 @@ def check_proxy(link):
         if data.get('protocol') in ['shadowsocks', 'ss']: return None 
 
         server_address = data.get('server')
-        # Если это домен, а не IP, пробуем его разрешить
         if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
             try:
-                server_address = socket.gethostbyname(server_address)
+                ip_addr = socket.gethostbyname(server_address)
+                if is_ip_banned(ip_addr): return None
             except:
-                return None # Не можем разрешить домен - пропускаем
-
-        if is_ip_banned(server_address):
+                return None
+        elif is_ip_banned(server_address):
             return None
         
+        # DPI FILTER
         prot = data.get('protocol'); net = data.get('network', 'tcp')
         sec = data.get('security', ''); flow = data.get('flow', '')
         is_tls = sec == 'tls' or data.get('tls') == 'tls'
