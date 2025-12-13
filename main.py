@@ -151,7 +151,7 @@ IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 
-BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers|oracle|digitalocean|ovh|kaopu|netcup|upcloud|worktitans|alibaba|global connectivity solutions llp|baykov|akamao|lucidacloud|global cloud|oc networks limited|play2go|acgnode inc|netranex|cognetcloud|rj network|bluevps|vdska|alexhost|h2nexus|hkt|timeweb|akilecloud|julian|microsoft|hostkey)"
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers|oracle|digitalocean|ovh|kaopu|netcup|upcloud|worktitans|alibaba|global connectivity solutions llp|baykov|akamao|lucidacloud|global cloud|oc networks limited|play2go|acgnode inc|netranex|cognetcloud|rj network|bluevps|vdska|alexhost|h2nexus|hkt|timeweb|akilecloud|julian|microsoft|hostkey|dataforest)"
 RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
 RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
 
@@ -521,6 +521,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
