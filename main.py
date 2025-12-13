@@ -132,7 +132,7 @@ BASE64_URLS = [
 
 SING_BOX_PATH = "./sing-box"
 
-MAX_WORKERS_CHECK = 500  
+MAX_WORKERS_CHECK = 200  
 MAX_WORKERS_SCRAPE = 30 
 TIMEOUT = 10           
 API_RETRIES = 2
@@ -482,6 +482,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
