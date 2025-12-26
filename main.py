@@ -16,7 +16,6 @@ from tqdm import tqdm
 from radix import Radix
 from bs4 import BeautifulSoup
 
-# ================= 1. ИСТОЧНИКИ (Без изменений) =================
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -129,7 +128,6 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
 ]
 
-# ================= 2. КОНФИГУРАЦИЯ (Без изменений) =================
 SING_BOX_PATH = "./sing-box"
 MAX_WORKERS_CHECK = 300
 MAX_WORKERS_SCRAPE = 30
@@ -171,7 +169,6 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= РАБОТА С БЛОК-ЛИСТАМИ (Без изменений) =================
 def load_rkn_lists():
     print("Downloading RKN block lists...")
     urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
@@ -196,7 +193,6 @@ def is_ip_banned(ip_str):
     except (ValueError, TypeError):
         return False
 
-# ================= ИЗМЕНЕНО: РАБОТА С CHEBURCHECK =================
 CHEBURCHECK_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -206,11 +202,6 @@ CHEBURCHECK_HEADERS = {
 cheburcheck_cache = {}
 
 def cheburcheck_is_blocked(target):
-    """
-    Проверяет IP или домен через cheburcheck.ru.
-    Возвращает True, если ресурс заблокирован, иначе False.
-    Сначала проверяет на "Белый список", затем на блокировку в "Реестре РКН".
-    """
     if not target: return False
     if target in cheburcheck_cache: return cheburcheck_cache[target]
 
@@ -220,13 +211,11 @@ def cheburcheck_is_blocked(target):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
 
-        # 1. Проверка на "Белый список". Если он есть, ресурс чистый.
         panel = soup.find('div', class_='result-panel')
         if panel and 'whitelist-theme' in panel.get('class', []):
             cheburcheck_cache[target] = False
             return False
 
-        # 2. Если не в белом списке, ищем статус в "Реестре РКН".
         rkn_label = soup.find(lambda tag: tag.name == 'span' and 'Реестр РКН' in tag.text and 'row-label' in tag.get('class', []))
         if not rkn_label:
             cheburcheck_cache[target] = False
@@ -239,7 +228,6 @@ def cheburcheck_is_blocked(target):
 
         rkn_status = rkn_value_tag.text.strip()
         
-        # Если статус НЕ "Не найден", значит есть какая-то запись о блокировке.
         is_blocked = (rkn_status != "Не найден")
         if is_blocked:
             print(f"[Cheburcheck] {target} is BLOCKED (Status: {rkn_status}). Filtering out.")
@@ -251,7 +239,6 @@ def cheburcheck_is_blocked(target):
         print(f"Warning: Cheburcheck request failed for {target}: {e}")
         return False
 
-# ================= 3. СКРАПЕР (Без изменений) =================
 def fetch_url_content(url):
     try:
         r = requests.get(url, timeout=10)
@@ -299,7 +286,6 @@ def scrape_all_sources():
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
     
-# ================= 4. ПАРСИНГ (Без изменений) =================
 def parse_proxy_link(link):
     try:
         if link.startswith('vmess://'):
@@ -385,8 +371,6 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА (ИЗМЕНЕНО) =================
-
 seen_proxies = set()
 error_counter = 0
 
@@ -403,7 +387,7 @@ def check_proxy(link):
         if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
             try:
                 ip_addr = socket.gethostbyname(server_address)
-                if is_ip_banned(ip_addr): return None # Быстрая предварительная проверка по локальной базе
+                if is_ip_banned(ip_addr): return None
             except:
                 return None
         elif is_ip_banned(server_address):
@@ -448,7 +432,6 @@ def check_proxy(link):
         
         if not api_data: return None
         
-        # ================== НОВЫЙ БЛОК ПРОВЕРКИ ПОСЛЕ ТЕСТА ==================
         exit_ip = api_data.get('ip')
         if cheburcheck_is_blocked(exit_ip):
             return None
@@ -457,7 +440,6 @@ def check_proxy(link):
         if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
             if cheburcheck_is_blocked(sni):
                 return None
-        # ================== КОНЕЦ НОВОГО БЛОКА ==================
 
         gpt_ok = False
         try:
@@ -495,8 +477,6 @@ def check_proxy(link):
             try: os.remove(config_filename)
             except: pass
 
-
-# ================= DEPLOY (Без изменений) =================
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
@@ -538,7 +518,6 @@ def deploy(links_content, pings_content):
         print("Vercel OK.")
     except Exception as e: print(f"Vercel Error: {e}")
     
-# ================= MAIN (Без изменений) =================
 def main():
     if not os.path.exists(SING_BOX_PATH):
         print("Sing-box not found!")
@@ -546,11 +525,9 @@ def main():
     
     load_rkn_lists()
 
-    # 1. Scrape
     all_raw = scrape_all_sources()
     if not all_raw: return
 
-    # 2. Check
     results = []
     seen_proxies.clear()
     
