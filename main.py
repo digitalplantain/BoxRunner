@@ -212,28 +212,22 @@ def cheburcheck_is_blocked(target):
         soup = BeautifulSoup(response.text, 'lxml')
 
         panel = soup.find('div', class_='result-panel')
-        if panel and 'whitelist-theme' in panel.get('class', []):
+        if not panel:
             cheburcheck_cache[target] = False
             return False
 
-        rkn_label = soup.find(lambda tag: tag.name == 'span' and 'Реестр РКН' in tag.text and 'row-label' in tag.get('class', []))
-        if not rkn_label:
+        panel_classes = panel.get('class', [])
+
+        if 'whitelist-theme' in panel_classes:
             cheburcheck_cache[target] = False
             return False
 
-        rkn_value_tag = rkn_label.find_next_sibling('span')
-        if not rkn_value_tag:
-            cheburcheck_cache[target] = False
-            return False
-
-        rkn_status = rkn_value_tag.text.strip()
-        
-        is_blocked = (rkn_status != "Не найден")
-        if is_blocked:
-            print(f"[Cheburcheck] {target} is BLOCKED (Status: {rkn_status}). Filtering out.")
-        
-        cheburcheck_cache[target] = is_blocked
-        return is_blocked
+        if 'blocked-theme' in panel_classes:
+            print(f"[Cheburcheck] {target} is BLOCKED (Reason: 'blocked-theme' found). Filtering out.")
+            cheburcheck_cache[target] = True
+            return True
+        cheburcheck_cache[target] = False
+        return False
 
     except Exception as e:
         print(f"Warning: Cheburcheck request failed for {target}: {e}")
@@ -550,3 +544,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
