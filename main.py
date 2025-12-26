@@ -17,7 +17,7 @@ from radix import Radix
 from bs4 import BeautifulSoup
 
 # ================= 1. ИСТОЧНИКИ (Без изменений) =================
-# ... (ваш список URL'ов) ...
+# ... (ваш список URL'ов остается здесь) ...
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -131,6 +131,7 @@ BASE64_URLS = [
 ]
 
 # ================= 2. КОНФИГУРАЦИЯ (Без изменений) =================
+# ... (ваш блок конфигурации) ...
 SING_BOX_PATH = "./sing-box"
 MAX_WORKERS_CHECK = 300
 MAX_WORKERS_SCRAPE = 30
@@ -173,7 +174,7 @@ def safe_base64_decode(s):
         except: return b""
 
 # ================= РАБОТА С БЛОК-ЛИСТАМИ (Без изменений) =================
-# ... (код load_rkn_lists, is_ip_banned без изменений)
+# ... (ваш блок) ...
 def load_rkn_lists():
     print("Downloading RKN block lists...")
     urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
@@ -198,31 +199,7 @@ def is_ip_banned(ip_str):
     except (ValueError, TypeError):
         return False
         
-# ================= НОВЫЙ КОД: ОПРЕДЕЛЕНИЕ СТРАНЫ IP =================
-ip_country_cache = {}
-def get_ip_country(ip_address):
-    """Определяет страну IP-адреса через прямой запрос к ipinfo.io."""
-    if not ip_address: return None
-    if ip_address in ip_country_cache: return ip_country_cache[ip_address]
-    
-    try:
-        # Не проверяем приватные/локальные адреса
-        if ipaddress.ip_address(ip_address).is_private:
-            return None
-        response = requests.get(f"http://ipinfo.io/{ip_address}/json", timeout=5)
-        if response.status_code == 200:
-            country = response.json().get('country')
-            ip_country_cache[ip_address] = country
-            return country
-    except Exception:
-        pass # Игнорируем ошибки, чтобы не прерывать основной процесс
-    
-    # Кэшируем None в случае ошибки, чтобы не пытаться снова
-    ip_country_cache[ip_address] = None
-    return None
-
-# ================= РАБОТА С CHEBURCHECK (Без изменений) =================
-# ... (код cheburcheck_is_blocked без изменений)
+# ================= ИЗМЕНЕНО: РАБОТА С CHEBURCHECK =================
 CHEBURCHECK_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -232,6 +209,10 @@ CHEBURCHECK_HEADERS = {
 cheburcheck_cache = {}
 
 def cheburcheck_is_blocked(target):
+    """
+    Проверяет IP или домен через cheburcheck.ru по CSS-классу.
+    Возвращает True, если ресурс заблокирован, иначе False.
+    """
     if not target: return False
     if target in cheburcheck_cache: return cheburcheck_cache[target]
 
@@ -240,26 +221,32 @@ def cheburcheck_is_blocked(target):
         response = requests.get(url, headers=CHEBURCHECK_HEADERS, timeout=15)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
+
         panel = soup.find('div', class_='result-panel')
         if not panel:
             cheburcheck_cache[target] = False
-            return False
+            return False # Неожиданный формат, не блокируем
+
         panel_classes = panel.get('class', [])
+        
         if 'whitelist-theme' in panel_classes:
             cheburcheck_cache[target] = False
             return False
+        
         if 'blocked-theme' in panel_classes:
-            print(f"[Cheburcheck] {target} is BLOCKED (Reason: 'blocked-theme' found). Filtering out.")
+            print(f"[Cheburcheck] {target} is BLOCKED (theme: blocked-theme). Filtering out.")
             cheburcheck_cache[target] = True
             return True
+            
         cheburcheck_cache[target] = False
         return False
+
     except Exception as e:
         print(f"Warning: Cheburcheck request failed for {target}: {e}")
         return False
 
 # ================= 3. СКРАПЕР (Без изменений) =================
-# ... (ваш код скрапера)
+# ... (ваш блок) ...
 def fetch_url_content(url):
     try:
         r = requests.get(url, timeout=10)
@@ -308,7 +295,7 @@ def scrape_all_sources():
     return list(all_proxies)
 
 # ================= 4. ПАРСИНГ (Без изменений) =================
-# ... (ваш код парсинга)
+# ... (ваш блок) ...
 def parse_proxy_link(link):
     try:
         if link.startswith('vmess://'):
@@ -346,7 +333,7 @@ def parse_proxy_link(link):
 def generate_singbox_config(data, local_port):
     config = {
         "log": {"disabled": True},
-        "inbounds": [{"type": "mixed","tag": "in","listen": "1227.0.0.1","listen_port": local_port,"set_system_proxy": False}],
+        "inbounds": [{"type": "mixed","tag": "in","listen": "127.0.0.1","listen_port": local_port,"set_system_proxy": False}],
         "outbounds": []
     }
     outbound = {"tag": "proxy", "type": data['protocol'], "server": data['server'], "server_port": int(data['port'])}
@@ -395,6 +382,7 @@ def rebuild_link(original_link, data, new_name):
     return f"{base}#{urllib.parse.quote(new_name)}"
 
 # ================= 5. ПРОВЕРКА (ИЗМЕНЕНО) =================
+
 seen_proxies = set()
 error_counter = 0
 
@@ -408,20 +396,32 @@ def check_proxy(link):
         if data.get('protocol') in ['shadowsocks', 'ss']: return None
 
         server_address = data.get('server')
-        entry_ip_addr = None
-        if server_address:
-            if re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
-                entry_ip_addr = server_address
-            else:
-                try: entry_ip_addr = socket.gethostbyname(server_address)
-                except: return None
-        else: return None
+        ip_addr = None
+        is_russian_entry = False
 
-        if is_ip_banned(entry_ip_addr): return None
+        # --- Определение IP и страны входного узла ---
+        if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
+            try:
+                ip_addr = socket.gethostbyname(server_address)
+            except:
+                return None
+        else:
+            ip_addr = server_address
+        
+        if not ip_addr: return None
 
-        # НОВЫЙ КОД: Определяем, является ли входная точка российской
-        entry_country = get_ip_country(entry_ip_addr)
-        is_russian_entry = (entry_country == 'RU')
+        # Быстрая предварительная проверка по локальной базе
+        if is_ip_banned(ip_addr): return None
+        
+        # Проверяем, не является ли входной IP российским
+        try:
+            r = requests.get(f"http://ipinfo.io/{ip_addr}/json", timeout=5)
+            if r.status_code == 200 and r.json().get('country') == 'RU':
+                is_russian_entry = True
+                print(f"[Info] Entry IP {ip_addr} is Russian. Bypassing Cheburcheck for its exit IP.")
+        except:
+            pass # Если не удалось проверить, считаем, что не российский
+        # --- Конец проверки входного узла ---
 
         prot = data.get('protocol'); net = data.get('network', 'tcp')
         sec = data.get('security', ''); flow = data.get('flow', '')
@@ -446,6 +446,7 @@ def check_proxy(link):
         if proc.poll() is not None: return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
+
         st = time.time()
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
@@ -461,22 +462,15 @@ def check_proxy(link):
         
         if not api_data: return None
         
-        exit_ip = api_data.get('ip')
-        exit_cc = api_data.get('country')
-        
-        # НОВЫЙ КОД: Логика для "маскированных" российских серверов
-        name_prefix = ""
-        is_masked_server = is_russian_entry and exit_cc != 'RU'
-
-        if is_masked_server:
-            name_prefix = "!RU! "
-            print(f"Detected masked RU server: Entry {entry_ip_addr} (RU) -> Exit {exit_ip} ({exit_cc}). Skipping Cheburcheck.")
-        else:
-            # Для обычных серверов выполняем проверку Cheburcheck
+        # --- Финальная проверка через Cheburcheck (кроме российских "прокладок") ---
+        if not is_russian_entry:
+            exit_ip = api_data.get('ip')
             if cheburcheck_is_blocked(exit_ip): return None
+
             sni = data.get('sni')
             if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
                 if cheburcheck_is_blocked(sni): return None
+        # --- Конец финальной проверки ---
 
         gpt_ok = False
         try:
@@ -497,7 +491,9 @@ def check_proxy(link):
         yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
         
-        name = f"{name_prefix}{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
+        base_name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
+        name = f"!RU! {base_name}" if is_russian_entry else base_name
+
         new_link = rebuild_link(link, data, name)
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
         
@@ -515,7 +511,7 @@ def check_proxy(link):
             except: pass
 
 # ================= DEPLOY (Без изменений) =================
-# ... (ваш код deploy)
+# ... (ваш блок) ...
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
@@ -558,7 +554,7 @@ def deploy(links_content, pings_content):
     except Exception as e: print(f"Vercel Error: {e}")
 
 # ================= MAIN (Без изменений) =================
-# ... (ваш код main)
+# ... (ваш блок) ...
 def main():
     if not os.path.exists(SING_BOX_PATH):
         print("Sing-box not found!")
