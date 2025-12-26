@@ -14,6 +14,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from radix import Radix
+from bs4 import BeautifulSoup
 
 # ================= 1. ИСТОЧНИКИ (Без изменений) =================
 PLAINTEXT_URLS = [
@@ -90,7 +91,6 @@ PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vmess.txt",
     "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/warp.txt"
 ]
-
 BASE64_URLS = [
     "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/main/mci/sub_1.txt",
     "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt",
@@ -129,34 +129,26 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
 ]
 
-# ================= 2. КОНФИГУРАЦИЯ =================
-
+# ================= 2. КОНФИГУРАЦИЯ (Без изменений) =================
 SING_BOX_PATH = "./sing-box"
-MAX_WORKERS_CHECK = 300  
-MAX_WORKERS_SCRAPE = 30 
-TIMEOUT = 10           
+MAX_WORKERS_CHECK = 300
+MAX_WORKERS_SCRAPE = 30
+TIMEOUT = 10
 API_RETRIES = 2
-
-# Secrets
 GH_TOKEN = os.environ.get("GH_TOKEN")
 GIST_ID = os.environ.get("GIST_ID")
 VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
 PROJ_ID = os.environ.get("PROJ_ID")
-
 GIST_FILENAME = "gistfile1.txt"
 PING_FILENAME = "pings.json"
 ENV_KEY = "GIST_URL"
-
 IP_API_URL = "http://ipinfo.io/json"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
-
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers|oracle|digitalocean|ovh|kaopu|netcup|upcloud|worktitans|alibaba|global connectivity solutions llp|baykov|akamao|lucidacloud|global cloud|oc networks limited|play2go|acgnode inc|netranex|cognetcloud|rj network|bluevps|vdska|alexhost|h2nexus|hkt|timeweb|julian|microsoft|hostkey|dataforest|nexet|cloud hosting)"
 RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
 RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
-
 RKN_BANNED_NETWORKS = Radix()
-
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
@@ -175,12 +167,11 @@ def safe_base64_decode(s):
     pad = len(s) % 4
     if pad: s += '=' * (4 - pad)
     try: return base64.urlsafe_b64decode(s)
-    except: 
+    except:
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= РАБОТА С БЛОК-ЛИСТАМИ =================
-
+# ================= РАБОТА С БЛОК-ЛИСТАМИ (Без изменений) =================
 def load_rkn_lists():
     print("Downloading RKN block lists...")
     urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
@@ -199,15 +190,68 @@ def load_rkn_lists():
     print(f"Loaded {count} banned networks into Radix tree.")
 
 def is_ip_banned(ip_str):
-    """Проверяет IP через Radix tree. Это очень быстро."""
     try:
         node = RKN_BANNED_NETWORKS.search_best(ip_str)
         return node is not None and 'banned' in node.data
     except (ValueError, TypeError):
         return False
 
-# ================= 3. СКРАПЕР =================
+# ================= ИЗМЕНЕНО: РАБОТА С CHEBURCHECK =================
+CHEBURCHECK_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'ru,en;q=0.9', 'Dnt': '1', 'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Upgrade-Insecure-Requests': '1',
+}
+cheburcheck_cache = {}
 
+def cheburcheck_is_blocked(target):
+    """
+    Проверяет IP или домен через cheburcheck.ru.
+    Возвращает True, если ресурс заблокирован, иначе False.
+    Сначала проверяет на "Белый список", затем на блокировку в "Реестре РКН".
+    """
+    if not target: return False
+    if target in cheburcheck_cache: return cheburcheck_cache[target]
+
+    try:
+        url = f"https://cheburcheck.ru/check?target={target}"
+        response = requests.get(url, headers=CHEBURCHECK_HEADERS, timeout=15)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'lxml')
+
+        # 1. Проверка на "Белый список". Если он есть, ресурс чистый.
+        panel = soup.find('div', class_='result-panel')
+        if panel and 'whitelist-theme' in panel.get('class', []):
+            cheburcheck_cache[target] = False
+            return False
+
+        # 2. Если не в белом списке, ищем статус в "Реестре РКН".
+        rkn_label = soup.find(lambda tag: tag.name == 'span' and 'Реестр РКН' in tag.text and 'row-label' in tag.get('class', []))
+        if not rkn_label:
+            cheburcheck_cache[target] = False
+            return False
+
+        rkn_value_tag = rkn_label.find_next_sibling('span')
+        if not rkn_value_tag:
+            cheburcheck_cache[target] = False
+            return False
+
+        rkn_status = rkn_value_tag.text.strip()
+        
+        # Если статус НЕ "Не найден", значит есть какая-то запись о блокировке.
+        is_blocked = (rkn_status != "Не найден")
+        if is_blocked:
+            print(f"[Cheburcheck] {target} is BLOCKED (Status: {rkn_status}). Filtering out.")
+        
+        cheburcheck_cache[target] = is_blocked
+        return is_blocked
+
+    except Exception as e:
+        print(f"Warning: Cheburcheck request failed for {target}: {e}")
+        return False
+
+# ================= 3. СКРАПЕР (Без изменений) =================
 def fetch_url_content(url):
     try:
         r = requests.get(url, timeout=10)
@@ -218,7 +262,7 @@ def fetch_url_content(url):
 def scrape_all_sources():
     print("Starting scraper...")
     all_proxies = set()
-    
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
         futures = {exe.submit(fetch_url_content, u): u for u in PLAINTEXT_URLS}
         for f in tqdm(as_completed(futures), total=len(PLAINTEXT_URLS), desc="Plaintext"):
@@ -254,9 +298,8 @@ def scrape_all_sources():
 
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
-
-# ================= 4. ПАРСИНГ =================
-
+    
+# ================= 4. ПАРСИНГ (Без изменений) =================
 def parse_proxy_link(link):
     try:
         if link.startswith('vmess://'):
@@ -271,7 +314,7 @@ def parse_proxy_link(link):
             data['sni'] = data.get('host') or data.get('sni')
             data['path'] = data.get('path')
             return data
-        
+
         parsed = urllib.parse.urlparse(link)
         protocol = parsed.scheme
         if protocol == 'ss': return {'protocol': 'shadowsocks'}
@@ -302,7 +345,7 @@ def generate_singbox_config(data, local_port):
     if data['protocol'] == 'vmess':
         outbound.update({"uuid": data['uuid'], "alter_id": int(data.get('alter_id', 0)), "security": data.get('security', 'auto')})
     elif data['protocol'] == 'vless':
-        outbound["uuid"] = data['uuid']; 
+        outbound["uuid"] = data['uuid'];
         if data.get('flow'): outbound["flow"] = data['flow']
     elif data['protocol'] == 'trojan':
         outbound["password"] = data['password']
@@ -310,7 +353,7 @@ def generate_singbox_config(data, local_port):
     tls_enabled = False
     if data['protocol'] == 'vmess' and data.get('tls') == 'tls': tls_enabled = True
     if data.get('security') in ['tls', 'reality']: tls_enabled = True
-    
+
     if tls_enabled:
         tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": True}
         if data.get('security') == 'reality':
@@ -342,7 +385,7 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА =================
+# ================= 5. ПРОВЕРКА (ИЗМЕНЕНО) =================
 
 seen_proxies = set()
 error_counter = 0
@@ -360,13 +403,12 @@ def check_proxy(link):
         if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
             try:
                 ip_addr = socket.gethostbyname(server_address)
-                if is_ip_banned(ip_addr): return None
+                if is_ip_banned(ip_addr): return None # Быстрая предварительная проверка по локальной базе
             except:
                 return None
         elif is_ip_banned(server_address):
             return None
         
-        # DPI FILTER
         prot = data.get('protocol'); net = data.get('network', 'tcp')
         sec = data.get('security', ''); flow = data.get('flow', '')
         is_tls = sec == 'tls' or data.get('tls') == 'tls'
@@ -381,11 +423,11 @@ def check_proxy(link):
         local_port = get_free_port()
         conf_str = generate_singbox_config(data, local_port)
         
-        config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-        config_file.write(conf_str)
-        config_file.close()
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as config_file:
+            config_file.write(conf_str)
+            config_filename = config_file.name
 
-        proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(1.5)
         if proc.poll() is not None: return None
 
@@ -395,12 +437,6 @@ def check_proxy(link):
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
-        gpt_ok = False
-        try:
-            gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
-            if gpt_r.status_code in [200, 401]: gpt_ok = True
-        except: pass
-
         api_data = {}
         for _ in range(API_RETRIES):
             try:
@@ -408,10 +444,26 @@ def check_proxy(link):
                 if r.status_code == 200 and 'ip' in r.json():
                     api_data = r.json()
                     break
-            except: pass
-            time.sleep(1)
+            except: time.sleep(1)
         
         if not api_data: return None
+        
+        # ================== НОВЫЙ БЛОК ПРОВЕРКИ ПОСЛЕ ТЕСТА ==================
+        exit_ip = api_data.get('ip')
+        if cheburcheck_is_blocked(exit_ip):
+            return None
+
+        sni = data.get('sni')
+        if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
+            if cheburcheck_is_blocked(sni):
+                return None
+        # ================== КОНЕЦ НОВОГО БЛОКА ==================
+
+        gpt_ok = False
+        try:
+            gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
+            if gpt_r.status_code in [200, 401]: gpt_ok = True
+        except: pass
         
         cc = api_data.get('country', 'XX')
         if cc == 'RU' or cc == 'XX': return None
@@ -439,12 +491,12 @@ def check_proxy(link):
         if proc: 
             try: proc.terminate(); proc.wait(timeout=1)
             except: proc.kill()
-        if config_file and os.path.exists(config_file.name):
-            try: os.remove(config_file.name)
+        if 'config_filename' in locals() and os.path.exists(config_filename):
+            try: os.remove(config_filename)
             except: pass
 
-# ================= DEPLOY =================
 
+# ================= DEPLOY (Без изменений) =================
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
@@ -472,21 +524,21 @@ def deploy(links_content, pings_content):
         envs = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env", headers=h).json().get('envs', [])
         eid = next((e['id'] for e in envs if e['key'] == ENV_KEY), None)
         body = {"value": final_url, "target": ["production"], "type": "plain"}
-        
+
         if eid: requests.patch(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env/{eid}", headers=h, json=body)
         else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
 
         proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
         payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
-        
+
         if 'link' in proj and 'repoId' in proj['link']:
             payload['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
-            
+
         requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload)
         print("Vercel OK.")
     except Exception as e: print(f"Vercel Error: {e}")
-
-
+    
+# ================= MAIN (Без изменений) =================
 def main():
     if not os.path.exists(SING_BOX_PATH):
         print("Sing-box not found!")
@@ -521,13 +573,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
