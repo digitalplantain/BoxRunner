@@ -2,3 +2,5 @@ requests
 pysocks
 tqdm
 py-radix
+beautifulsoup4
+lxml
