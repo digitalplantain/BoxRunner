@@ -17,7 +17,7 @@ from radix import Radix
 from bs4 import BeautifulSoup
 
 # ================= 1. ИСТОЧНИКИ (Без изменений) =================
-# ... (ваш список URL'ов остается здесь) ...
+# ... (ваш список URL'ов) ...
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -129,7 +129,6 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
     "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
 ]
-
 # ================= 2. КОНФИГУРАЦИЯ (Без изменений) =================
 # ... (ваш блок конфигурации) ...
 SING_BOX_PATH = "./sing-box"
@@ -154,6 +153,7 @@ RKN_BANNED_NETWORKS = Radix()
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
+# ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (Без изменений) =================
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
@@ -199,7 +199,8 @@ def is_ip_banned(ip_str):
     except (ValueError, TypeError):
         return False
         
-# ================= ИЗМЕНЕНО: РАБОТА С CHEBURCHECK =================
+# ================= РАБОТА С CHEBURCHECK (Без изменений) =================
+# ... (ваш блок, он уже корректный) ...
 CHEBURCHECK_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -209,38 +210,27 @@ CHEBURCHECK_HEADERS = {
 cheburcheck_cache = {}
 
 def cheburcheck_is_blocked(target):
-    """
-    Проверяет IP или домен через cheburcheck.ru по CSS-классу.
-    Возвращает True, если ресурс заблокирован, иначе False.
-    """
     if not target: return False
     if target in cheburcheck_cache: return cheburcheck_cache[target]
-
     try:
         url = f"https://cheburcheck.ru/check?target={target}"
         response = requests.get(url, headers=CHEBURCHECK_HEADERS, timeout=15)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
-
         panel = soup.find('div', class_='result-panel')
         if not panel:
             cheburcheck_cache[target] = False
-            return False # Неожиданный формат, не блокируем
-
+            return False
         panel_classes = panel.get('class', [])
-        
         if 'whitelist-theme' in panel_classes:
             cheburcheck_cache[target] = False
             return False
-        
         if 'blocked-theme' in panel_classes:
             print(f"[Cheburcheck] {target} is BLOCKED (theme: blocked-theme). Filtering out.")
             cheburcheck_cache[target] = True
             return True
-            
         cheburcheck_cache[target] = False
         return False
-
     except Exception as e:
         print(f"Warning: Cheburcheck request failed for {target}: {e}")
         return False
@@ -385,6 +375,7 @@ def rebuild_link(original_link, data, new_name):
 
 seen_proxies = set()
 error_counter = 0
+entry_ip_country_cache = {} # Кэш для стран входных IP
 
 def check_proxy(link):
     global error_counter
@@ -392,48 +383,31 @@ def check_proxy(link):
     config_filename = None
     try:
         data = parse_proxy_link(link)
-        if not data: return None
-        if data.get('protocol') in ['shadowsocks', 'ss']: return None
+        if not data or data.get('protocol') in ['shadowsocks', 'ss']:
+            return None
 
+        # --- Этап 1: Разрешение IP и предварительные фильтры ---
         server_address = data.get('server')
-        ip_addr = None
-        is_russian_entry = False
+        entry_ip = None
 
-        # --- Определение IP и страны входного узла ---
         if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
-            try:
-                ip_addr = socket.gethostbyname(server_address)
-            except:
-                return None
+            try: entry_ip = socket.gethostbyname(server_address)
+            except: return None
         else:
-            ip_addr = server_address
+            entry_ip = server_address
         
-        if not ip_addr: return None
-
-        # Быстрая предварительная проверка по локальной базе
-        if is_ip_banned(ip_addr): return None
+        if not entry_ip or is_ip_banned(entry_ip): return None
         
-        # Проверяем, не является ли входной IP российским
-        try:
-            r = requests.get(f"http://ipinfo.io/{ip_addr}/json", timeout=5)
-            if r.status_code == 200 and r.json().get('country') == 'RU':
-                is_russian_entry = True
-                print(f"[Info] Entry IP {ip_addr} is Russian. Bypassing Cheburcheck for its exit IP.")
-        except:
-            pass # Если не удалось проверить, считаем, что не российский
-        # --- Конец проверки входного узла ---
-
         prot = data.get('protocol'); net = data.get('network', 'tcp')
         sec = data.get('security', ''); flow = data.get('flow', '')
-        is_tls = sec == 'tls' or data.get('tls') == 'tls'
-        is_reality_vision = (sec == 'reality' and 'vision' in flow)
-        is_ws = (net == 'ws'); is_grpc = (net == 'grpc'); is_trojan = (prot == 'trojan')
-        if not (is_reality_vision or is_ws or is_grpc or is_trojan or is_tls): return None
+        if not ( (sec == 'reality' and 'vision' in flow) or (net == 'ws') or (net == 'grpc') or (prot == 'trojan') or (sec == 'tls') or (data.get('tls') == 'tls') ):
+            return None
         
         identifier = f"{data.get('server')}:{data.get('port')}"
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
+        # --- Этап 2: Тестирование прокси через Sing-box ---
         local_port = get_free_port()
         conf_str = generate_singbox_config(data, local_port)
         
@@ -451,6 +425,7 @@ def check_proxy(link):
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
+        # --- Этап 3: Получение данных о ВЫХОДНОМ IP ---
         api_data = {}
         for _ in range(API_RETRIES):
             try:
@@ -462,37 +437,55 @@ def check_proxy(link):
         
         if not api_data: return None
         
-        # --- Финальная проверка через Cheburcheck (кроме российских "прокладок") ---
-        if not is_russian_entry:
-            exit_ip = api_data.get('ip')
-            if cheburcheck_is_blocked(exit_ip): return None
+        exit_ip = api_data.get('ip')
+        exit_country = api_data.get('country', 'XX')
+        
+        if exit_country == 'RU' or exit_country == 'XX': return None
 
+        # --- Этап 4: Определение, является ли прокси "прокладкой" ---
+        is_russian_entry = False
+        entry_country = entry_ip_country_cache.get(entry_ip)
+        
+        if entry_country is None: # Если страны нет в кэше, запрашиваем
+            try:
+                r = requests.get(f"http://ipinfo.io/{entry_ip}/json", timeout=5)
+                r.raise_for_status()
+                entry_country = r.json().get('country', '')
+                entry_ip_country_cache[entry_ip] = entry_country
+            except:
+                entry_ip_country_cache[entry_ip] = '' # Кэшируем ошибку как пустую строку
+                entry_country = ''
+
+        if entry_country == 'RU' and exit_country != 'RU':
+            is_russian_entry = True
+            print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
+            
+        # --- Этап 5: Финальная проверка через Cheburcheck (кроме "прокладок") ---
+        if not is_russian_entry:
+            if cheburcheck_is_blocked(exit_ip): return None
             sni = data.get('sni')
             if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
                 if cheburcheck_is_blocked(sni): return None
-        # --- Конец финальной проверки ---
 
+        # --- Этап 6: Формирование имени и результата ---
+        isp = api_data.get('org', 'Unknown')
+        isp_clean = re.sub(r'^AS\d+\s+', '', isp)
+        if re.search(BANNED_ISP_REGEX, isp_clean): return None
+        
         gpt_ok = False
         try:
             gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
             if gpt_r.status_code in [200, 401]: gpt_ok = True
         except: pass
         
-        cc = api_data.get('country', 'XX')
-        if cc == 'RU' or cc == 'XX': return None
-        
-        isp = api_data.get('org', 'Unknown')
-        isp_clean = re.sub(r'^AS\d+\s+', '', isp)
-        if re.search(BANNED_ISP_REGEX, isp_clean): return None
-
-        flag = country_flag(cc)
+        flag = country_flag(exit_country)
         city = api_data.get('city', 'Unknown')
-        gemini_ico = '✅' if cc in GEMINI_ALLOWED else '❌'
-        yt_ico = '✅' if cc in YT_MUSIC_ALLOWED else '❌'
+        gemini_ico = '✅' if exit_country in GEMINI_ALLOWED else '❌'
+        yt_ico = '✅' if exit_country in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
         
-        base_name = f"{flag} {cc} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
-        name = f"!RU! {base_name}" if is_russian_entry else base_name
+        base_name = f"{flag} {exit_country} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
+        name = f"Whitelist - RU -> {base_name}" if is_russian_entry else base_name
 
         new_link = rebuild_link(link, data, name)
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
