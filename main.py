@@ -16,8 +16,6 @@ from tqdm import tqdm
 from radix import Radix
 from bs4 import BeautifulSoup
 
-# ================= 1. ИСТОЧНИКИ (Без изменений) =================
-# ... (ваш список URL'ов) ...
 PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
     "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
@@ -129,8 +127,7 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
     "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
 ]
-# ================= 2. КОНФИГУРАЦИЯ (Без изменений) =================
-# ... (ваш блок конфигурации) ...
+
 SING_BOX_PATH = "./sing-box"
 MAX_WORKERS_CHECK = 300
 MAX_WORKERS_SCRAPE = 30
@@ -153,7 +150,6 @@ RKN_BANNED_NETWORKS = Radix()
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
-# ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (Без изменений) =================
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
@@ -173,8 +169,6 @@ def safe_base64_decode(s):
         try: return base64.b64decode(s)
         except: return b""
 
-# ================= РАБОТА С БЛОК-ЛИСТАМИ (Без изменений) =================
-# ... (ваш блок) ...
 def load_rkn_lists():
     print("Downloading RKN block lists...")
     urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
@@ -199,8 +193,6 @@ def is_ip_banned(ip_str):
     except (ValueError, TypeError):
         return False
         
-# ================= РАБОТА С CHEBURCHECK (Без изменений) =================
-# ... (ваш блок, он уже корректный) ...
 CHEBURCHECK_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -235,8 +227,6 @@ def cheburcheck_is_blocked(target):
         print(f"Warning: Cheburcheck request failed for {target}: {e}")
         return False
 
-# ================= 3. СКРАПЕР (Без изменений) =================
-# ... (ваш блок) ...
 def fetch_url_content(url):
     try:
         r = requests.get(url, timeout=10)
@@ -284,8 +274,6 @@ def scrape_all_sources():
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
 
-# ================= 4. ПАРСИНГ (Без изменений) =================
-# ... (ваш блок) ...
 def parse_proxy_link(link):
     try:
         if link.startswith('vmess://'):
@@ -371,11 +359,9 @@ def rebuild_link(original_link, data, new_name):
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
 
-# ================= 5. ПРОВЕРКА (ИЗМЕНЕНО) =================
-
 seen_proxies = set()
 error_counter = 0
-entry_ip_country_cache = {} # Кэш для стран входных IP
+entry_ip_country_cache = {}
 
 def check_proxy(link):
     global error_counter
@@ -386,7 +372,6 @@ def check_proxy(link):
         if not data or data.get('protocol') in ['shadowsocks', 'ss']:
             return None
 
-        # --- Этап 1: Разрешение IP и предварительные фильтры ---
         server_address = data.get('server')
         entry_ip = None
 
@@ -407,7 +392,6 @@ def check_proxy(link):
         if identifier in seen_proxies: return None
         seen_proxies.add(identifier)
 
-        # --- Этап 2: Тестирование прокси через Sing-box ---
         local_port = get_free_port()
         conf_str = generate_singbox_config(data, local_port)
         
@@ -425,7 +409,6 @@ def check_proxy(link):
         requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
         ping = int((time.time() - st) * 1000)
 
-        # --- Этап 3: Получение данных о ВЫХОДНОМ IP ---
         api_data = {}
         for _ in range(API_RETRIES):
             try:
@@ -442,32 +425,29 @@ def check_proxy(link):
         
         if exit_country == 'RU' or exit_country == 'XX': return None
 
-        # --- Этап 4: Определение, является ли прокси "прокладкой" ---
         is_russian_entry = False
         entry_country = entry_ip_country_cache.get(entry_ip)
         
-        if entry_country is None: # Если страны нет в кэше, запрашиваем
+        if entry_country is None:
             try:
                 r = requests.get(f"http://ipinfo.io/{entry_ip}/json", timeout=5)
                 r.raise_for_status()
                 entry_country = r.json().get('country', '')
                 entry_ip_country_cache[entry_ip] = entry_country
             except:
-                entry_ip_country_cache[entry_ip] = '' # Кэшируем ошибку как пустую строку
+                entry_ip_country_cache[entry_ip] = ''
                 entry_country = ''
 
         if entry_country == 'RU' and exit_country != 'RU':
             is_russian_entry = True
             print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
             
-        # --- Этап 5: Финальная проверка через Cheburcheck (кроме "прокладок") ---
         if not is_russian_entry:
             if cheburcheck_is_blocked(exit_ip): return None
             sni = data.get('sni')
             if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
                 if cheburcheck_is_blocked(sni): return None
 
-        # --- Этап 6: Формирование имени и результата ---
         isp = api_data.get('org', 'Unknown')
         isp_clean = re.sub(r'^AS\d+\s+', '', isp)
         if re.search(BANNED_ISP_REGEX, isp_clean): return None
@@ -503,8 +483,6 @@ def check_proxy(link):
             try: os.remove(config_filename)
             except: pass
 
-# ================= DEPLOY (Без изменений) =================
-# ... (ваш блок) ...
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
         print("Secrets missing.")
@@ -546,8 +524,6 @@ def deploy(links_content, pings_content):
         print("Vercel OK.")
     except Exception as e: print(f"Vercel Error: {e}")
 
-# ================= MAIN (Без изменений) =================
-# ... (ваш блок) ...
 def main():
     if not os.path.exists(SING_BOX_PATH):
         print("Sing-box not found!")
@@ -555,11 +531,9 @@ def main():
     
     load_rkn_lists()
 
-    # 1. Scrape
     all_raw = scrape_all_sources()
     if not all_raw: return
 
-    # 2. Check
     results = []
     seen_proxies.clear()
     
@@ -582,4 +556,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
