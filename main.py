@@ -485,7 +485,7 @@ def check_proxy(link):
         gpt_ico = '✅' if gpt_ok else '❌'
         
         base_name = f"{flag} {exit_country} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
-        name = f"Whitelist - RU -> {base_name}" if is_russian_entry else base_name
+        name = f"⚠️ Anti-Whitelist 🇷🇺 RU -> {base_name}" if is_russian_entry else base_name
 
         new_link = rebuild_link(link, data, name)
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
@@ -582,3 +582,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
