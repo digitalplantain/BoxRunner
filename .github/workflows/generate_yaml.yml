@@ -1,10 +1,9 @@
 # .github/workflows/generate_yaml.yml
-name: SingBox Proxy Updater
-
+name: Generate Clash YAML Profile
 on:
   workflow_run:
     # Укажите имя файла вашего ОСНОВНОГО воркфлоу
-    workflows: ["Main CI/CD"] # <--- ЗАМЕНИТЕ ЭТО, если ваш файл называется иначе
+    workflows: ["SingBox Proxy Updater"] # <--- ЗАМЕНИТЕ ЭТО, если ваш файл называется иначе
     types:
       - completed
 
