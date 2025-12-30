@@ -1,5 +1,5 @@
 # .github/workflows/generate_yaml.yml
-name: Generate Clash YAML Profile
+name: SingBox Proxy Updater
 
 on:
   workflow_run:
