@@ -5,7 +5,7 @@ import os
 import sys
 import urllib.parse
 import requests
-import yaml  # Убедитесь, что PyYAML установлен: pip install pyyaml
+import yaml
 
 # --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
@@ -14,7 +14,7 @@ INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
 # --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (из основного скрипта) ---
-
+# ... (здесь блок функций safe_base64_decode и parse_proxy_link без изменений) ...
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -56,22 +56,18 @@ def parse_proxy_link(link):
         return data
     except: return None
 
-# --- ГЛАВНАЯ ФУНКЦИЯ КОНВЕРТАЦИИ ---
 
+# --- ГЛАВНАЯ ФУНКЦИЯ КОНВЕРТАЦИИ (Без изменений) ---
+# ... (здесь функция convert_link_to_clash_proxy без изменений) ...
 def convert_link_to_clash_proxy(link):
-    """Конвертирует vless/vmess/trojan URL в словарь для Clash YAML."""
     try:
-        # Извлекаем имя
         url_parts = link.split('#', 1)
         if len(url_parts) != 2 or not url_parts[1]:
-            return None # Пропускаем ссылки без имени
+            return None
         name = urllib.parse.unquote(url_parts[1])
-        
         data = parse_proxy_link(url_parts[0])
         if not data: return None
-
         proxy = {'name': name, 'type': data['protocol'], 'server': data['server'], 'port': data['port']}
-
         if data['protocol'] in ['vless', 'vmess']:
             proxy['uuid'] = data['uuid']
         if data['protocol'] == 'trojan':
@@ -79,8 +75,6 @@ def convert_link_to_clash_proxy(link):
         if data['protocol'] == 'vmess':
             proxy['alterId'] = data.get('alter_id', 0)
             proxy['cipher'] = data.get('security', 'auto')
-
-        # TLS и Reality
         tls_enabled = data.get('security') in ['tls', 'reality'] or data.get('tls') == 'tls'
         if tls_enabled:
             proxy['tls'] = True
@@ -93,8 +87,6 @@ def convert_link_to_clash_proxy(link):
                     'public-key': data.get('pbk', ''),
                     'short-id': data.get('sid', '')
                 }
-        
-        # Транспорт
         net = data.get('network', 'tcp')
         if net == 'ws':
             proxy['network'] = 'ws'
@@ -105,10 +97,8 @@ def convert_link_to_clash_proxy(link):
         elif net == 'grpc':
             proxy['network'] = 'grpc'
             proxy['grpc-opts'] = {'grpc-service-name': data.get('serviceName', '')}
-        
         if data.get('protocol') == 'vless' and data.get('flow'):
             proxy['flow'] = data['flow']
-
         return proxy
     except Exception as e:
         print(f"Failed to convert link {link[:30]}...: {e}")
@@ -134,15 +124,33 @@ def main():
         sys.exit(1)
     
     # 2. Конвертируем каждую ссылку
-    print("Converting proxy links to Clash format...")
+    print("Converting proxy links to Clash format and handling duplicates...")
     proxies = []
     proxy_names = []
+    
+    # ===================== ИЗМЕНЕННЫЙ БЛОК =====================
+    name_counts = {} # Словарь для отслеживания количества использований каждого имени
+
     for line in content.splitlines():
         if line.strip():
             clash_proxy = convert_link_to_clash_proxy(line.strip())
             if clash_proxy:
+                original_name = clash_proxy['name']
+                
+                # Проверяем, встречалось ли это имя раньше
+                if original_name in name_counts:
+                    # Если да, увеличиваем счетчик и создаем новое уникальное имя
+                    name_counts[original_name] += 1
+                    unique_name = f"{original_name} ({name_counts[original_name]})"
+                    clash_proxy['name'] = unique_name # Обновляем имя в самом прокси
+                else:
+                    # Если имя встречается впервые, просто инициализируем счетчик
+                    name_counts[original_name] = 1
+                    unique_name = original_name
+                
                 proxies.append(clash_proxy)
-                proxy_names.append(clash_proxy['name'])
+                proxy_names.append(unique_name)
+    # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
 
     if not proxies:
         print("No valid proxy links found to convert.")
@@ -197,7 +205,6 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    # Установка зависимостей, если их нет
     try:
         import yaml
     except ImportError:
