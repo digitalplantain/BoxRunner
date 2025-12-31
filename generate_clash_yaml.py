@@ -1,4 +1,3 @@
-# generate_clash_yaml.py
 import base64
 import json
 import os
@@ -8,13 +7,11 @@ import requests
 import yaml
 import re
 
-# --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
 GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -64,7 +61,6 @@ def clean_and_fix_short_id(sid):
     if len(clean_sid) % 2 != 0: clean_sid = '0' + clean_sid
     return clean_sid.lower()
 
-# --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
     try:
         url_parts = link.split('#', 1)
@@ -109,7 +105,6 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-# --- ГЕНЕРАЦИЯ КОНФИГА ДЛЯ РФ ---
 def get_base_config():
     return {
         'port': 7890,
@@ -175,7 +170,6 @@ def get_base_config():
             'strict-route': True,
         },
 
-        # --- RULE PROVIDERS (СПИСКИ) ---
         'rule-providers': {
             'reject': {
                 'type': 'http',
@@ -184,7 +178,6 @@ def get_base_config():
                 'path': './ruleset/reject.yaml',
                 'interval': 86400
             },
-            # --- ВОТ ЭТОГО НЕ ХВАТАЛО ---
             'telegram': {
                 'type': 'http',
                 'behavior': 'classical',
@@ -192,7 +185,6 @@ def get_base_config():
                 'path': './ruleset/telegramcidr.yaml',
                 'interval': 86400
             },
-            # ---------------------------
             'antifilter': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -210,7 +202,6 @@ def get_base_config():
         }
     }
 
-# --- ОСНОВНОЙ СКРИПТ ---
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
@@ -287,19 +278,17 @@ def main():
         }
     ]
 
-    # --- ПРАВИЛА МАРШРУТИЗАЦИИ ДЛЯ РФ ---
     config['rules'] = [
-        # 1. Блокировка рекламы
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-        
-        # 2. Принудительно через прокси (AI, Telegram, Crypto)
+
+        'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT'
+
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
         'RULE-SET,telegram,📲 Telegram',
         'GEOSITE,telegram,📲 Telegram',
         
-        # 3. Известные заблокированные соцсети/сервисы -> PROXY
         'GEOSITE,youtube,🚀 Manual',
         'GEOSITE,facebook,🚀 Manual',
         'GEOSITE,twitter,🚀 Manual',
@@ -308,27 +297,22 @@ def main():
         'DOMAIN-SUFFIX,linkedin.com,🚀 Manual',
         'DOMAIN-SUFFIX,medium.com,🚀 Manual',
         
-        # 4. Список Antifilter (все реестровые блокировки) -> PROXY
         'RULE-SET,antifilter,🚀 Manual',
         'RULE-SET,antifilter-community,🚀 Manual',
 
-        # 5. КРИТИЧЕСКИ ВАЖНО: Российские сервисы -> DIRECT (Мимо VPN)
         'GEOSITE,category-gov-ru,DIRECT', 
         'GEOSITE,yandex,DIRECT',
         'GEOSITE,vk,DIRECT',
         'GEOSITE,mailru,DIRECT',
         'GEOSITE,steam,DIRECT',
         
-        # Дополнительная страховка по доменным зонам
         'DOMAIN-SUFFIX,ru,DIRECT',
         'DOMAIN-SUFFIX,su,DIRECT',
         'DOMAIN-SUFFIX,rf,DIRECT',
         
-        # 6. Локальные IP и российские IP -> DIRECT
         'GEOIP,LAN,DIRECT',
         'GEOIP,RU,DIRECT',
         
-        # 7. Все остальное -> PROXY
         'MATCH,🚀 Manual'
     ]
 
