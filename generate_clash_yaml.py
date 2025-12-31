@@ -6,7 +6,7 @@ import sys
 import urllib.parse
 import requests
 import yaml
-import string # Добавляем для проверки hex символов
+import string
 
 # --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
@@ -56,22 +56,19 @@ def parse_proxy_link(link):
         return data
     except: return None
 
-# --- ГЛАВНАЯ ФУНКЦИЯ КОНВЕРТАЦИИ ---
-
+# --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
-    """Конвертирует vless/vmess/trojan URL в словарь для Clash YAML."""
     try:
         url_parts = link.split('#', 1)
-        if len(url_parts) != 2 or not url_parts[1]:
-            return None
+        if len(url_parts) != 2 or not url_parts[1]: return None
         name = urllib.parse.unquote(url_parts[1])
         data = parse_proxy_link(url_parts[0])
         if not data: return None
+        
         proxy = {'name': name, 'type': data['protocol'], 'server': data['server'], 'port': data['port']}
-        if data['protocol'] in ['vless', 'vmess']:
-            proxy['uuid'] = data['uuid']
-        if data['protocol'] == 'trojan':
-            proxy['password'] = data['password']
+        
+        if data['protocol'] in ['vless', 'vmess']: proxy['uuid'] = data['uuid']
+        if data['protocol'] == 'trojan': proxy['password'] = data['password']
         if data['protocol'] == 'vmess':
             proxy['alterId'] = data.get('alter_id', 0)
             proxy['cipher'] = data.get('security', 'auto')
@@ -79,35 +76,23 @@ def convert_link_to_clash_proxy(link):
         tls_enabled = data.get('security') in ['tls', 'reality'] or data.get('tls') == 'tls'
         if tls_enabled:
             proxy['tls'] = True
-            if data.get('sni'):
-                proxy['servername'] = data['sni']
-            if data.get('fp'):
-                proxy['client-fingerprint'] = data['fp']
+            if data.get('sni'): proxy['servername'] = data['sni']
+            if data.get('fp'): proxy['client-fingerprint'] = data['fp']
             
-            # ===================== ИЗМЕНЕННЫЙ БЛОК v3 =====================
             if data.get('security') == 'reality':
                 reality_opts = {'public-key': data.get('pbk', '')}
-                
-                # Получаем short-id как строку
-                raw_sid = str(data.get('sid', ''))
-                short_id = raw_sid.strip()
-                
-                # Проверка:
-                # 1. Не пустая строка
-                # 2. Состоит ТОЛЬКО из hex-символов (0-9, a-f, A-F)
-                if short_id and all(c in string.hexdigits for c in short_id):
-                    reality_opts['short-id'] = short_id
-                
+                raw_sid = str(data.get('sid', '')).strip()
+                # Строгая проверка short-id: не пустой, только hex, четная длина
+                if raw_sid and all(c in string.hexdigits for c in raw_sid) and len(raw_sid) % 2 == 0:
+                    reality_opts['short-id'] = raw_sid
                 proxy['reality-opts'] = reality_opts
-            # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
 
         net = data.get('network', 'tcp')
         if net == 'ws':
             proxy['network'] = 'ws'
             proxy['ws-opts'] = {'path': data.get('path', '/')}
             host = data.get('host') or data.get('sni')
-            if host:
-                proxy['ws-opts']['headers'] = {'Host': host}
+            if host: proxy['ws-opts']['headers'] = {'Host': host}
         elif net == 'grpc':
             proxy['network'] = 'grpc'
             proxy['grpc-opts'] = {'grpc-service-name': data.get('serviceName', '')}
@@ -115,17 +100,112 @@ def convert_link_to_clash_proxy(link):
         if data.get('protocol') == 'vless' and data.get('flow'):
             proxy['flow'] = data['flow']
         return proxy
-    except Exception as e:
-        print(f"Failed to convert link {link[:30]}...: {e}")
-        return None
+    except: return None
 
-# --- ОСНОВНОЙ СКРИПТ (без изменений) ---
+# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА ---
+def get_base_config():
+    return {
+        'port': 7890,
+        'socks-port': 7891,
+        'mixed-port': 7892,
+        'allow-lan': True,
+        'bind-address': '*',
+        'mode': 'rule',
+        'log-level': 'info',
+        'ipv6': True,
+        'external-controller': '127.0.0.1:9090',
+        'find-process-mode': 'strict',
+        'global-client-fingerprint': 'chrome',
+        
+        # GeoData конфигурация из примера
+        'geox-url': {
+            'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
+            'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
+            'mmdb': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb"
+        },
+        'geo-auto-update': True,
+        'geo-update-interval': 24,
+
+        # Sniffer
+        'sniffer': {
+            'enable': True,
+            'sniff': {
+                'TLS': {'ports': [443, 8443]},
+                'HTTP': {'ports': [80, 8080-8880], 'override-destination': True}
+            }
+        },
+
+        # DNS конфигурация (Fake-IP)
+        'dns': {
+            'enable': True,
+            'listen': '0.0.0.0:53',
+            'ipv6': True,
+            'enhanced-mode': 'fake-ip',
+            'fake-ip-range': '198.18.0.1/16',
+            'fake-ip-filter': ['*', '+.lan', '+.local', 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 'localhost.sec.qq.com', '+.srv.nintendo.net', '+.stun.playstation.net', 'xbox.*.microsoft.com', 'xbox.*.xboxlive.com', '+.battlenet.com.cn', '+.wotgame.cn', '+.wggames.cn', '+.wowsgame.cn', '+.wargaming.net', 'proxy.golang.org', 'stun.*', '+.stun.*', '+.stun.*.*', '+.stun.*.*.*', '*.local', 'connect.rom.miui.com', '+.msftconnecttest.com', '+.msftncsi.com'],
+            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
+            'nameserver': ['https://dns.alidns.com/dns-query', 'https://doh.pub/dns-query'],
+            'fallback': ['https://1.0.0.1/dns-query', 'https://8.8.4.4/dns-query', 'https://1.1.1.1/dns-query', 'https://8.8.8.8/dns-query', 'tcp://1.0.0.1', 'tcp://8.8.4.4', 'tcp://1.1.1.1', 'tcp://8.8.8.8'],
+            'fallback-filter': {'geoip': True, 'geoip-code': 'CN', 'ipcidr': ['240.0.0.0/4']}
+        },
+
+        # Tun режим (для справки, управление обычно через GUI Verge)
+        'tun': {
+            'enable': True,
+            'stack': 'system',
+            'dns-hijack': ['any:53'],
+            'auto-route': True,
+            'auto-redirect': True,
+            'strict-route': True,
+        },
+
+        # Провайдеры правил (автообновляемые списки сайтов)
+        'rule-providers': {
+            'reject': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt",
+                'path': './ruleset/reject.yaml',
+                'interval': 86400
+            },
+            'google': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt",
+                'path': './ruleset/google.yaml',
+                'interval': 86400
+            },
+            'telegram': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
+                'path': './ruleset/telegramcidr.yaml',
+                'interval': 86400
+            },
+             'proxy': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt",
+                'path': './ruleset/proxy.yaml',
+                'interval': 86400
+            },
+            'cn': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cn.txt",
+                'path': './ruleset/cn.yaml',
+                'interval': 86400
+            }
+        }
+    }
+
+# --- ОСНОВНОЙ СКРИПТ ---
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
         sys.exit(1)
     
-    print(f"Fetching source file '{INPUT_FILENAME}' from Gist {GIST_ID}...")
+    print(f"Fetching source file from Gist {GIST_ID}...")
     try:
         headers = {'Authorization': f'token {GH_TOKEN}'}
         r = requests.get(f'https://api.github.com/gists/{GIST_ID}', headers=headers)
@@ -133,66 +213,99 @@ def main():
         gist_data = r.json()
         content = gist_data['files'][INPUT_FILENAME]['content']
     except Exception as e:
-        print(f"Error fetching Gist file: {e}")
+        print(f"Error fetching Gist: {e}")
         sys.exit(1)
     
-    print("Converting proxy links to Clash format and handling duplicates...")
     proxies = []
     proxy_names = []
     name_counts = {}
 
+    print("Converting proxies...")
     for line in content.splitlines():
         if line.strip():
-            clash_proxy = convert_link_to_clash_proxy(line.strip())
-            if clash_proxy:
-                original_name = clash_proxy['name']
-                if original_name in name_counts:
-                    name_counts[original_name] += 1
-                    unique_name = f"{original_name} ({name_counts[original_name]})"
-                    clash_proxy['name'] = unique_name
+            p = convert_link_to_clash_proxy(line.strip())
+            if p:
+                name = p['name']
+                if name in name_counts:
+                    name_counts[name] += 1
+                    name = f"{name} ({name_counts[name]})"
+                    p['name'] = name
                 else:
-                    name_counts[original_name] = 1
-                    unique_name = original_name
-                proxies.append(clash_proxy)
-                proxy_names.append(unique_name)
+                    name_counts[name] = 1
+                proxies.append(p)
+                proxy_names.append(name)
 
     if not proxies:
-        print("No valid proxy links found to convert.")
+        print("No proxies found.")
         return
 
-    print(f"Successfully converted {len(proxies)} proxies.")
-
-    clash_config = {
-        'port': 7890,
-        'socks-port': 7891,
-        'allow-lan': False,
-        'mode': 'rule',
-        'log-level': 'info',
-        'external-controller': '127.0.0.1:9090',
-        'proxies': proxies,
-        'proxy-groups': [
-            {'name': 'PROXY', 'type': 'select', 'proxies': ['URL-Test', 'Direct', *proxy_names]},
-            {'name': 'URL-Test', 'type': 'url-test', 'proxies': proxy_names, 'url': 'http://www.gstatic.com/generate_204', 'interval': 300}
-        ],
-        'rules': ['MATCH,PROXY']
-    }
+    # Собираем итоговый конфиг
+    config = get_base_config()
+    config['proxies'] = proxies
     
-    yaml_content = yaml.dump(clash_config, allow_unicode=True, sort_keys=False)
+    # Настраиваем группы прокси
+    config['proxy-groups'] = [
+        {
+            'name': '🚀 Manual',
+            'type': 'select',
+            'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
+        },
+        {
+            'name': '♻️ Auto',
+            'type': 'url-test',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 300,
+            'tolerance': 50,
+            'proxies': proxy_names
+        },
+        {
+            'name': '🔮 LoadBalance',
+            'type': 'load-balance',
+            'strategy': 'consistent-hashing',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 300,
+            'proxies': proxy_names
+        },
+        {
+            'name': '📲 Telegram',
+            'type': 'select',
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+        },
+         {
+            'name': '🤖 OpenAI',
+            'type': 'select',
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+        }
+    ]
 
-    print(f"Uploading generated '{OUTPUT_FILENAME}' to Gist...")
+    # Настраиваем правила
+    config['rules'] = [
+        'RULE-SET,reject,REJECT',
+        'RULE-SET,google,🚀 Manual',
+        'RULE-SET,telegram,📲 Telegram',
+        'GEOIP,LAN,DIRECT',
+        'GEOIP,CN,DIRECT',
+        'RULE-SET,cn,DIRECT',
+        'DOMAIN-SUFFIX,cn,DIRECT',
+        'DOMAIN-KEYWORD,openai,🤖 OpenAI',
+        'GEOSITE,openai,🤖 OpenAI',
+        'MATCH,🚀 Manual'
+    ]
+
+    print("Saving YAML...")
+    yaml_content = yaml.dump(config, allow_unicode=True, sort_keys=False)
+
     try:
         payload = {'files': {OUTPUT_FILENAME: {'content': yaml_content}}}
-        r = requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers=headers, json=payload)
-        r.raise_for_status()
-        print("Gist updated successfully with Clash YAML profile.")
+        requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers=headers, json=payload).raise_for_status()
+        print("Done! Clash profile updated.")
     except Exception as e:
-        print(f"Error updating Gist: {e}")
+        print(f"Error uploading: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    try:
-        import yaml
-    except ImportError:
-        print("PyYAML not found. Installing...")
+    try: import yaml
+    except:
         os.system(f"{sys.executable} -m pip install pyyaml")
+        import yaml
     main()
