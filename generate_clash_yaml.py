@@ -6,6 +6,7 @@ import sys
 import urllib.parse
 import requests
 import yaml
+import string # Добавляем для проверки hex символов
 
 # --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
@@ -13,7 +14,7 @@ GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (без изменений) ---
+# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -83,14 +84,19 @@ def convert_link_to_clash_proxy(link):
             if data.get('fp'):
                 proxy['client-fingerprint'] = data['fp']
             
-            # ===================== ИЗМЕНЕННЫЙ БЛОК v2 =====================
+            # ===================== ИЗМЕНЕННЫЙ БЛОК v3 =====================
             if data.get('security') == 'reality':
                 reality_opts = {'public-key': data.get('pbk', '')}
-                short_id = data.get('sid', '')
                 
-                # Более строгая проверка: добавляем sid, только если он существует и не состоит из пробелов
-                if short_id and short_id.strip():
-                    reality_opts['short-id'] = short_id.strip() # Очищаем от случайных пробелов
+                # Получаем short-id как строку
+                raw_sid = str(data.get('sid', ''))
+                short_id = raw_sid.strip()
+                
+                # Проверка:
+                # 1. Не пустая строка
+                # 2. Состоит ТОЛЬКО из hex-символов (0-9, a-f, A-F)
+                if short_id and all(c in string.hexdigits for c in short_id):
+                    reality_opts['short-id'] = short_id
                 
                 proxy['reality-opts'] = reality_opts
             # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
