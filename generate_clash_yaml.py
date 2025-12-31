@@ -141,10 +141,10 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
+            'default-nameserver': ['8.8.8.8', '9.9.9.9'],
             'nameserver': [
                 'https://dns.google/dns-query',
-                'https://1.1.1.1/dns-query'
+                'https://doh.pub/dns-query'
             ],
             'fallback': [
                 'https://doh.pub/dns-query',
