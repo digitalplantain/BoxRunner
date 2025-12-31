@@ -61,6 +61,7 @@ def clean_and_fix_short_id(sid):
     if len(clean_sid) % 2 != 0: clean_sid = '0' + clean_sid
     return clean_sid.lower()
 
+# --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
     try:
         url_parts = link.split('#', 1)
@@ -141,10 +142,10 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'default-nameserver': ['8.8.8.8', '9.9.9.9'],
+            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
             'nameserver': [
                 'https://dns.google/dns-query',
-                'https://doh.pub/dns-query'
+                'https://1.1.1.1/dns-query'
             ],
             'fallback': [
                 'https://doh.pub/dns-query',
@@ -185,6 +186,14 @@ def get_base_config():
                 'path': './ruleset/telegramcidr.yaml',
                 'interval': 86400
             },
+            'discord': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Discord/Discord.yaml",
+                'path': './ruleset/discord.yaml',
+                'interval': 86400
+            },
+            # ------------------------------------------------
             'antifilter': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -255,7 +264,7 @@ def main():
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
             'interval': 300,
-            'tolerance': 50,
+            'tolerance': 200,
             'proxies': proxy_names
         },
         {
@@ -271,6 +280,11 @@ def main():
             'type': 'select',
             'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
+        {
+            'name': '🎮 Discord',
+            'type': 'select',
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+        },
          {
             'name': '🤖 OpenAI',
             'type': 'select',
@@ -281,19 +295,23 @@ def main():
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-
-        'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT'
+        
+        'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
 
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
+        
         'RULE-SET,telegram,📲 Telegram',
         'GEOSITE,telegram,📲 Telegram',
+        
+        'RULE-SET,discord,🎮 Discord',
+        'GEOSITE,discord,🎮 Discord',
         
         'GEOSITE,youtube,🚀 Manual',
         'GEOSITE,facebook,🚀 Manual',
         'GEOSITE,twitter,🚀 Manual',
         'GEOSITE,instagram,🚀 Manual',
-        'GEOSITE,discord,🚀 Manual',
+
         'DOMAIN-SUFFIX,linkedin.com,🚀 Manual',
         'DOMAIN-SUFFIX,medium.com,🚀 Manual',
         
@@ -305,11 +323,9 @@ def main():
         'GEOSITE,vk,DIRECT',
         'GEOSITE,mailru,DIRECT',
         'GEOSITE,steam,DIRECT',
-        
         'DOMAIN-SUFFIX,ru,DIRECT',
         'DOMAIN-SUFFIX,su,DIRECT',
         'DOMAIN-SUFFIX,rf,DIRECT',
-        
         'GEOIP,LAN,DIRECT',
         'GEOIP,RU,DIRECT',
         
