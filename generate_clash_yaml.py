@@ -124,7 +124,6 @@ def get_base_config():
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
         
-        # Используем базу MetaCubeX - она самая полная для Geosite
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -141,24 +140,22 @@ def get_base_config():
             }
         },
 
-        # --- DNS ОПТИМИЗИРОВАННЫЙ ДЛЯ РФ ---
         'dns': {
             'enable': True,
             'listen': '0.0.0.0:53',
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'default-nameserver': ['223.5.5.5', '114.114.114.114'], # Сначала пробуем резолвить через Китай/РФ для скорости
+            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
             'nameserver': [
-                'https://dns.google/dns-query', # Основной резолв через Google (пойдет через прокси)
+                'https://dns.google/dns-query',
                 'https://1.1.1.1/dns-query'
             ],
             'fallback': [
-                'https://doh.pub/dns-query', # Fallback на Tencent/Ali
+                'https://doh.pub/dns-query',
                 'https://dns.alidns.com/dns-query'
             ],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
-            # Политика DNS: Рунет резолвим локально, остальное - через безопасный DNS
             'nameserver-policy': {
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
@@ -180,7 +177,6 @@ def get_base_config():
 
         # --- RULE PROVIDERS (СПИСКИ) ---
         'rule-providers': {
-            # Реклама
             'reject': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -188,7 +184,15 @@ def get_base_config():
                 'path': './ruleset/reject.yaml',
                 'interval': 86400
             },
-            # Реальный список заблокированного в РФ от antifilter.download
+            # --- ВОТ ЭТОГО НЕ ХВАТАЛО ---
+            'telegram': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
+                'path': './ruleset/telegramcidr.yaml',
+                'interval': 86400
+            },
+            # ---------------------------
             'antifilter': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -196,7 +200,6 @@ def get_base_config():
                 'path': './ruleset/antifilter.yaml',
                 'interval': 86400
             },
-            # Сообщество antifilter (более широкий список)
             'antifilter-community': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -310,12 +313,11 @@ def main():
         'RULE-SET,antifilter-community,🚀 Manual',
 
         # 5. КРИТИЧЕСКИ ВАЖНО: Российские сервисы -> DIRECT (Мимо VPN)
-        # Госуслуги, банки, школы и т.д.
         'GEOSITE,category-gov-ru,DIRECT', 
         'GEOSITE,yandex,DIRECT',
         'GEOSITE,vk,DIRECT',
         'GEOSITE,mailru,DIRECT',
-        'GEOSITE,steam,DIRECT', # Steam скачивание лучше напрямую
+        'GEOSITE,steam,DIRECT',
         
         # Дополнительная страховка по доменным зонам
         'DOMAIN-SUFFIX,ru,DIRECT',
@@ -326,7 +328,7 @@ def main():
         'GEOIP,LAN,DIRECT',
         'GEOIP,RU,DIRECT',
         
-        # 7. Все остальное (зарубежный интернет) -> PROXY
+        # 7. Все остальное -> PROXY
         'MATCH,🚀 Manual'
     ]
 
