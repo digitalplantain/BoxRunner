@@ -153,7 +153,6 @@ def get_base_config():
                 'https://chrome.cloudflare-dns.com/dns-query'
             ],
             'fallback': [
-                'https://common.dot.dns.yandex.net/dns-query',
                 'https://doh.pub/dns-query',
                 'https://dns.comss.one/dns-query',
                 'https://dns.adguard-dns.com/dns-query',
@@ -162,11 +161,11 @@ def get_base_config():
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
             'nameserver-policy': {
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-                'geosite:category-gov-ru': ['https://common.dot.dns.yandex.net/dns-query', 'https://doh.pub/dns-query'],
-                'geosite:yandex,vk,mailru': ['https://common.dot.dns.yandex.net/dns-query', 'https://doh.pub/dns-query'],
-                '+.ru': ['https://common.dot.dns.yandex.net/dns-query', 'https://doh.pub/dns-query'],
-                '+.su': ['https://common.dot.dns.yandex.net/dns-query', 'https://doh.pub/dns-query'],
-                '+.rf': ['https://common.dot.dns.yandex.net/dns-query', 'https://doh.pub/dns-query']
+                'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
 
