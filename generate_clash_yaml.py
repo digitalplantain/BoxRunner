@@ -6,7 +6,7 @@ import sys
 import urllib.parse
 import requests
 import yaml
-import string
+import re  # Добавили регулярные выражения
 
 # --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
@@ -56,6 +56,25 @@ def parse_proxy_link(link):
         return data
     except: return None
 
+# --- НОВАЯ ФУНКЦИЯ ОЧИСТКИ SHORT-ID ---
+def clean_reality_short_id(sid):
+    if not sid:
+        return None
+    
+    # 1. Приводим к строке
+    sid = str(sid)
+    
+    # 2. Удаляем ВСЁ, что не является a-f, A-F или 0-9
+    # Это удалит пробелы, тире, '0x' префиксы и прочий мусор
+    clean_sid = re.sub(r'[^0-9a-fA-F]', '', sid)
+    
+    # 3. Проверка длины
+    # Если строка пустая или имеет нечетную длину (Clash требует байты)
+    if len(clean_sid) == 0 or len(clean_sid) % 2 != 0:
+        return None
+        
+    return clean_sid.lower() # Возвращаем в нижнем регистре
+
 # --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
     try:
@@ -79,13 +98,19 @@ def convert_link_to_clash_proxy(link):
             if data.get('sni'): proxy['servername'] = data['sni']
             if data.get('fp'): proxy['client-fingerprint'] = data['fp']
             
+            # === БЛОК REALITY С НОВОЙ ОЧИСТКОЙ ===
             if data.get('security') == 'reality':
                 reality_opts = {'public-key': data.get('pbk', '')}
-                raw_sid = str(data.get('sid', '')).strip()
-                # Строгая проверка short-id: не пустой, только hex, четная длина
-                if raw_sid and all(c in string.hexdigits for c in raw_sid) and len(raw_sid) % 2 == 0:
-                    reality_opts['short-id'] = raw_sid
+                
+                # Используем функцию жесткой очистки
+                raw_sid = data.get('sid', '')
+                valid_sid = clean_reality_short_id(raw_sid)
+                
+                if valid_sid:
+                    reality_opts['short-id'] = valid_sid
+                
                 proxy['reality-opts'] = reality_opts
+            # =====================================
 
         net = data.get('network', 'tcp')
         if net == 'ws':
@@ -102,7 +127,7 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА ---
+# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА (Без изменений) ---
 def get_base_config():
     return {
         'port': 7890,
@@ -116,8 +141,6 @@ def get_base_config():
         'external-controller': '127.0.0.1:9090',
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
-        
-        # GeoData конфигурация из примера
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -125,8 +148,6 @@ def get_base_config():
         },
         'geo-auto-update': True,
         'geo-update-interval': 24,
-
-        # Sniffer
         'sniffer': {
             'enable': True,
             'sniff': {
@@ -134,8 +155,6 @@ def get_base_config():
                 'HTTP': {'ports': [80, 8080-8880], 'override-destination': True}
             }
         },
-
-        # DNS конфигурация (Fake-IP)
         'dns': {
             'enable': True,
             'listen': '0.0.0.0:53',
@@ -148,8 +167,6 @@ def get_base_config():
             'fallback': ['https://1.0.0.1/dns-query', 'https://8.8.4.4/dns-query', 'https://1.1.1.1/dns-query', 'https://8.8.8.8/dns-query', 'tcp://1.0.0.1', 'tcp://8.8.4.4', 'tcp://1.1.1.1', 'tcp://8.8.8.8'],
             'fallback-filter': {'geoip': True, 'geoip-code': 'CN', 'ipcidr': ['240.0.0.0/4']}
         },
-
-        # Tun режим (для справки, управление обычно через GUI Verge)
         'tun': {
             'enable': True,
             'stack': 'system',
@@ -158,8 +175,6 @@ def get_base_config():
             'auto-redirect': True,
             'strict-route': True,
         },
-
-        # Провайдеры правил (автообновляемые списки сайтов)
         'rule-providers': {
             'reject': {
                 'type': 'http',
@@ -239,11 +254,9 @@ def main():
         print("No proxies found.")
         return
 
-    # Собираем итоговый конфиг
     config = get_base_config()
     config['proxies'] = proxies
     
-    # Настраиваем группы прокси
     config['proxy-groups'] = [
         {
             'name': '🚀 Manual',
@@ -278,7 +291,6 @@ def main():
         }
     ]
 
-    # Настраиваем правила
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'RULE-SET,google,🚀 Manual',
