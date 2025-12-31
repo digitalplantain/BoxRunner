@@ -56,28 +56,13 @@ def parse_proxy_link(link):
         return data
     except: return None
 
-# --- ФУНКЦИЯ ВАЛИДАЦИИ SHORT-ID ---
-def get_valid_short_id(sid):
-    if not sid:
-        return None
-    
-    # 1. Приводим к строке и чистим
-    sid_str = str(sid).strip().lower()
-    
-    # 2. Если это просто "0", считаем, что ID нет (удаляем)
-    if sid_str == '0':
-        return None
-
-    # 3. Удаляем все не-hex символы
-    clean_sid = re.sub(r'[^0-9a-f]', '', sid_str)
-    
-    # 4. Проверяем длину:
-    # - Должна быть не пустой
-    # - Должна быть ЧЕТНОЙ (Clash требует полные байты)
-    if not clean_sid or len(clean_sid) % 2 != 0:
-        return None # Если длина нечетная (например 'abc'), лучше удалить, чем ломать конфиг
-        
-    return clean_sid
+def clean_and_fix_short_id(sid):
+    if not sid: return None
+    sid = str(sid).strip()
+    clean_sid = re.sub(r'[^0-9a-fA-F]', '', sid)
+    if not clean_sid: return None
+    if len(clean_sid) % 2 != 0: clean_sid = '0' + clean_sid
+    return clean_sid.lower()
 
 # --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
@@ -102,19 +87,12 @@ def convert_link_to_clash_proxy(link):
             if data.get('sni'): proxy['servername'] = data['sni']
             if data.get('fp'): proxy['client-fingerprint'] = data['fp']
             
-            # === БЛОК REALITY ===
             if data.get('security') == 'reality':
                 reality_opts = {'public-key': data.get('pbk', '')}
-                
                 raw_sid = data.get('sid', '')
-                # Используем строгую валидацию: либо идеально, либо никак
-                valid_sid = get_valid_short_id(raw_sid)
-                
-                if valid_sid:
-                    reality_opts['short-id'] = valid_sid
-                
+                valid_sid = clean_and_fix_short_id(raw_sid)
+                if valid_sid: reality_opts['short-id'] = str(valid_sid)
                 proxy['reality-opts'] = reality_opts
-            # ====================
 
         net = data.get('network', 'tcp')
         if net == 'ws':
@@ -131,7 +109,7 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА ---
+# --- ГЕНЕРАЦИЯ КОНФИГА ДЛЯ РФ ---
 def get_base_config():
     return {
         'port': 7890,
@@ -145,6 +123,8 @@ def get_base_config():
         'external-controller': '127.0.0.1:9090',
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
+        
+        # Используем базу MetaCubeX - она самая полная для Geosite
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -152,6 +132,7 @@ def get_base_config():
         },
         'geo-auto-update': True,
         'geo-update-interval': 24,
+
         'sniffer': {
             'enable': True,
             'sniff': {
@@ -159,18 +140,35 @@ def get_base_config():
                 'HTTP': {'ports': [80, 8080-8880], 'override-destination': True}
             }
         },
+
+        # --- DNS ОПТИМИЗИРОВАННЫЙ ДЛЯ РФ ---
         'dns': {
             'enable': True,
             'listen': '0.0.0.0:53',
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'fake-ip-filter': ['*', '+.lan', '+.local', 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 'localhost.sec.qq.com', '+.srv.nintendo.net', '+.stun.playstation.net', 'xbox.*.microsoft.com', 'xbox.*.xboxlive.com', '+.battlenet.com.cn', '+.wotgame.cn', '+.wggames.cn', '+.wowsgame.cn', '+.wargaming.net', 'proxy.golang.org', 'stun.*', '+.stun.*', '+.stun.*.*', '+.stun.*.*.*', '*.local', 'connect.rom.miui.com', '+.msftconnecttest.com', '+.msftncsi.com'],
-            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
-            'nameserver': ['https://dns.alidns.com/dns-query', 'https://doh.pub/dns-query'],
-            'fallback': ['https://1.0.0.1/dns-query', 'https://8.8.4.4/dns-query', 'https://1.1.1.1/dns-query', 'https://8.8.8.8/dns-query', 'tcp://1.0.0.1', 'tcp://8.8.4.4', 'tcp://1.1.1.1', 'tcp://8.8.8.8'],
-            'fallback-filter': {'geoip': True, 'geoip-code': 'CN', 'ipcidr': ['240.0.0.0/4']}
+            'default-nameserver': ['223.5.5.5', '114.114.114.114'], # Сначала пробуем резолвить через Китай/РФ для скорости
+            'nameserver': [
+                'https://dns.google/dns-query', # Основной резолв через Google (пойдет через прокси)
+                'https://1.1.1.1/dns-query'
+            ],
+            'fallback': [
+                'https://doh.pub/dns-query', # Fallback на Tencent/Ali
+                'https://dns.alidns.com/dns-query'
+            ],
+            'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
+            # Политика DNS: Рунет резолвим локально, остальное - через безопасный DNS
+            'nameserver-policy': {
+                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
+            }
         },
+
         'tun': {
             'enable': True,
             'stack': 'system',
@@ -179,7 +177,10 @@ def get_base_config():
             'auto-redirect': True,
             'strict-route': True,
         },
+
+        # --- RULE PROVIDERS (СПИСКИ) ---
         'rule-providers': {
+            # Реклама
             'reject': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -187,32 +188,20 @@ def get_base_config():
                 'path': './ruleset/reject.yaml',
                 'interval': 86400
             },
-            'google': {
+            # Реальный список заблокированного в РФ от antifilter.download
+            'antifilter': {
                 'type': 'http',
                 'behavior': 'domain',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt",
-                'path': './ruleset/google.yaml',
+                'url': "https://antifilter.download/list/domains.lst",
+                'path': './ruleset/antifilter.yaml',
                 'interval': 86400
             },
-            'telegram': {
-                'type': 'http',
-                'behavior': 'classical',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
-                'path': './ruleset/telegramcidr.yaml',
-                'interval': 86400
-            },
-             'proxy': {
+            # Сообщество antifilter (более широкий список)
+            'antifilter-community': {
                 'type': 'http',
                 'behavior': 'domain',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt",
-                'path': './ruleset/proxy.yaml',
-                'interval': 86400
-            },
-            'cn': {
-                'type': 'http',
-                'behavior': 'domain',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cn.txt",
-                'path': './ruleset/cn.yaml',
+                'url': "https://community.antifilter.download/list/domains.lst",
+                'path': './ruleset/antifilter-community.yaml',
                 'interval': 86400
             }
         }
@@ -295,16 +284,49 @@ def main():
         }
     ]
 
+    # --- ПРАВИЛА МАРШРУТИЗАЦИИ ДЛЯ РФ ---
     config['rules'] = [
+        # 1. Блокировка рекламы
         'RULE-SET,reject,REJECT',
-        'RULE-SET,google,🚀 Manual',
-        'RULE-SET,telegram,📲 Telegram',
-        'GEOIP,LAN,DIRECT',
-        'GEOIP,CN,DIRECT',
-        'RULE-SET,cn,DIRECT',
-        'DOMAIN-SUFFIX,cn,DIRECT',
+        'GEOSITE,category-ads-all,REJECT',
+        
+        # 2. Принудительно через прокси (AI, Telegram, Crypto)
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
+        'RULE-SET,telegram,📲 Telegram',
+        'GEOSITE,telegram,📲 Telegram',
+        
+        # 3. Известные заблокированные соцсети/сервисы -> PROXY
+        'GEOSITE,youtube,🚀 Manual',
+        'GEOSITE,facebook,🚀 Manual',
+        'GEOSITE,twitter,🚀 Manual',
+        'GEOSITE,instagram,🚀 Manual',
+        'GEOSITE,discord,🚀 Manual',
+        'DOMAIN-SUFFIX,linkedin.com,🚀 Manual',
+        'DOMAIN-SUFFIX,medium.com,🚀 Manual',
+        
+        # 4. Список Antifilter (все реестровые блокировки) -> PROXY
+        'RULE-SET,antifilter,🚀 Manual',
+        'RULE-SET,antifilter-community,🚀 Manual',
+
+        # 5. КРИТИЧЕСКИ ВАЖНО: Российские сервисы -> DIRECT (Мимо VPN)
+        # Госуслуги, банки, школы и т.д.
+        'GEOSITE,category-gov-ru,DIRECT', 
+        'GEOSITE,yandex,DIRECT',
+        'GEOSITE,vk,DIRECT',
+        'GEOSITE,mailru,DIRECT',
+        'GEOSITE,steam,DIRECT', # Steam скачивание лучше напрямую
+        
+        # Дополнительная страховка по доменным зонам
+        'DOMAIN-SUFFIX,ru,DIRECT',
+        'DOMAIN-SUFFIX,su,DIRECT',
+        'DOMAIN-SUFFIX,rf,DIRECT',
+        
+        # 6. Локальные IP и российские IP -> DIRECT
+        'GEOIP,LAN,DIRECT',
+        'GEOIP,RU,DIRECT',
+        
+        # 7. Все остальное (зарубежный интернет) -> PROXY
         'MATCH,🚀 Manual'
     ]
 
