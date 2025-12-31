@@ -6,7 +6,7 @@ import sys
 import urllib.parse
 import requests
 import yaml
-import re  # Добавили регулярные выражения
+import re
 
 # --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
@@ -56,24 +56,26 @@ def parse_proxy_link(link):
         return data
     except: return None
 
-# --- НОВАЯ ФУНКЦИЯ ОЧИСТКИ SHORT-ID ---
-def clean_reality_short_id(sid):
+# --- ФУНКЦИЯ ОЧИСТКИ И ИСПРАВЛЕНИЯ SHORT-ID ---
+def clean_and_fix_short_id(sid):
     if not sid:
         return None
     
     # 1. Приводим к строке
-    sid = str(sid)
+    sid = str(sid).strip()
     
-    # 2. Удаляем ВСЁ, что не является a-f, A-F или 0-9
-    # Это удалит пробелы, тире, '0x' префиксы и прочий мусор
+    # 2. Удаляем мусор (все кроме hex)
     clean_sid = re.sub(r'[^0-9a-fA-F]', '', sid)
     
-    # 3. Проверка длины
-    # Если строка пустая или имеет нечетную длину (Clash требует байты)
-    if len(clean_sid) == 0 or len(clean_sid) % 2 != 0:
+    if not clean_sid:
         return None
+    
+    # 3. АВТО-ИСПРАВЛЕНИЕ: Добавляем '0' в начало, если длина нечетная
+    # '0' -> '00', 'abc' -> '0abc'
+    if len(clean_sid) % 2 != 0:
+        clean_sid = '0' + clean_sid
         
-    return clean_sid.lower() # Возвращаем в нижнем регистре
+    return clean_sid.lower()
 
 # --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
@@ -98,19 +100,20 @@ def convert_link_to_clash_proxy(link):
             if data.get('sni'): proxy['servername'] = data['sni']
             if data.get('fp'): proxy['client-fingerprint'] = data['fp']
             
-            # === БЛОК REALITY С НОВОЙ ОЧИСТКОЙ ===
+            # === ИСПРАВЛЕННЫЙ БЛОК REALITY ===
             if data.get('security') == 'reality':
                 reality_opts = {'public-key': data.get('pbk', '')}
                 
-                # Используем функцию жесткой очистки
                 raw_sid = data.get('sid', '')
-                valid_sid = clean_reality_short_id(raw_sid)
+                # Используем функцию с авто-исправлением (0 -> 00)
+                valid_sid = clean_and_fix_short_id(raw_sid)
                 
                 if valid_sid:
-                    reality_opts['short-id'] = valid_sid
+                    # Важно: передаем как строку, чтобы YAML не подумал что это число
+                    reality_opts['short-id'] = str(valid_sid)
                 
                 proxy['reality-opts'] = reality_opts
-            # =====================================
+            # ================================
 
         net = data.get('network', 'tcp')
         if net == 'ws':
@@ -127,7 +130,7 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА (Без изменений) ---
+# --- ГЕНЕРАЦИЯ ШАБЛОНА КОНФИГА ---
 def get_base_config():
     return {
         'port': 7890,
