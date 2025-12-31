@@ -13,8 +13,7 @@ GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (из основного скрипта) ---
-# ... (здесь блок функций safe_base64_decode и parse_proxy_link без изменений) ...
+# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (без изменений) ---
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -56,10 +55,10 @@ def parse_proxy_link(link):
         return data
     except: return None
 
+# --- ГЛАВНАЯ ФУНКЦИЯ КОНВЕРТАЦИИ ---
 
-# --- ГЛАВНАЯ ФУНКЦИЯ КОНВЕРТАЦИИ (Без изменений) ---
-# ... (здесь функция convert_link_to_clash_proxy без изменений) ...
 def convert_link_to_clash_proxy(link):
+    """Конвертирует vless/vmess/trojan URL в словарь для Clash YAML."""
     try:
         url_parts = link.split('#', 1)
         if len(url_parts) != 2 or not url_parts[1]:
@@ -75,6 +74,7 @@ def convert_link_to_clash_proxy(link):
         if data['protocol'] == 'vmess':
             proxy['alterId'] = data.get('alter_id', 0)
             proxy['cipher'] = data.get('security', 'auto')
+        
         tls_enabled = data.get('security') in ['tls', 'reality'] or data.get('tls') == 'tls'
         if tls_enabled:
             proxy['tls'] = True
@@ -82,11 +82,19 @@ def convert_link_to_clash_proxy(link):
                 proxy['servername'] = data['sni']
             if data.get('fp'):
                 proxy['client-fingerprint'] = data['fp']
+            
+            # ===================== ИЗМЕНЕННЫЙ БЛОК =====================
             if data.get('security') == 'reality':
-                proxy['reality-opts'] = {
-                    'public-key': data.get('pbk', ''),
-                    'short-id': data.get('sid', '')
-                }
+                # Создаем словарь для reality-opts
+                reality_opts = {'public-key': data.get('pbk', '')}
+                # Получаем short-id
+                short_id = data.get('sid', '')
+                # Добавляем ключ 'short-id' только если он не пустой
+                if short_id:
+                    reality_opts['short-id'] = short_id
+                proxy['reality-opts'] = reality_opts
+            # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
+
         net = data.get('network', 'tcp')
         if net == 'ws':
             proxy['network'] = 'ws'
@@ -97,6 +105,7 @@ def convert_link_to_clash_proxy(link):
         elif net == 'grpc':
             proxy['network'] = 'grpc'
             proxy['grpc-opts'] = {'grpc-service-name': data.get('serviceName', '')}
+        
         if data.get('protocol') == 'vless' and data.get('flow'):
             proxy['flow'] = data['flow']
         return proxy
@@ -104,14 +113,12 @@ def convert_link_to_clash_proxy(link):
         print(f"Failed to convert link {link[:30]}...: {e}")
         return None
 
-# --- ОСНОВНОЙ СКРИПТ ---
-
+# --- ОСНОВНОЙ СКРИПТ (без изменений) ---
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
         sys.exit(1)
     
-    # 1. Получаем исходный файл из Gist
     print(f"Fetching source file '{INPUT_FILENAME}' from Gist {GIST_ID}...")
     try:
         headers = {'Authorization': f'token {GH_TOKEN}'}
@@ -123,34 +130,25 @@ def main():
         print(f"Error fetching Gist file: {e}")
         sys.exit(1)
     
-    # 2. Конвертируем каждую ссылку
     print("Converting proxy links to Clash format and handling duplicates...")
     proxies = []
     proxy_names = []
-    
-    # ===================== ИЗМЕНЕННЫЙ БЛОК =====================
-    name_counts = {} # Словарь для отслеживания количества использований каждого имени
+    name_counts = {}
 
     for line in content.splitlines():
         if line.strip():
             clash_proxy = convert_link_to_clash_proxy(line.strip())
             if clash_proxy:
                 original_name = clash_proxy['name']
-                
-                # Проверяем, встречалось ли это имя раньше
                 if original_name in name_counts:
-                    # Если да, увеличиваем счетчик и создаем новое уникальное имя
                     name_counts[original_name] += 1
                     unique_name = f"{original_name} ({name_counts[original_name]})"
-                    clash_proxy['name'] = unique_name # Обновляем имя в самом прокси
+                    clash_proxy['name'] = unique_name
                 else:
-                    # Если имя встречается впервые, просто инициализируем счетчик
                     name_counts[original_name] = 1
                     unique_name = original_name
-                
                 proxies.append(clash_proxy)
                 proxy_names.append(unique_name)
-    # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
 
     if not proxies:
         print("No valid proxy links found to convert.")
@@ -158,7 +156,6 @@ def main():
 
     print(f"Successfully converted {len(proxies)} proxies.")
 
-    # 3. Создаем полную YAML конфигурацию
     clash_config = {
         'port': 7890,
         'socks-port': 7891,
@@ -168,35 +165,17 @@ def main():
         'external-controller': '127.0.0.1:9090',
         'proxies': proxies,
         'proxy-groups': [
-            {
-                'name': 'PROXY',
-                'type': 'select',
-                'proxies': ['URL-Test', 'Direct', *proxy_names]
-            },
-            {
-                'name': 'URL-Test',
-                'type': 'url-test',
-                'proxies': proxy_names,
-                'url': 'http://www.gstatic.com/generate_204',
-                'interval': 300
-            }
+            {'name': 'PROXY', 'type': 'select', 'proxies': ['URL-Test', 'Direct', *proxy_names]},
+            {'name': 'URL-Test', 'type': 'url-test', 'proxies': proxy_names, 'url': 'http://www.gstatic.com/generate_204', 'interval': 300}
         ],
-        'rules': [
-            'MATCH,PROXY'
-        ]
+        'rules': ['MATCH,PROXY']
     }
     
-    # 4. Преобразуем в YAML строку
     yaml_content = yaml.dump(clash_config, allow_unicode=True, sort_keys=False)
 
-    # 5. Обновляем Gist с новым файлом
     print(f"Uploading generated '{OUTPUT_FILENAME}' to Gist...")
     try:
-        payload = {
-            'files': {
-                OUTPUT_FILENAME: {'content': yaml_content}
-            }
-        }
+        payload = {'files': {OUTPUT_FILENAME: {'content': yaml_content}}}
         r = requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers=headers, json=payload)
         r.raise_for_status()
         print("Gist updated successfully with Clash YAML profile.")
@@ -210,6 +189,4 @@ if __name__ == "__main__":
     except ImportError:
         print("PyYAML not found. Installing...")
         os.system(f"{sys.executable} -m pip install pyyaml")
-        import yaml
-    
     main()
