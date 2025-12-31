@@ -83,15 +83,15 @@ def convert_link_to_clash_proxy(link):
             if data.get('fp'):
                 proxy['client-fingerprint'] = data['fp']
             
-            # ===================== ИЗМЕНЕННЫЙ БЛОК =====================
+            # ===================== ИЗМЕНЕННЫЙ БЛОК v2 =====================
             if data.get('security') == 'reality':
-                # Создаем словарь для reality-opts
                 reality_opts = {'public-key': data.get('pbk', '')}
-                # Получаем short-id
                 short_id = data.get('sid', '')
-                # Добавляем ключ 'short-id' только если он не пустой
-                if short_id:
-                    reality_opts['short-id'] = short_id
+                
+                # Более строгая проверка: добавляем sid, только если он существует и не состоит из пробелов
+                if short_id and short_id.strip():
+                    reality_opts['short-id'] = short_id.strip() # Очищаем от случайных пробелов
+                
                 proxy['reality-opts'] = reality_opts
             # ===================== КОНЕЦ ИЗМЕНЕННОГО БЛОКА =====================
 
