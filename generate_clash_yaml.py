@@ -141,17 +141,6 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'fake-ip-filter': [
-                '*', '+.lan', '+.local', 
-                'digitalplantain.vercel.app',
-                'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
-                'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
-                'localhost.sec.qq.com', '+.srv.nintendo.net', '+.stun.playstation.net', 
-                'xbox.*.microsoft.com', 'xbox.*.xboxlive.com', '+.battlenet.com.cn', 
-                '+.wotgame.cn', '+.wggames.cn', '+.wowsgame.cn', '+.wargaming.net', 
-                'proxy.golang.org', 'stun.*', '+.stun.*', '+.stun.*.*', '+.stun.*.*.*', 
-                '*.local', 'connect.rom.miui.com'
-            ],
             'default-nameserver': ['223.5.5.5', '114.114.114.114'],
             'nameserver': [
                 'https://dns.google/dns-query',
@@ -166,13 +155,12 @@ def get_base_config():
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
-        
+
         'tun': {
             'enable': True,
             'stack': 'system',
@@ -220,7 +208,7 @@ def get_base_config():
             }
         }
     }
-        
+
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
