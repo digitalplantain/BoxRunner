@@ -136,8 +136,9 @@ def get_base_config():
             'enable': True,
             'sniff': {
                 'TLS': {'ports': [443, 8443]},
-                # ИСПРАВЛЕНО: Убрано вычитание 8080-8880. Оставлены конкретные порты.
-                'HTTP': {'ports': [80, 8080, 8880], 'override-destination': True}
+                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Добавлены кавычки вокруг диапазона ---
+                'HTTP': {'ports': [80, '8080-8880'], 'override-destination': True}
+                # -----------------------------------------------------------
             }
         },
 
@@ -297,12 +298,9 @@ def main():
         }
     ]
 
-    # --- ПРАВИЛА МАРШРУТИЗАЦИИ ДЛЯ РФ ---
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-        
-        # Обновление конфига напрямую
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
@@ -334,7 +332,6 @@ def main():
         'DOMAIN-SUFFIX,rf,DIRECT',
         'GEOIP,LAN,DIRECT',
         'GEOIP,RU,DIRECT',
-        
         'MATCH,🚀 Manual'
     ]
 
