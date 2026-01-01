@@ -141,30 +141,20 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            'fake-ip-filter': [
-                '*', '+.lan', '+.local', 
-                'digitalplantain.vercel.app',
-                'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
-                'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
-                'localhost.sec.qq.com'
-            ],
-            'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
+            'default-nameserver': ['223.5.5.5', '114.114.114.114'],
             'nameserver': [
                 'https://dns.google/dns-query',
                 'https://1.1.1.1/dns-query'
             ],
             'fallback': [
                 'https://doh.pub/dns-query',
-                'https://dns.alidns.com/dns-query',
-                'system' # <--- ВАЖНО: Если все DoH упали, используем DNS провайдера/оператора
+                'https://dns.alidns.com/dns-query'
             ],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
             'nameserver-policy': {
-                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                # Для Vercel пробуем сначала РФ DNS, потом системный
-                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'system'],
+                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
@@ -263,13 +253,6 @@ def main():
     
     config['proxy-groups'] = [
         {
-            'name': '🔄 ConfigUpdate',
-            'type': 'fallback',
-            'url': 'https://digitalplantain.vercel.app',
-            'interval': 600,
-            'proxies': ['DIRECT', '♻️ Auto']
-        },
-        {
             'name': '🚀 Manual',
             'type': 'select',
             'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
@@ -310,8 +293,7 @@ def main():
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-        
-        'DOMAIN-SUFFIX,digitalplantain.vercel.app,🔄 ConfigUpdate',
+        'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
