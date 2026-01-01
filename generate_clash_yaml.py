@@ -1,3 +1,4 @@
+# generate_clash_yaml.py
 import base64
 import json
 import os
@@ -7,11 +8,13 @@ import requests
 import yaml
 import re
 
+# --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
 GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
+# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -106,6 +109,7 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
+# --- ГЕНЕРАЦИЯ КОНФИГА ДЛЯ РФ ---
 def get_base_config():
     return {
         'port': 7890,
@@ -132,7 +136,8 @@ def get_base_config():
             'enable': True,
             'sniff': {
                 'TLS': {'ports': [443, 8443]},
-                'HTTP': {'ports': [80, 8080-8880], 'override-destination': True}
+                # ИСПРАВЛЕНО: Убрано вычитание 8080-8880. Оставлены конкретные порты.
+                'HTTP': {'ports': [80, 8080, 8880], 'override-destination': True}
             }
         },
 
@@ -193,7 +198,6 @@ def get_base_config():
                 'path': './ruleset/discord.yaml',
                 'interval': 86400
             },
-            # ------------------------------------------------
             'antifilter': {
                 'type': 'http',
                 'behavior': 'domain',
@@ -211,6 +215,7 @@ def get_base_config():
         }
     }
 
+# --- ОСНОВНОЙ СКРИПТ ---
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
@@ -263,7 +268,7 @@ def main():
             'name': '♻️ Auto',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
+            'interval': 600,
             'tolerance': 200,
             'proxies': proxy_names
         },
@@ -292,12 +297,14 @@ def main():
         }
     ]
 
+    # --- ПРАВИЛА МАРШРУТИЗАЦИИ ДЛЯ РФ ---
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
         
+        # Обновление конфига напрямую
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
-
+        
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
         
@@ -311,7 +318,6 @@ def main():
         'GEOSITE,facebook,🚀 Manual',
         'GEOSITE,twitter,🚀 Manual',
         'GEOSITE,instagram,🚀 Manual',
-
         'DOMAIN-SUFFIX,linkedin.com,🚀 Manual',
         'DOMAIN-SUFFIX,medium.com,🚀 Manual',
         
