@@ -109,6 +109,8 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
+# ... (начало файла без изменений)
+
 # --- ГЕНЕРАЦИЯ КОНФИГА ДЛЯ РФ ---
 def get_base_config():
     return {
@@ -136,9 +138,7 @@ def get_base_config():
             'enable': True,
             'sniff': {
                 'TLS': {'ports': [443, 8443]},
-                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Добавлены кавычки вокруг диапазона ---
                 'HTTP': {'ports': [80, '8080-8880'], 'override-destination': True}
-                # -----------------------------------------------------------
             }
         },
 
@@ -148,6 +148,18 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
+            # 1. ДОБАВЛЯЕМ В ФИЛЬТР FAKE-IP
+            'fake-ip-filter': [
+                '*', '+.lan', '+.local', 
+                'digitalplantain.vercel.app', # <--- ВАЖНО: Реальный IP для обновлялки
+                'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
+                'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
+                'localhost.sec.qq.com', '+.srv.nintendo.net', '+.stun.playstation.net', 
+                'xbox.*.microsoft.com', 'xbox.*.xboxlive.com', '+.battlenet.com.cn', 
+                '+.wotgame.cn', '+.wggames.cn', '+.wowsgame.cn', '+.wargaming.net', 
+                'proxy.golang.org', 'stun.*', '+.stun.*', '+.stun.*.*', '+.stun.*.*.*', 
+                '*.local', 'connect.rom.miui.com'
+            ],
             'default-nameserver': ['223.5.5.5', '114.114.114.114'],
             'nameserver': [
                 'https://dns.google/dns-query',
@@ -162,61 +174,16 @@ def get_base_config():
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+                # 2. ДОБАВЛЯЕМ DNS ПОЛИТИКУ ДЛЯ VERCEL (Резолвим через РФ/Китай DNS, так как они доступны напрямую)
+                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
 
-        'tun': {
-            'enable': True,
-            'stack': 'system',
-            'dns-hijack': ['any:53'],
-            'auto-route': True,
-            'auto-redirect': True,
-            'strict-route': True,
-        },
-
-        'rule-providers': {
-            'reject': {
-                'type': 'http',
-                'behavior': 'domain',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt",
-                'path': './ruleset/reject.yaml',
-                'interval': 86400
-            },
-            'telegram': {
-                'type': 'http',
-                'behavior': 'classical',
-                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
-                'path': './ruleset/telegramcidr.yaml',
-                'interval': 86400
-            },
-            'discord': {
-                'type': 'http',
-                'behavior': 'classical',
-                'url': "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Discord/Discord.yaml",
-                'path': './ruleset/discord.yaml',
-                'interval': 86400
-            },
-            'antifilter': {
-                'type': 'http',
-                'behavior': 'domain',
-                'url': "https://antifilter.download/list/domains.lst",
-                'path': './ruleset/antifilter.yaml',
-                'interval': 86400
-            },
-            'antifilter-community': {
-                'type': 'http',
-                'behavior': 'domain',
-                'url': "https://community.antifilter.download/list/domains.lst",
-                'path': './ruleset/antifilter-community.yaml',
-                'interval': 86400
-            }
-        }
-    }
-
-# --- ОСНОВНОЙ СКРИПТ ---
+# ... (остальной код без изменений)
+        
 def main():
     if not GIST_ID or not GH_TOKEN:
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
