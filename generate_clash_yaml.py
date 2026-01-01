@@ -149,28 +149,34 @@ def get_base_config():
                 'localhost.sec.qq.com'
             ],
             'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
+            
             'nameserver': [
                 'https://dns.google/dns-query',
-                'https://1.1.1.1/dns-query'
+                'https://1.1.1.1/dns-query',
+                'https://dns.alidns.com/dns-query'
             ],
+            
             'fallback': [
                 'https://doh.pub/dns-query',
                 'https://dns.alidns.com/dns-query',
-                'system' # <--- ВАЖНО: Если все DoH упали, используем DNS провайдера/оператора
+                'https://1.0.0.1/dns-query',
+                'https://8.8.4.4/dns-query'
             ],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
+            
             'nameserver-policy': {
-                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query', 'system'],
-                # Для Vercel пробуем сначала РФ DNS, потом системный
-                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'system'],
-                '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-                '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-                '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
+                'digitalplantain.vercel.app': ['https://dns.alidns.com/dns-query', 'system'],
+                
+                'geosite:category-gov-ru': ['https://dns.alidns.com/dns-query', 'system'],
+                'geosite:yandex,vk,mailru': ['https://dns.alidns.com/dns-query', 'system'],
+                '+.ru': ['https://dns.alidns.com/dns-query', 'system'],
+                '+.su': ['https://dns.alidns.com/dns-query', 'system'],
+                '+.rf': ['https://dns.alidns.com/dns-query', 'system'],
+                
+                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
-
+        
         'tun': {
             'enable': True,
             'stack': 'system',
