@@ -1,4 +1,3 @@
-# generate_clash_yaml.py
 import base64
 import json
 import os
@@ -8,13 +7,11 @@ import requests
 import yaml
 import re
 
-# --- КОНФИГУРАЦИЯ ---
 GIST_ID = os.environ.get("GIST_ID")
 GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-# --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
@@ -64,7 +61,6 @@ def clean_and_fix_short_id(sid):
     if len(clean_sid) % 2 != 0: clean_sid = '0' + clean_sid
     return clean_sid.lower()
 
-# --- КОНВЕРТЕР ---
 def convert_link_to_clash_proxy(link):
     try:
         url_parts = link.split('#', 1)
@@ -109,9 +105,6 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-# ... (начало файла без изменений)
-
-# --- ГЕНЕРАЦИЯ КОНФИГА ДЛЯ РФ ---
 def get_base_config():
     return {
         'port': 7890,
@@ -148,10 +141,9 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
-            # 1. ДОБАВЛЯЕМ В ФИЛЬТР FAKE-IP
             'fake-ip-filter': [
                 '*', '+.lan', '+.local', 
-                'digitalplantain.vercel.app', # <--- ВАЖНО: Реальный IP для обновлялки
+                'digitalplantain.vercel.app',
                 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
                 'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
                 'localhost.sec.qq.com', '+.srv.nintendo.net', '+.stun.playstation.net', 
@@ -174,15 +166,60 @@ def get_base_config():
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:category-gov-ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 'geosite:yandex,vk,mailru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
-                # 2. ДОБАВЛЯЕМ DNS ПОЛИТИКУ ДЛЯ VERCEL (Резолвим через РФ/Китай DNS, так как они доступны напрямую)
                 'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.ru': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.su': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
                 '+.rf': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
+        
+        'tun': {
+            'enable': True,
+            'stack': 'system',
+            'dns-hijack': ['any:53'],
+            'auto-route': True,
+            'auto-redirect': True,
+            'strict-route': True,
+        },
 
-# ... (остальной код без изменений)
+        'rule-providers': {
+            'reject': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt",
+                'path': './ruleset/reject.yaml',
+                'interval': 86400
+            },
+            'telegram': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
+                'path': './ruleset/telegramcidr.yaml',
+                'interval': 86400
+            },
+            'discord': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Discord/Discord.yaml",
+                'path': './ruleset/discord.yaml',
+                'interval': 86400
+            },
+            'antifilter': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://antifilter.download/list/domains.lst",
+                'path': './ruleset/antifilter.yaml',
+                'interval': 86400
+            },
+            'antifilter-community': {
+                'type': 'http',
+                'behavior': 'domain',
+                'url': "https://community.antifilter.download/list/domains.lst",
+                'path': './ruleset/antifilter-community.yaml',
+                'interval': 86400
+            }
+        }
+    }
         
 def main():
     if not GIST_ID or not GH_TOKEN:
