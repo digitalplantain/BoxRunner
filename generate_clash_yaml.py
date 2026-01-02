@@ -271,8 +271,8 @@ def main():
         'type': 'url-test',
         'url': 'http://www.gstatic.com/generate_204',
         'interval': 600,
-        'tolerance': 200,
-        'proxies': names_standard if names_standard else ['DIRECT'] # Заглушка, если список пуст
+        'tolerance': 1000,
+        'proxies': names_standard if names_standard else ['DIRECT']
     }
 
     group_aw = {
@@ -280,8 +280,8 @@ def main():
         'type': 'url-test',
         'url': 'http://www.gstatic.com/generate_204',
         'interval': 600,
-        'tolerance': 200,
-        'proxies': names_aw if names_aw else ['DIRECT'] # Заглушка
+        'tolerance': 1000,
+        'proxies': names_aw if names_aw else ['DIRECT']
     }
 
     group_auto_fallback = {
@@ -312,7 +312,7 @@ def main():
         'type': 'load-balance',
         'strategy': 'consistent-hashing',
         'url': 'http://www.gstatic.com/generate_204',
-        'interval': 300,
+        'interval': 600,
         'proxies': all_names
     }
 
