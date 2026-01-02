@@ -149,34 +149,27 @@ def get_base_config():
                 'localhost.sec.qq.com'
             ],
             'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
-            
             'nameserver': [
                 'https://dns.google/dns-query',
                 'https://1.1.1.1/dns-query',
                 'https://dns.alidns.com/dns-query'
             ],
-            
             'fallback': [
                 'https://doh.pub/dns-query',
-                'https://dns.alidns.com/dns-query',
-                'https://1.0.0.1/dns-query',
-                'https://8.8.4.4/dns-query'
+                'https://dns.alidns.com/dns-query'
             ],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
-            
             'nameserver-policy': {
                 'digitalplantain.vercel.app': ['https://dns.alidns.com/dns-query', 'system'],
-                
                 'geosite:category-gov-ru': ['https://dns.alidns.com/dns-query', 'system'],
                 'geosite:yandex,vk,mailru': ['https://dns.alidns.com/dns-query', 'system'],
                 '+.ru': ['https://dns.alidns.com/dns-query', 'system'],
                 '+.su': ['https://dns.alidns.com/dns-query', 'system'],
                 '+.rf': ['https://dns.alidns.com/dns-query', 'system'],
-                
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
-        
+
         'tun': {
             'enable': True,
             'stack': 'system',
@@ -242,10 +235,11 @@ def main():
         sys.exit(1)
     
     proxies = []
-    proxy_names = []
+    names_standard = []
+    names_aw = []
     name_counts = {}
 
-    print("Converting proxies...")
+    print("Converting proxies and separating Anti-Whitelist...")
     for line in content.splitlines():
         if line.strip():
             p = convert_link_to_clash_proxy(line.strip())
@@ -257,8 +251,13 @@ def main():
                     p['name'] = name
                 else:
                     name_counts[name] = 1
+                
                 proxies.append(p)
-                proxy_names.append(name)
+                
+                if "Anti-Whitelist" in name:
+                    names_aw.append(name)
+                else:
+                    names_standard.append(name)
 
     if not proxies:
         print("No proxies found.")
@@ -266,57 +265,84 @@ def main():
 
     config = get_base_config()
     config['proxies'] = proxies
-    
+        
+    group_standard = {
+        'name': '⚡ Standard',
+        'type': 'url-test',
+        'url': 'http://www.gstatic.com/generate_204',
+        'interval': 600,
+        'tolerance': 200,
+        'proxies': names_standard if names_standard else ['DIRECT'] # Заглушка, если список пуст
+    }
+
+    group_aw = {
+        'name': '🛡️ Anti-Whitelist',
+        'type': 'url-test',
+        'url': 'http://www.gstatic.com/generate_204',
+        'interval': 600,
+        'tolerance': 200,
+        'proxies': names_aw if names_aw else ['DIRECT'] # Заглушка
+    }
+
+    group_auto_fallback = {
+        'name': '♻️ Auto',
+        'type': 'fallback',
+        'url': 'http://www.gstatic.com/generate_204',
+        'interval': 600,
+        'proxies': ['⚡ Standard', '🛡️ Anti-Whitelist']
+    }
+
+    group_update = {
+        'name': '🔄 ConfigUpdate',
+        'type': 'fallback',
+        'url': 'https://digitalplantain.vercel.app',
+        'interval': 600,
+        'proxies': ['DIRECT', '♻️ Auto']
+    }
+
+    all_names = names_standard + names_aw
+    group_manual = {
+        'name': '🚀 Manual',
+        'type': 'select',
+        'proxies': ['♻️ Auto', '⚡ Standard', '🛡️ Anti-Whitelist', '🔮 LoadBalance'] + all_names
+    }
+
+    group_loadbalance = {
+        'name': '🔮 LoadBalance',
+        'type': 'load-balance',
+        'strategy': 'consistent-hashing',
+        'url': 'http://www.gstatic.com/generate_204',
+        'interval': 300,
+        'proxies': all_names
+    }
+
     config['proxy-groups'] = [
-        {
-            'name': '🔄 ConfigUpdate',
-            'type': 'fallback',
-            'url': 'https://digitalplantain.vercel.app',
-            'interval': 600,
-            'proxies': ['DIRECT', '♻️ Auto']
-        },
-        {
-            'name': '🚀 Manual',
-            'type': 'select',
-            'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
-        },
-        {
-            'name': '♻️ Auto',
-            'type': 'url-test',
-            'url': 'http://www.gstatic.com/generate_204',
-            'interval': 600,
-            'tolerance': 200,
-            'proxies': proxy_names
-        },
-        {
-            'name': '🔮 LoadBalance',
-            'type': 'load-balance',
-            'strategy': 'consistent-hashing',
-            'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
-            'proxies': proxy_names
-        },
+        group_manual,
+        group_auto_fallback, 
+        group_standard,      
+        group_aw,            
+        group_loadbalance,
+        group_update,
         {
             'name': '📲 Telegram',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
         },
         {
             'name': '🎮 Discord',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
         },
          {
             'name': '🤖 OpenAI',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
         }
     ]
 
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-        
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,🔄 ConfigUpdate',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
