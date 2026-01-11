@@ -6,6 +6,7 @@ import urllib.parse
 import requests
 import yaml
 import re
+import string
 
 GIST_ID = os.environ.get("GIST_ID")
 GH_TOKEN = os.environ.get("GH_TOKEN")
@@ -141,31 +142,51 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
+            
             'fake-ip-filter': [
                 '*', '+.lan', '+.local', 
-                'digitalplantain.vercel.app',
+                'digitalplantain.vercel.app', 
+                '+.yandex-team.ru', '+.yndx.net', '+.yanet.org', '+.yandex.net', '+.yandex.cloud',
                 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
                 'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
                 'localhost.sec.qq.com'
             ],
+            
             'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
+            
             'nameserver': [
                 'https://dns.google/dns-query',
-                'https://1.1.1.1/dns-query',
-                'https://dns.alidns.com/dns-query'
+                'https://1.1.1.1/dns-query'
             ],
+            
             'fallback': [
                 'https://doh.pub/dns-query',
                 'https://dns.alidns.com/dns-query'
             ],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
+            
             'nameserver-policy': {
-                'digitalplantain.vercel.app': ['https://dns.alidns.com/dns-query', 'system'],
-                'geosite:category-gov-ru': ['https://dns.alidns.com/dns-query', 'system'],
-                'geosite:yandex,vk,mailru': ['https://dns.alidns.com/dns-query', 'system'],
-                '+.ru': ['https://dns.alidns.com/dns-query', 'system'],
-                '+.su': ['https://dns.alidns.com/dns-query', 'system'],
-                '+.rf': ['https://dns.alidns.com/dns-query', 'system'],
+                'yandex-team.ru': 'system',
+                '+.yandex-team.ru': 'system',
+                'yndx.net': 'system',
+                '+.yndx.net': 'system',
+                'yanet.org': 'system',
+                '+.yanet.org': 'system',
+                'yandex.net': 'system',
+                '+.yandex.net': 'system',
+                'yandex.cloud': 'system',
+                '+.yandex.cloud': 'system',
+                
+                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'system'],
+                
+                'geosite:category-gov-ru': 'system',
+                'geosite:yandex': 'system',
+                'geosite:vk': 'system',
+                'geosite:mailru': 'system',
+                '+.ru': 'system',
+                '+.su': 'system',
+                '+.rf': 'system',
+                
                 'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
@@ -235,11 +256,10 @@ def main():
         sys.exit(1)
     
     proxies = []
-    names_standard = []
-    names_aw = []
+    proxy_names = []
     name_counts = {}
 
-    print("Converting proxies and separating Anti-Whitelist...")
+    print("Converting proxies...")
     for line in content.splitlines():
         if line.strip():
             p = convert_link_to_clash_proxy(line.strip())
@@ -251,13 +271,8 @@ def main():
                     p['name'] = name
                 else:
                     name_counts[name] = 1
-                
                 proxies.append(p)
-                
-                if "Anti-Whitelist" in name:
-                    names_aw.append(name)
-                else:
-                    names_standard.append(name)
+                proxy_names.append(name)
 
     if not proxies:
         print("No proxies found.")
@@ -265,92 +280,56 @@ def main():
 
     config = get_base_config()
     config['proxies'] = proxies
-        
-    group_standard = {
-        'name': '⚡ Standard',
-        'type': 'url-test',
-        'url': 'http://www.gstatic.com/generate_204',
-        'interval': 600,
-        'tolerance': 1000,
-        'proxies': names_standard if names_standard else ['DIRECT']
-    }
-
-    group_aw = {
-        'name': '🛡️ Anti-Whitelist',
-        'type': 'url-test',
-        'url': 'http://www.gstatic.com/generate_204',
-        'interval': 600,
-        'tolerance': 1000,
-        'proxies': names_aw if names_aw else ['DIRECT']
-    }
-
-    group_auto_fallback = {
-        'name': '♻️ Auto',
-        'type': 'fallback',
-        'url': 'http://www.gstatic.com/generate_204',
-        'interval': 600,
-        'proxies': ['⚡ Standard', '🛡️ Anti-Whitelist']
-    }
-
-    group_update = {
-        'name': '🔄 ConfigUpdate',
-        'type': 'fallback',
-        'url': 'https://digitalplantain.vercel.app',
-        'interval': 600,
-        'proxies': ['DIRECT', '♻️ Auto']
-    }
-
-    all_names = names_standard + names_aw
-    group_manual = {
-        'name': '🚀 Manual',
-        'type': 'select',
-        'proxies': ['♻️ Auto', '⚡ Standard', '🛡️ Anti-Whitelist', '🔮 LoadBalance'] + all_names
-    }
-
-    group_loadbalance = {
-        'name': '🔮 LoadBalance',
-        'type': 'load-balance',
-        'strategy': 'consistent-hashing',
-        'url': 'http://www.gstatic.com/generate_204',
-        'interval': 600,
-        'proxies': all_names
-    }
-
+    
     config['proxy-groups'] = [
-        group_manual,
-        group_auto_fallback, 
-        group_standard,      
-        group_aw,            
-        group_loadbalance,
-        group_update,
+        {
+            'name': '🚀 Manual',
+            'type': 'select',
+            'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
+        },
+        {
+            'name': '♻️ Auto',
+            'type': 'url-test',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 600,
+            'tolerance': 200,
+            'proxies': proxy_names
+        },
+        {
+            'name': '🔮 LoadBalance',
+            'type': 'load-balance',
+            'strategy': 'consistent-hashing',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 300,
+            'proxies': proxy_names
+        },
         {
             'name': '📲 Telegram',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
         {
             'name': '🎮 Discord',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
          {
             'name': '🤖 OpenAI',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + all_names
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         }
     ]
 
     config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
-        'DOMAIN-SUFFIX,digitalplantain.vercel.app,🔄 ConfigUpdate',
+        
+        'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
-        
         'RULE-SET,telegram,📲 Telegram',
         'GEOSITE,telegram,📲 Telegram',
-        
         'RULE-SET,discord,🎮 Discord',
         'GEOSITE,discord,🎮 Discord',
         
@@ -364,6 +343,12 @@ def main():
         'RULE-SET,antifilter,🚀 Manual',
         'RULE-SET,antifilter-community,🚀 Manual',
 
+        'DOMAIN-SUFFIX,yandex-team.ru,DIRECT',
+        'DOMAIN-SUFFIX,yndx.net,DIRECT',
+        'DOMAIN-SUFFIX,yanet.org,DIRECT',
+        'DOMAIN-SUFFIX,yandex.net,DIRECT',
+        'DOMAIN-SUFFIX,yandex.cloud,DIRECT',
+        
         'GEOSITE,category-gov-ru,DIRECT', 
         'GEOSITE,yandex,DIRECT',
         'GEOSITE,vk,DIRECT',
@@ -372,8 +357,10 @@ def main():
         'DOMAIN-SUFFIX,ru,DIRECT',
         'DOMAIN-SUFFIX,su,DIRECT',
         'DOMAIN-SUFFIX,rf,DIRECT',
+        
         'GEOIP,LAN,DIRECT',
         'GEOIP,RU,DIRECT',
+        
         'MATCH,🚀 Manual'
     ]
 
