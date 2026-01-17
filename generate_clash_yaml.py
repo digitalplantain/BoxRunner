@@ -291,7 +291,7 @@ def main():
             'name': '♻️ Auto',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 120,
+            'interval': 300,
             'tolerance': 1000,
             'proxies': proxy_names
         },
@@ -300,7 +300,7 @@ def main():
             'type': 'load-balance',
             'strategy': 'consistent-hashing',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 120,
+            'interval': 300,
             'proxies': proxy_names
         },
         {
