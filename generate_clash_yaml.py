@@ -291,8 +291,8 @@ def main():
             'name': '♻️ Auto',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 600,
-            'tolerance': 200,
+            'interval': 300,
+            'tolerance': 1000,
             'proxies': proxy_names
         },
         {
