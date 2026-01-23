@@ -325,6 +325,8 @@ def main():
         'GEOSITE,category-ads-all,REJECT',
         
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
+
+        'DOMAIN-SUFFIX,habr.com,🚀 Manual',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
