@@ -60,7 +60,11 @@ PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/YasserDivaR/pr0xy/refs/heads/main/ShadowSocks2021.txt",
     "https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/vless.txt",
     "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/vless_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/vmess_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/trojan_iran.txt",
     "https://github.com/Argh94/Proxy-List/raw/refs/heads/main/All_Config.txt",
+    "https://raw.githubusercontent.com/Argh94/V2RayAutoConfig/refs/heads/main/configs/Russia.txt",
     "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS",
     "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt",
     "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt",
@@ -105,9 +109,11 @@ PLAINTEXT_URLS = [
     "https://bp.wl.free.nf/confs/merged.txt",
     "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/wl.txt",
     "https://wlr.s3-website.cloud.ru/bucket-93b250/wl.txt",
-    "https://bp.wl.free.nf/confs/wl.txt"
-    
-    
+    "https://bp.wl.free.nf/confs/wl.txt",
+    "https://raw.githubusercontent.com/nscl5/5/main/configs/all.txt",
+    "https://raw.githubusercontent.com/FNET00bot/FNET00/Config/Main",
+    "https://raw.githubusercontent.com/wiki/gfpcom/free-proxy-list/lists/ss.txt",
+    "https://raw.githubusercontent.com/R3ZARAHIMI/7/main/Config_jo.txt" 
 ]
 BASE64_URLS = [
     "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/main/mci/sub_1.txt",
@@ -144,7 +150,14 @@ BASE64_URLS = [
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hysteria",
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vless",
     "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
-    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/trojan",
+    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/vless.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/vmess.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/trojan.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/hysteria2.txt"
 ]
 
 SING_BOX_PATH = "./sing-box"
@@ -575,4 +588,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
