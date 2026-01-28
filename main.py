@@ -96,7 +96,18 @@ PLAINTEXT_URLS = [
     "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
     "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
     "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-checked.txt",
-    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-SNI-RU-all.txt"
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-SNI-RU-all.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/selected.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/selected.txt",
+    "https://bp.wl.free.nf/confs/selected.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/merged.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/merged.txt",
+    "https://bp.wl.free.nf/confs/merged.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/wl.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/wl.txt",
+    "https://bp.wl.free.nf/confs/wl.txt"
+    
+    
 ]
 BASE64_URLS = [
     "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/main/mci/sub_1.txt",
@@ -564,3 +575,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
