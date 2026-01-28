@@ -2,7 +2,7 @@ name: SingBox Proxy Updater
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/55 * * * *'
   workflow_dispatch:
 
 jobs:
