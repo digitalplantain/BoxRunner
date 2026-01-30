@@ -289,29 +289,31 @@ def main():
 
     config = get_base_config()
     config['proxies'] = proxies
-    
+
     config['proxy-groups'] = [
         {
             'name': '🚀 Manual',
             'type': 'select',
-            'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
+            'proxies': ['♻️ Auto'] + proxy_names 
         },
+    
         {
             'name': '♻️ Auto',
-            'type': 'url-test',
+            'type': 'fallback',
             'url': 'http://www.gstatic.com/generate_204',
             'interval': 300,
             'tolerance': 1000,
-            'proxies': proxy_names
+            'proxies': ['🚀 sorted-proxies']
         },
+    
         {
-            'name': '🔮 LoadBalance',
-            'type': 'load-balance',
-            'strategy': 'consistent-hashing',
+            'name': '🚀 sorted-proxies',
+            'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
             'interval': 300,
             'proxies': proxy_names
         },
+        
         {
             'name': '📲 Telegram',
             'type': 'select',
@@ -322,7 +324,7 @@ def main():
             'type': 'select',
             'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
-         {
+        {
             'name': '🤖 OpenAI',
             'type': 'select',
             'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
