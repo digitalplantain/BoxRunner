@@ -152,17 +152,26 @@ def get_base_config():
                 'localhost.sec.qq.com'
             ],
             
-            'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
+            'default-nameserver': [
+                'https://doh.pub/dns-query',
+                'https://dns.alidns.com/dns-query',
+                'system'
+            ],
             
             'nameserver': [
                 'https://dns.google/dns-query',
-                'https://1.1.1.1/dns-query'
+                'tls://dns.google',
+                'https://1.1.1.1/dns-query',
+                'tls://1.1.1.1'
             ],
             
             'fallback': [
                 'https://doh.pub/dns-query',
-                'https://dns.alidns.com/dns-query'
+                'https://dns.alidns.com/dns-query',
+                'tls://dns.adguard-dns.com',
+                'quic://dns.adguard-dns.com'
             ],
+            
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
             
             'nameserver-policy': {
