@@ -453,9 +453,10 @@ def check_proxy(link):
         if not api_data: return None
         
         exit_ip = api_data.get('ip')
-        exit_country = api_data.get('country', 'XX')
-        
-        if exit_country == 'RU' or exit_country == 'XX': return None
+        exit_country = api_data.get('country', 'XX') 
+        #if exit_country == 'RU' or exit_country == 'XX': return None
+        BANNED_EXIT_COUNTRIES = {'RU', 'XX', 'HK', 'CN'}
+        if exit_country in BANNED_EXIT_COUNTRIES: return None
 
         is_russian_entry = False
         entry_country = entry_ip_country_cache.get(entry_ip)
@@ -588,5 +589,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
