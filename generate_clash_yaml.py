@@ -290,44 +290,65 @@ def main():
     config = get_base_config()
     config['proxies'] = proxies
 
-    config['proxy-groups'] = [
-        {
-            'name': '🚀 Manual',
-            'type': 'select',
-            'proxies': ['♻️ Auto'] + proxy_names 
-        },
+        standard_names = []
+    anti_wl_names = []
+
+    for name in proxy_names:
+        if 'Anti-Whitelist' in name:
+            anti_wl_names.append(name)
+        else:
+            standard_names.append(name)
+
+    # Если вдруг обычных прокси нет, чтобы конфиг не сломался, добавим хоть что-то
+    if not standard_names and anti_wl_names:
+        standard_names = anti_wl_names
+
+    config = get_base_config()
+    config['proxies'] = proxies
     
+    config['proxy-groups'] = [
         {
             'name': '♻️ Auto',
             'type': 'fallback',
             'url': 'http://www.gstatic.com/generate_204',
             'interval': 300,
-            'tolerance': 1000,
-            'proxies': ['🚀 sorted-proxies']
+            'proxies': ['⚡ Standard', '🛡️ Anti-Whitelist']
         },
-    
         {
-            'name': '🚀 sorted-proxies',
+            'name': '⚡ Standard',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
             'interval': 300,
-            'proxies': proxy_names
+            'tolerance': 1000,
+            'proxies': standard_names if standard_names else ['DIRECT'] 
         },
-        
+        {
+            'name': '🛡️ Anti-Whitelist',
+            'type': 'url-test',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 300,
+            'tolerance': 1000,
+            'proxies': anti_wl_names if anti_wl_names else ['DIRECT']
+        },
+        {
+            'name': '🚀 Manual',
+            'type': 'select',
+            'proxies': ['♻️ Auto', '⚡ Standard', '🛡️ Anti-Whitelist'] + proxy_names
+        },
         {
             'name': '📲 Telegram',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['♻️ Auto', '🚀 Manual']
         },
         {
             'name': '🎮 Discord',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['♻️ Auto', '🚀 Manual']
         },
         {
             'name': '🤖 OpenAI',
             'type': 'select',
-            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
+            'proxies': ['♻️ Auto', '🚀 Manual']
         }
     ]
 
