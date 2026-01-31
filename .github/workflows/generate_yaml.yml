@@ -1,15 +1,12 @@
-# .github/workflows/generate_yaml.yml
 name: Generate Clash YAML Profile
 on:
   workflow_run:
-    # Укажите имя файла вашего ОСНОВНОГО воркфлоу
-    workflows: ["SingBox Proxy Updater"] # <--- ЗАМЕНИТЕ ЭТО, если ваш файл называется иначе
+    workflows: ["SingBox Proxy Updater"]
     types:
       - completed
 
 jobs:
   build-yaml:
-    # Запускать только если основной воркфлоу завершился успешно
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     
@@ -30,6 +27,5 @@ jobs:
       - name: Generate and Upload Clash YAML
         run: python generate_clash_yaml.py
         env:
-          # Передаем секреты в скрипт
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GIST_ID: ${{ secrets.GIST_ID }}
