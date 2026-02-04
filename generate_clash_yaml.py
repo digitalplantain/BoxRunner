@@ -153,14 +153,12 @@ def get_base_config():
             ],
             
             'default-nameserver': [
-                '223.5.5.5', '114.114.114.114', 'system'
+                '8.8.8.8', '9.9.9.9', '223.5.5.5', '114.114.114.114', 'system'
             ],
             
             'nameserver': [
                 'https://dns.google/dns-query',
-                'tls://dns.google',
-                'https://1.1.1.1/dns-query',
-                'tls://1.1.1.1'
+                'tls://dns.google'
             ],
             
             'fallback': [
