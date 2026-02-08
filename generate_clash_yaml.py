@@ -286,7 +286,7 @@ def main():
     config = get_base_config()
     config['proxies'] = proxies
 
-        standard_names = []
+    standard_names = []
     anti_wl_names = []
 
     for name in proxy_names:
