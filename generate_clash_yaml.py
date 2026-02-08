@@ -306,14 +306,14 @@ def main():
             'name': '♻️ Auto',
             'type': 'fallback',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
+            'interval': 3600,
             'proxies': ['⚡ Standard', '🛡️ Anti-Whitelist']
         },
         {
             'name': '⚡ Standard',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
+            'interval': 3600,
             'tolerance': 1000,
             'proxies': standard_names if standard_names else ['DIRECT'] 
         },
@@ -321,7 +321,7 @@ def main():
             'name': '🛡️ Anti-Whitelist',
             'type': 'url-test',
             'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
+            'interval': 3600,
             'tolerance': 1000,
             'proxies': anti_wl_names if anti_wl_names else ['DIRECT']
         },
