@@ -6,6 +6,7 @@ import urllib.parse
 import requests
 import yaml
 import re
+import string
 
 GIST_ID = os.environ.get("GIST_ID")
 GH_TOKEN = os.environ.get("GH_TOKEN")
@@ -105,18 +106,6 @@ def convert_link_to_clash_proxy(link):
         return proxy
     except: return None
 
-def get_telegram_official_cidrs():
-    print("Fetching official Telegram CIDRs...")
-    try:
-        r = requests.get("https://core.telegram.org/resources/cidr.txt", timeout=10)
-        r.raise_for_status()
-        cidrs = [line.strip() for line in r.text.splitlines() if line.strip()]
-        print(f"Loaded {len(cidrs)} Telegram CIDRs.")
-        return cidrs
-    except Exception as e:
-        print(f"Warning: Failed to fetch Telegram CIDRs ({e}). Using only GEOSITE/GEOIP.")
-        return []
-
 def get_base_config():
     return {
         'port': 7890,
@@ -131,7 +120,6 @@ def get_base_config():
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
         
-        # Настройки GEO-баз (Meta Core)
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -154,25 +142,57 @@ def get_base_config():
             'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
+            
             'fake-ip-filter': [
                 '*', '+.lan', '+.local', 
                 'digitalplantain.vercel.app', 
                 '+.yandex-team.ru', '+.yndx.net', '+.yanet.org', '+.yandex.net', '+.yandex.cloud',
                 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
-                'msftncsi.com', '+.msftncsi.com'
+                'msftncsi.com', '+.msftncsi.com', 'localhost.ptlogin2.qq.com', 
+                'localhost.sec.qq.com'
             ],
-            'default-nameserver': ['8.8.8.8', '1.1.1.1'],
-            'nameserver': ['https://dns.google/dns-query', 'https://1.1.1.1/dns-query'],
-            'fallback': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+            
+            'default-nameserver': [
+                '8.8.8.8', '9.9.9.9', '223.5.5.5', '114.114.114.114'
+            ],
+            
+            'nameserver': [
+                'https://dns.google/dns-query',
+                'tls://dns.google'
+            ],
+            
+            'fallback': [
+                'https://doh.pub/dns-query',
+                'https://dns.alidns.com/dns-query',
+                'tls://dns.adguard-dns.com',
+                'quic://dns.adguard-dns.com'
+            ],
+            
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
+            
             'nameserver-policy': {
+                'yandex-team.ru': 'system',
+                '+.yandex-team.ru': 'system',
+                'yndx.net': 'system',
+                '+.yndx.net': 'system',
+                'yanet.org': 'system',
+                '+.yanet.org': 'system',
+                'yandex.net': 'system',
+                '+.yandex.net': 'system',
+                'yandex.cloud': 'system',
+                '+.yandex.cloud': 'system',
+                
+                'digitalplantain.vercel.app': ['https://doh.pub/dns-query', 'system'],
+                
                 'geosite:category-gov-ru': 'system',
                 'geosite:yandex': 'system',
                 'geosite:vk': 'system',
                 'geosite:mailru': 'system',
                 '+.ru': 'system',
                 '+.su': 'system',
-                '+.rf': 'system'
+                '+.rf': 'system',
+                
+                'geosite:cn,private': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query']
             }
         },
 
@@ -185,13 +205,26 @@ def get_base_config():
             'strict-route': True,
         },
 
-        # Оставляем только те провайдеры, которые не покрываются GEOSITE
         'rule-providers': {
             'reject': {
                 'type': 'http',
                 'behavior': 'domain',
                 'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt",
                 'path': './ruleset/reject.yaml',
+                'interval': 86400
+            },
+            'telegram': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt",
+                'path': './ruleset/telegramcidr.yaml',
+                'interval': 86400
+            },
+            'discord': {
+                'type': 'http',
+                'behavior': 'classical',
+                'url': "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Discord/Discord.yaml",
+                'path': './ruleset/discord.yaml',
                 'interval': 86400
             },
             'antifilter': {
@@ -216,7 +249,6 @@ def main():
         print("Error: GIST_ID or GH_TOKEN secrets are not set.")
         sys.exit(1)
     
-    # 1. Загрузка прокси из Gist
     print(f"Fetching source file from Gist {GIST_ID}...")
     try:
         headers = {'Authorization': f'token {GH_TOKEN}'}
@@ -228,7 +260,6 @@ def main():
         print(f"Error fetching Gist: {e}")
         sys.exit(1)
     
-    # 2. Обработка прокси
     proxies = []
     proxy_names = []
     name_counts = {}
@@ -252,7 +283,9 @@ def main():
         print("No proxies found.")
         return
 
-    # 3. Разделение на группы
+    config = get_base_config()
+    config['proxies'] = proxies
+
     standard_names = []
     anti_wl_names = []
 
@@ -265,7 +298,6 @@ def main():
     if not standard_names and anti_wl_names:
         standard_names = anti_wl_names
 
-    # 4. Формирование конфига
     config = get_base_config()
     config['proxies'] = proxies
     
@@ -315,50 +347,37 @@ def main():
         }
     ]
 
-    # 5. Сборка правил
-    rules = [
+    config['rules'] = [
         'RULE-SET,reject,REJECT',
         'GEOSITE,category-ads-all,REJECT',
         
-        # Прямое подключение к техническим доменам
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
+
+        'DOMAIN-SUFFIX,habr.com,🚀 Manual',
         
-        # OpenAI
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
-        
-        # Discord (через GEOSITE)
+        'RULE-SET,telegram,📲 Telegram',
+        'GEOSITE,telegram,📲 Telegram',
+        'RULE-SET,discord,🎮 Discord',
         'GEOSITE,discord,🎮 Discord',
-    ]
-
-    # 6. Добавление Telegram (Официальные CIDR + GEOSITE + GEOIP)
-    tg_cidrs = get_telegram_official_cidrs()
-    
-    # Сначала добавляем конкретные IP-подсети из официального списка
-    for cidr in tg_cidrs:
-        # no-resolve нужен, чтобы не резолвить IP, если правило совпало, и это ускоряет работу
-        if ':' in cidr:
-            rules.append(f'IP-CIDR6,{cidr},📲 Telegram,no-resolve')
-        else:
-            rules.append(f'IP-CIDR,{cidr},📲 Telegram,no-resolve')
-
-    # Затем добавляем общие правила GeoSite и GeoIP
-    rules.append('GEOSITE,telegram,📲 Telegram')
-    rules.append('GEOIP,telegram,📲 Telegram')
-
-    # 7. Продолжение общих правил
-    rules.extend([
+        
         'GEOSITE,youtube,🚀 Manual',
         'GEOSITE,facebook,🚀 Manual',
         'GEOSITE,twitter,🚀 Manual',
         'GEOSITE,instagram,🚀 Manual',
+        'DOMAIN-SUFFIX,linkedin.com,🚀 Manual',
+        'DOMAIN-SUFFIX,medium.com,🚀 Manual',
         
         'RULE-SET,antifilter,🚀 Manual',
         'RULE-SET,antifilter-community,🚀 Manual',
 
-        # RU сегмент и Yandex - напрямую
         'DOMAIN-SUFFIX,yandex-team.ru,DIRECT',
         'DOMAIN-SUFFIX,yndx.net,DIRECT',
+        'DOMAIN-SUFFIX,yanet.org,DIRECT',
+        'DOMAIN-SUFFIX,yandex.net,DIRECT',
+        'DOMAIN-SUFFIX,yandex.cloud,DIRECT',
+        
         'GEOSITE,category-gov-ru,DIRECT', 
         'GEOSITE,yandex,DIRECT',
         'GEOSITE,vk,DIRECT',
@@ -372,9 +391,7 @@ def main():
         'GEOIP,RU,DIRECT',
         
         'MATCH,🚀 Manual'
-    ])
-
-    config['rules'] = rules
+    ]
 
     print("Saving YAML...")
     yaml_content = yaml.dump(config, allow_unicode=True, sort_keys=False)
