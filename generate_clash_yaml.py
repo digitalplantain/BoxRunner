@@ -12,7 +12,7 @@ GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-def safe_base64_decode(s):в
+def safe_base64_decode(s):
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
     pad = len(s) % 4
