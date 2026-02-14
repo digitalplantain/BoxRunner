@@ -166,6 +166,13 @@ def get_base_config():
             'fallback': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
             'nameserver-policy': {
+                # Bootstrap для DoH серверов, чтобы избежать DNS-петли
+                'dns.google': 'system',
+                'cloudflare-dns.com': 'system', # Домен для 1.1.1.1
+                'doh.pub': 'system',
+                'dns.alidns.com': 'system',
+                
+                # Ваши существующие правила
                 'geosite:category-gov-ru': 'system',
                 'geosite:yandex': 'system',
                 'geosite:vk': 'system',
@@ -182,7 +189,7 @@ def get_base_config():
             'dns-hijack': ['any:53'],
             'auto-route': True,
             'auto-redirect': True,
-            'strict-route': True,
+            'strict-route': False,
         },
 
         # Оставляем только те провайдеры, которые не покрываются GEOSITE
