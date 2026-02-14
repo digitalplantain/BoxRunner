@@ -131,17 +131,7 @@ def get_base_config():
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
         
-        'unified-delay': True,
-        'tcp-concurrent': True,
-        'interface-name': '',
-        
-        'profile': {
-            'store-selected': True,
-            'store-fake-ip': True
-        },
-        
-        'keep-alive-interval': 15,
-        
+        # Настройки GEO-баз (Meta Core)
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -171,7 +161,7 @@ def get_base_config():
                 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
                 'msftncsi.com', '+.msftncsi.com'
             ],
-            'default-nameserver': ['8.8.8.8', '1.1.1.1', '223.5.5.5', '114.114.114.114', 'system'],
+            'default-nameserver': ['8.8.8.8', '1.1.1.1'],
             'nameserver': ['https://dns.google/dns-query', 'https://1.1.1.1/dns-query'],
             'fallback': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
@@ -194,7 +184,7 @@ def get_base_config():
         },
 
         'tun': {
-            'enable': False,
+            'enable': True,
             'stack': 'system',
             'dns-hijack': ['any:53'],
             'auto-route': True,
