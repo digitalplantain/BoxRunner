@@ -171,7 +171,7 @@ def get_base_config():
                 'network-check.kde.org', 'msftconnecttest.com', '+.msftconnecttest.com', 
                 'msftncsi.com', '+.msftncsi.com'
             ],
-            'default-nameserver': ['8.8.8.8', '1.1.1.1'],
+            'default-nameserver': ['8.8.8.8', '1.1.1.1', '223.5.5.5', '114.114.114.114', 'system'],
             'nameserver': ['https://dns.google/dns-query', 'https://1.1.1.1/dns-query'],
             'fallback': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
