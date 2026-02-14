@@ -12,7 +12,7 @@ GH_TOKEN = os.environ.get("GH_TOKEN")
 INPUT_FILENAME = "gistfile1.txt"
 OUTPUT_FILENAME = "clash_profile.yaml"
 
-def safe_base64_decode(s):
+def safe_base64_decode(s):в
     if not s: return b""
     s = s.strip().replace('\n', '').replace('\r', '')
     pad = len(s) % 4
@@ -126,7 +126,7 @@ def get_base_config():
         'bind-address': '*',
         'mode': 'rule',
         'log-level': 'info',
-        'ipv6': False,
+        'ipv6': True,
         'external-controller': '127.0.0.1:9090',
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
@@ -161,7 +161,7 @@ def get_base_config():
         'dns': {
             'enable': True,
             'listen': '0.0.0.0:53',
-            'ipv6': False,
+            'ipv6': True,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
             'fake-ip-filter': [
@@ -194,7 +194,7 @@ def get_base_config():
         },
 
         'tun': {
-            'enable': True,
+            'enable': False,
             'stack': 'system',
             'dns-hijack': ['any:53'],
             'auto-route': True,
