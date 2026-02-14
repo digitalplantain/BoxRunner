@@ -126,12 +126,22 @@ def get_base_config():
         'bind-address': '*',
         'mode': 'rule',
         'log-level': 'info',
-        'ipv6': True,
+        'ipv6': False,
         'external-controller': '127.0.0.1:9090',
         'find-process-mode': 'strict',
         'global-client-fingerprint': 'chrome',
         
-        # Настройки GEO-баз (Meta Core)
+        'unified-delay': True,
+        'tcp-concurrent': True,
+        'interface-name': '',
+        
+        'profile': {
+            'store-selected': True,
+            'store-fake-ip': True
+        },
+        
+        'keep-alive-interval': 15,
+        
         'geox-url': {
             'geoip': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             'geosite': "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -151,7 +161,7 @@ def get_base_config():
         'dns': {
             'enable': True,
             'listen': '0.0.0.0:53',
-            'ipv6': True,
+            'ipv6': False,
             'enhanced-mode': 'fake-ip',
             'fake-ip-range': '198.18.0.1/16',
             'fake-ip-filter': [
