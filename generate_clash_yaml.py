@@ -152,24 +152,17 @@ def get_base_config():
                 'localhost.sec.qq.com'
             ],
             
-            'default-nameserver': [
-                '223.5.5.5', '114.114.114.114', 'system'
-            ],
+            'default-nameserver': ['223.5.5.5', '114.114.114.114', 'system'],
             
             'nameserver': [
                 'https://dns.google/dns-query',
-                'tls://dns.google',
-                'https://1.1.1.1/dns-query',
-                'tls://1.1.1.1'
+                'https://1.1.1.1/dns-query'
             ],
             
             'fallback': [
                 'https://doh.pub/dns-query',
-                'https://dns.alidns.com/dns-query',
-                'tls://dns.adguard-dns.com',
-                'quic://dns.adguard-dns.com'
+                'https://dns.alidns.com/dns-query'
             ],
-            
             'fallback-filter': {'geoip': True, 'geoip-code': 'RU', 'ipcidr': ['240.0.0.0/4']},
             
             'nameserver-policy': {
@@ -287,65 +280,43 @@ def main():
 
     config = get_base_config()
     config['proxies'] = proxies
-
-    standard_names = []
-    anti_wl_names = []
-
-    for name in proxy_names:
-        if 'Anti-Whitelist' in name:
-            anti_wl_names.append(name)
-        else:
-            standard_names.append(name)
-
-    if not standard_names and anti_wl_names:
-        standard_names = anti_wl_names
-
-    config = get_base_config()
-    config['proxies'] = proxies
     
     config['proxy-groups'] = [
         {
-            'name': '♻️ Auto',
-            'type': 'fallback',
-            'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
-            'proxies': ['⚡ Standard', '🛡️ Anti-Whitelist']
-        },
-        {
-            'name': '⚡ Standard',
-            'type': 'url-test',
-            'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
-            'tolerance': 1000,
-            'proxies': standard_names if standard_names else ['DIRECT'] 
-        },
-        {
-            'name': '🛡️ Anti-Whitelist',
-            'type': 'url-test',
-            'url': 'http://www.gstatic.com/generate_204',
-            'interval': 300,
-            'tolerance': 1000,
-            'proxies': anti_wl_names if anti_wl_names else ['DIRECT']
-        },
-        {
             'name': '🚀 Manual',
             'type': 'select',
-            'proxies': ['♻️ Auto', '⚡ Standard', '🛡️ Anti-Whitelist'] + proxy_names
+            'proxies': ['♻️ Auto', '🔮 LoadBalance'] + proxy_names
+        },
+        {
+            'name': '♻️ Auto',
+            'type': 'url-test',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 600,
+            'tolerance': 200,
+            'proxies': proxy_names
+        },
+        {
+            'name': '🔮 LoadBalance',
+            'type': 'load-balance',
+            'strategy': 'consistent-hashing',
+            'url': 'http://www.gstatic.com/generate_204',
+            'interval': 300,
+            'proxies': proxy_names
         },
         {
             'name': '📲 Telegram',
             'type': 'select',
-            'proxies': ['♻️ Auto', '🚀 Manual']
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
         {
             'name': '🎮 Discord',
             'type': 'select',
-            'proxies': ['♻️ Auto', '🚀 Manual']
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         },
-        {
+         {
             'name': '🤖 OpenAI',
             'type': 'select',
-            'proxies': ['♻️ Auto', '🚀 Manual']
+            'proxies': ['🚀 Manual', '♻️ Auto'] + proxy_names
         }
     ]
 
@@ -354,8 +325,6 @@ def main():
         'GEOSITE,category-ads-all,REJECT',
         
         'DOMAIN-SUFFIX,digitalplantain.vercel.app,DIRECT',
-
-        'DOMAIN-SUFFIX,habr.com,🚀 Manual',
         
         'DOMAIN-KEYWORD,openai,🤖 OpenAI',
         'GEOSITE,openai,🤖 OpenAI',
