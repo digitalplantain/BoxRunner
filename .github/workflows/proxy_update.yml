@@ -23,10 +23,8 @@ jobs:
 
     - name: Download Sing-box
       run: |
-        # Скачиваем v1.12.12
         wget https://github.com/SagerNet/sing-box/releases/download/v1.12.12/sing-box-1.12.12-linux-amd64.tar.gz
         tar -xzf sing-box-1.12.12-linux-amd64.tar.gz
-        # Достаем бинарник из вложенной папки
         mv sing-box-1.12.12-linux-amd64/sing-box ./sing-box
         chmod +x sing-box
         ./sing-box version
