@@ -173,9 +173,9 @@ GIST_FILENAME = "gistfile1.txt"
 PING_FILENAME = "pings.json"
 ENV_KEY = "GIST_URL"
 IP_API_URL = "http://ipinfo.io/json"
-IP_API_FALLBACK_URL = "http://ip-api.com/json" # Запасной API для выхода
+IP_API_FALLBACK_URL = "http://ip-api.com/json"
 IP_ENTRY_API_URL = "http://ipinfo.io/{ip}/json"
-IP_ENTRY_API_FALLBACK_URL = "http://ip-api.com/json/{ip}?fields=country" # Запасной API для входа
+IP_ENTRY_API_FALLBACK_URL = "http://ip-api.com/json/{ip}?fields=country"
 TEST_URL = "http://www.gstatic.com/generate_204"
 OPENAI_URL = "https://api.openai.com/v1/models"
 BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers|oracle|digitalocean|ovh|kaopu|netcup|upcloud|worktitans|alibaba|global connectivity solutions llp|baykov|akamao|lucidacloud|global cloud|oc networks limited|play2go|acgnode inc|netranex|cognetcloud|rj network|bluevps|vdska|alexhost|h2nexus|hkt|timeweb|julian|microsoft|hostkey|dataforest|nexet|cloud hosting)"
@@ -281,7 +281,6 @@ def scrape_all_sources():
                 content = content.replace('<br/>', '\n').replace('<br>', '\n')
                 for line in content.splitlines():
                     l = line.strip()
-                    # Добавлены hy2 и tuic
                     if l.startswith(('vmess://', 'vless://', 'trojan://', 'hysteria2://', 'hy2://', 'tuic://')): all_proxies.add(l)
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
@@ -293,7 +292,6 @@ def scrape_all_sources():
                     decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
                     for line in decoded.splitlines():
                         l = line.strip()
-                        # Добавлены hy2 и tuic
                         if l.startswith(('vmess://', 'vless://', 'trojan://', 'hysteria2://', 'hy2://', 'tuic://')): all_proxies.add(l)
                 except: pass
 
@@ -313,7 +311,6 @@ def scrape_all_sources():
 
 def parse_proxy_link(link):
     try:
-        # Hysteria2 / hy2 support
         if link.startswith('hysteria2://') or link.startswith('hy2://'):
             parsed = urllib.parse.urlparse(link)
             query = urllib.parse.parse_qs(parsed.query)
@@ -321,17 +318,15 @@ def parse_proxy_link(link):
                 'protocol': 'hysteria2',
                 'server': parsed.hostname,
                 'port': parsed.port,
-                'password': parsed.username, # In hy2 URL, password is often in userinfo if no uuid
+                'password': parsed.username,
                 'sni': query.get('sni', [parsed.hostname])[0],
                 'insecure': query.get('insecure', ['0'])[0] == '1'
             }
             return data
 
-        # TUIC support
         if link.startswith('tuic://'):
             parsed = urllib.parse.urlparse(link)
             query = urllib.parse.parse_qs(parsed.query)
-            # tuic://uuid:password@host:port?sni=...
             data = {
                 'protocol': 'tuic',
                 'server': parsed.hostname,
@@ -384,14 +379,11 @@ def generate_singbox_config(data, local_port):
     }
     outbound = {"tag": "proxy", "type": data['protocol'], "server": data['server'], "server_port": int(data['port'])}
 
-    # Hysteria2 Config
     if data['protocol'] == 'hysteria2':
         outbound['password'] = data.get('password', '')
         tls_conf = {"enabled": True, "server_name": data.get('sni', data['server']), "insecure": data.get('insecure', False)}
         outbound['tls'] = tls_conf
-        # Optional: up_mbps/down_mbps can be added if needed, but sing-box works without them
 
-    # TUIC Config
     elif data['protocol'] == 'tuic':
         outbound['uuid'] = data['uuid']
         outbound['password'] = data.get('password', '')
@@ -401,19 +393,15 @@ def generate_singbox_config(data, local_port):
         tls_conf = {"enabled": True, "server_name": data.get('sni', data['server']), "alpn": ["h3"]}
         outbound['tls'] = tls_conf
 
-    # VMess Config
     elif data['protocol'] == 'vmess':
         outbound.update({"uuid": data['uuid'], "alter_id": int(data.get('alter_id', 0)), "security": data.get('security', 'auto')})
-        # TLS Logic for VMess
         if data.get('tls') == 'tls':
              tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": False}
              outbound["tls"] = tls_conf
 
-    # VLess Config
     elif data['protocol'] == 'vless':
         outbound["uuid"] = data['uuid']
         if data.get('flow'): outbound["flow"] = data['flow']
-        # TLS/Reality Logic
         tls_enabled = False
         if data.get('security') in ['tls', 'reality']: tls_enabled = True
         
@@ -424,14 +412,11 @@ def generate_singbox_config(data, local_port):
             if data.get('fp'): tls_conf["utls"] = {"enabled": True, "fingerprint": data['fp']}
             outbound["tls"] = tls_conf
 
-    # Trojan Config
     elif data['protocol'] == 'trojan':
         outbound["password"] = data['password']
-        # Trojan usually implies TLS
         tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": False}
         outbound["tls"] = tls_conf
 
-    # Transport Layer (WS/gRPC) for VMess/VLess/Trojan
     transport = {}
     net = data.get('network', 'tcp')
     if net == 'ws':
@@ -447,8 +432,6 @@ def generate_singbox_config(data, local_port):
     return json.dumps(config)
 
 def rebuild_link(original_link, data, new_name):
-    # Простая логика пересборки, сохраняем оригинальную схему, меняем только имя (#)
-    # Для VMess нужен JSON, для остального URL params
     if original_link.startswith('vmess://'):
         try:
             b64 = original_link[8:]
@@ -461,13 +444,11 @@ def rebuild_link(original_link, data, new_name):
     return f"{base}#{urllib.parse.quote(new_name)}"
 
 def get_ip_info(ip, cache, is_exit=False):
-    """Определяет страну и ISP для IP с fallback API."""
     if ip in cache:
         return cache[ip]
     
     info = {'country': '', 'org': ''}
     try:
-        # Пробуем основной API
         r = requests.get(f"http://ipinfo.io/{ip}/json", timeout=5)
         r.raise_for_status()
         d = r.json()
@@ -475,12 +456,11 @@ def get_ip_info(ip, cache, is_exit=False):
         info['org'] = d.get('org', '')
     except:
         try:
-            # Fallback API
             r = requests.get(f"http://ip-api.com/json/{ip}?fields=country,isp", timeout=5)
             r.raise_for_status()
             d = r.json()
             info['country'] = d.get('country', '')
-            info['org'] = d.get('isp', '') # ip-api uses 'isp' field
+            info['org'] = d.get('isp', '')
         except:
             pass
     
@@ -511,15 +491,12 @@ def check_proxy(link):
         
         if not entry_ip or is_ip_banned(entry_ip): return None
         
-        # --- Смягчение фильтра протоколов ---
         prot = data.get('protocol')
-        # Разрешаем hysteria2 и tuic без ограничений по транспорту
         if prot in ['hysteria2', 'tuic']:
-            pass # Skip transport checks
+            pass
         else:
             net = data.get('network', 'tcp')
             sec = data.get('security', ''); flow = data.get('flow', '')
-            # Старый фильтр для vmess/vless/trojan
             if not ( (sec == 'reality' and 'vision' in flow) or (net == 'ws') or (net == 'grpc') or (prot == 'trojan') or (sec == 'tls') or (data.get('tls') == 'tls') ):
                 return None
         
@@ -545,10 +522,8 @@ def check_proxy(link):
         ping = int((time.time() - st) * 1000)
 
         api_data = {}
-        # Получение информации о выходном IP (с fallback)
         for _ in range(API_RETRIES):
             try:
-                # Пробуем ipinfo.io
                 r = requests.get(IP_API_URL, proxies=proxies, timeout=TIMEOUT)
                 if r.status_code == 200 and 'ip' in r.json():
                     api_data = r.json()
@@ -556,13 +531,11 @@ def check_proxy(link):
             except: 
                 pass
         
-        # Если ipinfo не ответил, пробуем ip-api.com (определяет выходной IP через заголовки или просто свой IP)
         if not api_data:
             try:
                 r = requests.get(IP_API_FALLBACK_URL, proxies=proxies, timeout=TIMEOUT)
                 if r.status_code == 200:
                     d = r.json()
-                    # Адаптация полей ip-api под ipinfo формат
                     api_data = {
                         'ip': d.get('query'),
                         'country': d.get('countryCode'),
@@ -577,16 +550,12 @@ def check_proxy(link):
         exit_ip = api_data.get('ip')
         exit_country = api_data.get('country', 'XX')
         
-        # --- Смягчение фильтра стран выхода ---
-        BANNED_EXIT_COUNTRIES = {'RU', 'HK', 'CN'} # Убрали XX
+        BANNED_EXIT_COUNTRIES = {'RU', 'HK', 'CN'} 
         if exit_country in BANNED_EXIT_COUNTRIES: return None
-        # Если страна неизвестна (XX), оставляем, но Cheburcheck потом может заблокировать
 
-        # --- Определение Anti-Whitelist с Fallback ---
         is_russian_entry = False
         entry_country = ''
         
-        # Используем функцию с fallback
         entry_info = get_ip_info(entry_ip, entry_ip_country_cache)
         entry_country = entry_info.get('country', '')
 
@@ -594,7 +563,6 @@ def check_proxy(link):
             is_russian_entry = True
             print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
             
-        # --- Cheburcheck Logic ---
         if not is_russian_entry:
             if cheburcheck_is_blocked(exit_ip): return None
             sni = data.get('sni')
@@ -617,7 +585,6 @@ def check_proxy(link):
         yt_ico = '✅' if exit_country in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
         
-        # Добавляем метки протоколов
         proto_tag = ""
         if prot == 'hysteria2': proto_tag = "[HY2] "
         elif prot == 'tuic': proto_tag = "[TUIC] "
@@ -633,7 +600,6 @@ def check_proxy(link):
     except Exception as e:
         if error_counter < 5: 
             error_counter += 1
-            # print(f"Error checking proxy: {e}") # Debug
         return None
     finally:
         if proc: 
@@ -707,8 +673,37 @@ def main():
     
     if results:
         results.sort(key=lambda x: x[0])
-        links_str = "\n".join([r[1] for r in results])
-        pings_map = {r[2]: r[0] for r in results}
+        
+        final_links = []
+        pings_map = {}
+        
+        print("Assigning numbers...")
+        for idx, (ping, link, old_hash) in enumerate(results):
+            try:
+                if link.startswith('vmess://'):
+                    b64 = link[8:]
+                    data = json.loads(safe_base64_decode(b64).decode('utf-8'))
+                    old_name = data.get('ps', '')
+                    data['ps'] = f"{idx+1}. {old_name}"
+                    new_b64 = base64.b64encode(json.dumps(data).encode('utf-8')).decode('utf-8')
+                    new_link = f"vmess://{new_b64}"
+                else:
+                    parts = link.split('#')
+                    base = parts[0]
+                    old_name = urllib.parse.unquote(parts[1]) if len(parts) > 1 else ""
+                    new_name = f"{idx+1} - {old_name}"
+                    new_link = f"{base}#{urllib.parse.quote(new_name)}"
+                
+                final_links.append(new_link)
+                new_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
+                pings_map[new_hash] = ping
+                
+            except Exception as e:
+                print(f"Error numbering link {idx+1}: {e}")
+                final_links.append(link)
+                pings_map[old_hash] = ping
+
+        links_str = "\n".join(final_links)
         pings_json = json.dumps(pings_map)
         deploy(links_str, pings_json)
     else:
