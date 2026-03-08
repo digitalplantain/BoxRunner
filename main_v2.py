@@ -341,7 +341,7 @@ def scrape_all_sources():
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
 
-# ========== ПАРСЕР (только основные протоколы) ==========
+# ========== ПАРСЕР (ПОЛНЫЙ) ==========
 def parse_proxy_link(link):
     try:
         # ----- VMess -----
@@ -406,11 +406,106 @@ def parse_proxy_link(link):
             }
             return data
 
+        # ----- Shadowsocks (ss://) -----
+        if protocol == 'ss':
+            parsed = urllib.parse.urlparse(link)
+            if '@' in parsed.netloc:
+                userinfo, hostport = parsed.netloc.split('@', 1)
+            else:
+                userinfo = parsed.username or ''
+                hostport = parsed.hostname or ''
+            decoded = safe_base64_decode(userinfo).decode('utf-8')
+            if ':' in decoded:
+                method, password = decoded.split(':', 1)
+            else:
+                return None
+            data = {
+                'protocol': 'shadowsocks',
+                'method': method,
+                'password': password,
+                'server': parsed.hostname,
+                'port': parsed.port or 443,
+                'plugin': parsed.query
+            }
+            return data
+
+        # ----- Hysteria v1 (hysteria://) -----
+        if protocol == 'hysteria':
+            parsed = urllib.parse.urlparse(link)
+            query = urllib.parse.parse_qs(parsed.query)
+            data = {
+                'protocol': 'hysteria',
+                'server': parsed.hostname,
+                'port': parsed.port or 443,
+                'auth': query.get('auth', [''])[0] or parsed.username or '',
+                'up_mbps': int(query.get('upmbps', [10])[0]),
+                'down_mbps': int(query.get('downmbps', [50])[0]),
+                'sni': query.get('peer', [parsed.hostname])[0],
+                'insecure': query.get('insecure', ['0'])[0] == '1',
+                'alpn': query.get('alpn', ['h3'])[0],
+            }
+            return data
+
+        # ----- AnyTLS (anytls://) -----
+        if protocol == 'anytls':
+            parsed = urllib.parse.urlparse(link)
+            query = urllib.parse.parse_qs(parsed.query)
+            data = {
+                'protocol': 'anytls',
+                'server': parsed.hostname,
+                'port': parsed.port,
+                'password': parsed.password or parsed.username or '',
+                'sni': query.get('sni', [parsed.hostname])[0],
+                'insecure': query.get('insecure', ['0'])[0] == '1',
+            }
+            return data
+
+        # ----- ShadowTLS (sn://) -----
+        if protocol == 'sn':
+            parsed = urllib.parse.urlparse(link)
+            query = urllib.parse.parse_qs(parsed.query)
+            data = {
+                'protocol': 'shadowtls',
+                'server': parsed.hostname,
+                'port': parsed.port,
+                'password': parsed.username or '',
+                'sni': query.get('sni', [parsed.hostname])[0],
+                'insecure': query.get('insecure', ['0'])[0] == '1',
+                'version': int(query.get('version', [3])[0]),
+            }
+            return data
+
+        # ----- SOCKS5 / SOCKS4 -----
+        if protocol in ('socks5', 'socks4', 'socks4a'):
+            parsed = urllib.parse.urlparse(link)
+            data = {
+                'protocol': protocol,
+                'server': parsed.hostname,
+                'port': parsed.port or 1080,
+                'username': parsed.username,
+                'password': parsed.password,
+            }
+            return data
+
+        # ----- HTTP / HTTPS прокси -----
+        if protocol in ('http', 'https'):
+            parsed = urllib.parse.urlparse(link)
+            data = {
+                'protocol': 'http',
+                'server': parsed.hostname,
+                'port': parsed.port or (443 if parsed.scheme == 'https' else 80),
+                'username': parsed.username,
+                'password': parsed.password,
+                'tls': parsed.scheme == 'https',
+            }
+            return data
+
         return None
-    except Exception:
+    except Exception as e:
+        if DEBUG: print(f"Parse exception: {e}")
         return None
 
-# ========== ГЕНЕРАЦИЯ КОНФИГА (только основные протоколы) ==========
+# ========== ГЕНЕРАЦИЯ КОНФИГА (ПОЛНАЯ) ==========
 def generate_singbox_config(data, local_port, gateway=None):
     """
     gateway: (host, port) if not None, then the outbound will use detour to this gateway
@@ -421,7 +516,6 @@ def generate_singbox_config(data, local_port, gateway=None):
         "outbounds": []
     }
 
-    # Если есть gateway, добавляем его как отдельный outbound
     if gateway:
         gateway_host, gateway_port = gateway
         config["outbounds"].append({
@@ -501,11 +595,94 @@ def generate_singbox_config(data, local_port, gateway=None):
         })
         outbound["tls"] = {"enabled": True, "server_name": data.get('sni', data['server']), "alpn": ["h3"]}
 
+    # ----- Shadowsocks -----
+    elif proto == 'shadowsocks':
+        outbound.update({
+            "type": "shadowsocks",
+            "server": data['server'],
+            "server_port": int(data['port']),
+            "method": data['method'],
+            "password": data['password']
+        })
+        if data.get('plugin'):
+            outbound["plugin"] = data['plugin']
+
+    # ----- Hysteria v1 -----
+    elif proto == 'hysteria':
+        outbound.update({
+            "type": "hysteria",
+            "server": data['server'],
+            "server_port": int(data['port']),
+            "up_mbps": data['up_mbps'],
+            "down_mbps": data['down_mbps'],
+            "auth": data['auth'],
+            "tls": {
+                "enabled": True,
+                "server_name": data['sni'],
+                "insecure": data['insecure'],
+                "alpn": [data['alpn']]
+            }
+        })
+
+    # ----- AnyTLS -----
+    elif proto == 'anytls':
+        outbound.update({
+            "type": "anytls",
+            "server": data['server'],
+            "server_port": int(data['port']),
+            "password": data['password'],
+            "tls": {
+                "enabled": True,
+                "server_name": data['sni'],
+                "insecure": data['insecure']
+            }
+        })
+
+    # ----- ShadowTLS -----
+    elif proto == 'shadowtls':
+        outbound.update({
+            "type": "shadowtls",
+            "server": data['server'],
+            "server_port": int(data['port']),
+            "password": data['password'],
+            "version": data['version'],
+            "tls": {
+                "enabled": True,
+                "server_name": data['sni'],
+                "insecure": data['insecure']
+            }
+        })
+
+    # ----- SOCKS -----
+    elif proto in ('socks5', 'socks4', 'socks4a'):
+        outbound.update({
+            "type": "socks",
+            "server": data['server'],
+            "server_port": int(data['port']),
+            "version": proto.replace('socks', '')
+        })
+        if data.get('username') and data.get('password'):
+            outbound["username"] = data['username']
+            outbound["password"] = data['password']
+
+    # ----- HTTP -----
+    elif proto == 'http':
+        outbound.update({
+            "type": "http",
+            "server": data['server'],
+            "server_port": int(data['port'])
+        })
+        if data.get('username') and data.get('password'):
+            outbound["username"] = data['username']
+            outbound["password"] = data['password']
+        if data.get('tls'):
+            outbound["tls"] = {"enabled": True, "server_name": data['server']}
+
     else:
         if DEBUG: print(f"Unknown protocol: {proto}")
         return None
 
-    # Если есть gateway, добавляем detour
+    # Добавляем detour, если есть gateway
     if gateway:
         outbound["detour"] = "gateway"
 
@@ -525,7 +702,7 @@ def generate_singbox_config(data, local_port, gateway=None):
     config["outbounds"].append(outbound)
     return json.dumps(config)
 
-# ========== ПРОВЕРКА (оригинальная) ==========
+# ========== ПРОВЕРКА (первичная) ==========
 seen_proxies = set()
 error_counter = 0
 entry_ip_country_cache = {}
@@ -672,6 +849,18 @@ def check_proxy(link):
             proto_tag = "[HY2] "
         elif proto == 'tuic':
             proto_tag = "[TUIC] "
+        elif proto == 'shadowsocks':
+            proto_tag = "[SS] "
+        elif proto == 'hysteria':
+            proto_tag = "[HY1] "
+        elif proto == 'anytls':
+            proto_tag = "[AnyTLS] "
+        elif proto == 'shadowtls':
+            proto_tag = "[ShadowTLS] "
+        elif proto in ('socks5', 'socks4', 'socks4a'):
+            proto_tag = f"[{proto.upper()}] "
+        elif proto == 'http':
+            proto_tag = "[HTTP] "
 
         base_name = f"{proto_tag}{flag} {exit_country} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
         name = f"⚠️ Anti-Whitelist 🇷🇺 RU -> {base_name}" if is_russian_entry else base_name
@@ -680,7 +869,7 @@ def check_proxy(link):
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
 
         reject_stats['success'] += 1
-        return (ping, new_link, link_hash, data, is_russian_entry)  # возвращаем больше данных
+        return (ping, new_link, link_hash, data, is_russian_entry)
 
     except Exception as e:
         if error_counter < 5:
@@ -762,7 +951,6 @@ def check_proxy_via_gateway(link, data, gateway_host, gateway_port):
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        # Тест
         try:
             st = time.time()
             requests.get(TEST_URL, proxies=proxies, timeout=GATEWAY_CHECK_TIMEOUT)
@@ -770,7 +958,6 @@ def check_proxy_via_gateway(link, data, gateway_host, gateway_port):
         except Exception:
             return None
 
-        # API
         api_data = {}
         for _ in range(API_RETRIES):
             try:
@@ -798,8 +985,6 @@ def check_proxy_via_gateway(link, data, gateway_host, gateway_port):
         if not api_data:
             return None
 
-        # Здесь можно было бы добавить дополнительную проверку (страна и т.д.), но мы просто фиксируем работоспособность
-        # Возвращаем те же данные, что и в основной проверке
         exit_country = api_data.get('country', 'XX')
         flag = country_flag(exit_country)
         city = api_data.get('city', 'Unknown')
@@ -812,9 +997,20 @@ def check_proxy_via_gateway(link, data, gateway_host, gateway_port):
             proto_tag = "[HY2] "
         elif proto == 'tuic':
             proto_tag = "[TUIC] "
+        elif proto == 'shadowsocks':
+            proto_tag = "[SS] "
+        elif proto == 'hysteria':
+            proto_tag = "[HY1] "
+        elif proto == 'anytls':
+            proto_tag = "[AnyTLS] "
+        elif proto == 'shadowtls':
+            proto_tag = "[ShadowTLS] "
+        elif proto in ('socks5', 'socks4', 'socks4a'):
+            proto_tag = f"[{proto.upper()}] "
+        elif proto == 'http':
+            proto_tag = "[HTTP] "
 
         base_name = f"{proto_tag}{flag} {exit_country} - {city} ◈ {isp_clean}"
-        # Обновим имя, добавив отметку о проверке через gateway (опционально)
         name = f"✅ GATEWAY: {base_name}"
 
         new_link = rebuild_link(link, data, name)
@@ -888,7 +1084,6 @@ def main():
         print("Sing-box not found!")
         sys.exit(1)
 
-    # Проверка версии sing-box
     try:
         result = subprocess.run([SING_BOX_PATH, "version"], capture_output=True, text=True)
         print("Sing-box version:", result.stdout.strip())
@@ -905,7 +1100,6 @@ def main():
     results = []
     seen_proxies.clear()
 
-    # Первичная проверка (как раньше)
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
         futures = {exe.submit(check_proxy, l): l for l in all_raw}
         for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
@@ -929,14 +1123,12 @@ def main():
     print("\nStarting final gateway check...")
 
     # Выбираем лучший antiwhitelist прокси (с наименьшим пингом и пометкой)
-    # Сортируем results по пингу, ищем первый с is_russian_entry=True
     gateway_result = None
-    for res in sorted(results, key=lambda x: x[0]):  # x[0] - ping
+    for res in sorted(results, key=lambda x: x[0]):
         if res[4]:  # is_russian_entry
             gateway_result = res
             break
     if not gateway_result:
-        # Если нет antiwhitelist, берём самый быстрый
         gateway_result = min(results, key=lambda x: x[0])
         print("No anti-whitelist proxy found, using fastest proxy as gateway.")
     else:
@@ -962,15 +1154,11 @@ def main():
 
     print(f"Gateway started on port {gateway_port}")
 
-    # Проверяем остальные прокси через gateway
     final_results = []
-    # Исключаем сам gateway из повторной проверки, но добавляем его в финальный список
     other_results = [r for r in results if r != gateway_result]
 
     def check_one(r):
         ping, link, link_hash, data, is_russian = r
-        # Пропускаем проверку через gateway для прокси с российским entry (они и так работают напрямую)
-        # но для единообразия проверим все
         res = check_proxy_via_gateway(link, data, "127.0.0.1", gateway_port)
         if res:
             return res
@@ -985,21 +1173,16 @@ def main():
             if res:
                 final_results.append(res)
 
-    # Останавливаем gateway
     gateway_proc.terminate()
     gateway_proc.wait(timeout=5)
     os.unlink(gateway_config_file.name)
 
-    # Добавляем сам gateway в финальный список (он уже рабочий)
-    # Пересобираем ссылку с новым номером позже, пока просто сохраняем
     final_results.append((gateway_ping, gateway_link, gateway_hash))
 
     print(f"\nWorking after gateway check: {len(final_results)} (filtered out {reject_stats['gateway_filtered']})")
 
-    # Сортируем по пингу
     final_results.sort(key=lambda x: x[0])
 
-    # Присваиваем номера
     final_links = []
     pings_map = {}
     for idx, (ping, link, old_hash) in enumerate(final_results):
