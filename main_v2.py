@@ -176,8 +176,8 @@ GH_TOKEN = os.environ.get("GH_TOKEN")
 GIST_ID = os.environ.get("GIST_ID")
 VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN")
 PROJ_ID = os.environ.get("PROJ_ID")
-GIST_FILENAME = "gistfile2.txt"
-PING_FILENAME = "pings2.json"
+GIST_FILENAME = "gistfile1.txt"
+PING_FILENAME = "pings.json"
 ENV_KEY = "GIST_URL"
 IP_API_URL = "http://ipinfo.io/json"
 IP_API_FALLBACK_URL = "http://ip-api.com/json"
@@ -191,6 +191,23 @@ RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
 RKN_BANNED_NETWORKS = Radix()
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
 YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
+
+# ========== ДИАГНОСТИКА ==========
+DEBUG = True  # установите False, чтобы отключить детальный вывод
+reject_stats = {
+    'parse_failed': 0,
+    'no_server': 0,
+    'ip_banned': 0,
+    'identifier_duplicate': 0,
+    'singbox_failed': 0,
+    'test_failed': 0,
+    'api_failed': 0,
+    'exit_country_banned': 0,
+    'cheburcheck_blocked': 0,
+    'isp_banned': 0,
+    'other_error': 0,
+    'success': 0
+}
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -260,13 +277,13 @@ def cheburcheck_is_blocked(target):
             cheburcheck_cache[target] = False
             return False
         if 'blocked-theme' in panel_classes:
-            print(f"[Cheburcheck] {target} is BLOCKED (theme: blocked-theme). Filtering out.")
+            if DEBUG: print(f"[Cheburcheck] {target} is BLOCKED")
             cheburcheck_cache[target] = True
             return True
         cheburcheck_cache[target] = False
         return False
     except Exception as e:
-        print(f"Warning: Cheburcheck request failed for {target}: {e}")
+        if DEBUG: print(f"Warning: Cheburcheck request failed for {target}: {e}")
         return False
 
 def fetch_url_content(url):
@@ -483,7 +500,8 @@ def parse_proxy_link(link):
             return data
 
         return None
-    except Exception:
+    except Exception as e:
+        if DEBUG: print(f"Parse exception: {e}")
         return None
 
 # ========== ГЕНЕРАЦИЯ КОНФИГА (расширенная) ==========
@@ -647,6 +665,7 @@ def generate_singbox_config(data, local_port):
             outbound["tls"] = {"enabled": True, "server_name": data['server']}
 
     else:
+        if DEBUG: print(f"Unknown protocol: {proto}")
         return None
 
     # Добавляем транспорт для тех протоколов, где он нужен
@@ -665,7 +684,7 @@ def generate_singbox_config(data, local_port):
     config["outbounds"].append(outbound)
     return json.dumps(config)
 
-# ========== ПРОВЕРКА (убрана блокировка shadowsocks) ==========
+# ========== ПРОВЕРКА (с диагностикой) ==========
 seen_proxies = set()
 error_counter = 0
 entry_ip_country_cache = {}
@@ -677,34 +696,43 @@ def check_proxy(link):
     try:
         data = parse_proxy_link(link)
         if not data:
+            reject_stats['parse_failed'] += 1
+            if DEBUG: print(f"Parse failed for {link[:100]}")
             return None
 
         server_address = data.get('server')
-        entry_ip = None
+        if not server_address:
+            reject_stats['no_server'] += 1
+            if DEBUG: print(f"No server in data for {link[:100]}")
+            return None
 
-        if server_address and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
+        entry_ip = None
+        if not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', server_address):
             try:
                 entry_ip = socket.gethostbyname(server_address)
             except:
+                reject_stats['other_error'] += 1
+                if DEBUG: print(f"DNS failed for {server_address}")
                 return None
         else:
             entry_ip = server_address
 
         if not entry_ip or is_ip_banned(entry_ip):
+            reject_stats['ip_banned'] += 1
+            if DEBUG: print(f"IP banned: {entry_ip}")
             return None
-
-        # Дополнительная фильтрация для некоторых протоколов (оставим как в оригинале)
-        # Можно убрать, если не нужно
-        # (Здесь можно оставить логику проверки network/security, но она не критична)
 
         identifier = f"{data.get('server')}:{data.get('port')}"
         if identifier in seen_proxies:
+            reject_stats['identifier_duplicate'] += 1
             return None
         seen_proxies.add(identifier)
 
         local_port = get_free_port()
         conf_str = generate_singbox_config(data, local_port)
         if not conf_str:
+            reject_stats['singbox_failed'] += 1
+            if DEBUG: print(f"Config generation failed for {link[:100]}")
             return None
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as config_file:
@@ -714,13 +742,20 @@ def check_proxy(link):
         proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(1.5)
         if proc.poll() is not None:
+            reject_stats['singbox_failed'] += 1
+            if DEBUG: print(f"Sing-box failed to start for {link[:100]}")
             return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
 
-        st = time.time()
-        requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
-        ping = int((time.time() - st) * 1000)
+        try:
+            st = time.time()
+            requests.get(TEST_URL, proxies=proxies, timeout=TIMEOUT)
+            ping = int((time.time() - st) * 1000)
+        except Exception as e:
+            reject_stats['test_failed'] += 1
+            if DEBUG: print(f"Test request failed for {link[:100]}: {e}")
+            return None
 
         api_data = {}
         for _ in range(API_RETRIES):
@@ -747,6 +782,8 @@ def check_proxy(link):
                 pass
 
         if not api_data:
+            reject_stats['api_failed'] += 1
+            if DEBUG: print(f"IP API failed for {link[:100]}")
             return None
 
         exit_ip = api_data.get('ip')
@@ -754,6 +791,8 @@ def check_proxy(link):
 
         BANNED_EXIT_COUNTRIES = {'RU', 'BY', 'HK', 'CN'}
         if exit_country in BANNED_EXIT_COUNTRIES:
+            reject_stats['exit_country_banned'] += 1
+            if DEBUG: print(f"Exit country banned: {exit_country}")
             return None
 
         is_russian_entry = False
@@ -764,19 +803,23 @@ def check_proxy(link):
 
         if entry_country == 'RU' and exit_country != 'RU':
             is_russian_entry = True
-            print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
+            if DEBUG: print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
 
         if not is_russian_entry:
             if cheburcheck_is_blocked(exit_ip):
+                reject_stats['cheburcheck_blocked'] += 1
                 return None
             sni = data.get('sni')
             if sni and sni != exit_ip and not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', sni):
                 if cheburcheck_is_blocked(sni):
+                    reject_stats['cheburcheck_blocked'] += 1
                     return None
 
         isp = api_data.get('org', 'Unknown')
         isp_clean = re.sub(r'^AS\d+\s+', '', isp)
         if re.search(BANNED_ISP_REGEX, isp_clean):
+            reject_stats['isp_banned'] += 1
+            if DEBUG: print(f"ISP banned: {isp_clean}")
             return None
 
         gpt_ok = False
@@ -793,6 +836,7 @@ def check_proxy(link):
         yt_ico = '✅' if exit_country in YT_MUSIC_ALLOWED else '❌'
         gpt_ico = '✅' if gpt_ok else '❌'
 
+        proto = data['protocol']
         proto_tag = ""
         if proto == 'hysteria2':
             proto_tag = "[HY2] "
@@ -817,11 +861,14 @@ def check_proxy(link):
         new_link = rebuild_link(link, data, name)
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
 
+        reject_stats['success'] += 1
         return (ping, new_link, link_hash)
 
     except Exception as e:
         if error_counter < 5:
             error_counter += 1
+        reject_stats['other_error'] += 1
+        if DEBUG: print(f"Unexpected error for {link[:100]}: {e}")
         return None
     finally:
         if proc:
@@ -925,6 +972,14 @@ def main():
         print("Sing-box not found!")
         sys.exit(1)
 
+    # Проверка версии sing-box
+    try:
+        result = subprocess.run([SING_BOX_PATH, "version"], capture_output=True, text=True)
+        print("Sing-box version:", result.stdout.strip())
+    except Exception as e:
+        print(f"Failed to run sing-box: {e}")
+        sys.exit(1)
+
     load_rkn_lists()
 
     all_raw = scrape_all_sources()
@@ -942,6 +997,14 @@ def main():
                 results.append(res)
 
     print(f"\nWorking: {len(results)}")
+
+    # Вывод статистики отказов
+    print("\nRejection statistics:")
+    total_rejects = sum(v for k,v in reject_stats.items() if k != 'success')
+    print(f"Total processed: {len(all_raw)}, Success: {reject_stats['success']}, Rejects: {total_rejects}")
+    for reason, count in reject_stats.items():
+        if count > 0:
+            print(f"  {reason}: {count}")
 
     if results:
         results.sort(key=lambda x: x[0])
