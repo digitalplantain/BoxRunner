@@ -170,7 +170,9 @@ BASE64_URLS = [
 SING_BOX_PATH = "./sing-box"
 MAX_WORKERS_CHECK = 300
 MAX_WORKERS_SCRAPE = 30
+MAX_WORKERS_FINAL = 50      # для финальной проверки через gateway
 TIMEOUT = 10
+GATEWAY_CHECK_TIMEOUT = 15  # таймаут для проверок через gateway
 API_RETRIES = 2
 GH_TOKEN = os.environ.get("GH_TOKEN")
 GIST_ID = os.environ.get("GIST_ID")
@@ -190,10 +192,10 @@ RKN_SUBNET_URL = "https://antifilter.network/download/subnet.lst"
 RKN_IPSUM_URL = "https://antifilter.network/download/ipsum.lst"
 RKN_BANNED_NETWORKS = Radix()
 GEMINI_ALLOWED = {'AL', 'DZ', 'AS', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BR', 'IO', 'VG', 'BN', 'BG', 'BF', 'BI', 'CV', 'KH', 'CM', 'CA', 'BQ', 'KY', 'CF', 'TD', 'CL', 'CX', 'CC', 'CO', 'KM', 'CK', 'CI', 'CR', 'HR', 'CW', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IM', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MR', 'MU', 'MX', 'FM', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MK', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'CY', 'CG', 'RO', 'RW', 'BL', 'KN', 'LC', 'PM', 'VC', 'SH', 'WS', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'KR', 'SS', 'ES', 'LK', 'SD', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'GB', 'AE', 'US', 'UM', 'VI', 'UY', 'UZ', 'VU', 'VE', 'VN', 'WF', 'EH', 'YE', 'ZM', 'ZW'}
-YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JO', 'KZ', 'KE', 'KW', 'LA', 'LV', 'LB', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
+YT_MUSIC_ALLOWED = {'DZ', 'AS', 'AR', 'AW', 'AU', 'AT', 'AZ', 'BH', 'BD', 'BY', 'BE', 'BM', 'BO', 'BA', 'BR', 'BG', 'KH', 'CA', 'KY', 'CL', 'CO', 'CR', 'HR', 'CY', 'CZ', 'DK', 'DO', 'EC', 'EG', 'SV', 'EE', 'FI', 'FR', 'GF', 'PF', 'GE', 'DE', 'GH', 'GR', 'GP', 'GU', 'GT', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'XK', 'KG', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MY', 'MT', 'MX', 'MA', 'NP', 'NL', 'NZ', 'NI', 'NG', 'MK', 'MP', 'NO', 'OM', 'PK', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'SA', 'SN', 'RS', 'SG', 'SK', 'SI', 'ZA', 'KR', 'ES', 'LK', 'SE', 'CH', 'TW', 'TZ', 'TH', 'TN', 'TR', 'TC', 'VI', 'UG', 'UA', 'AE', 'GB', 'US', 'UY', 'VE', 'VN', 'YE', 'ZW'}
 
 # ========== ДИАГНОСТИКА ==========
-DEBUG = True  # установите False, чтобы отключить детальный вывод
+DEBUG = False  # отключим детальный вывод, но можно включить при необходимости
 reject_stats = {
     'parse_failed': 0,
     'no_server': 0,
@@ -206,7 +208,8 @@ reject_stats = {
     'cheburcheck_blocked': 0,
     'isp_banned': 0,
     'other_error': 0,
-    'success': 0
+    'success': 0,
+    'gateway_filtered': 0   # для прокси, отсеянных на финальной проверке
 }
 
 def get_free_port():
@@ -338,7 +341,7 @@ def scrape_all_sources():
     print(f"Total unique raw links: {len(all_proxies)}")
     return list(all_proxies)
 
-# ========== ПАРСЕР (расширенный) ==========
+# ========== ПАРСЕР (только основные протоколы) ==========
 def parse_proxy_link(link):
     try:
         # ----- VMess -----
@@ -403,114 +406,31 @@ def parse_proxy_link(link):
             }
             return data
 
-        # ----- Shadowsocks (ss://) -----
-        if protocol == 'ss':
-            parsed = urllib.parse.urlparse(link)
-            # userinfo может быть в формате method:password@host:port
-            if '@' in parsed.netloc:
-                userinfo, hostport = parsed.netloc.split('@', 1)
-            else:
-                userinfo = parsed.username or ''
-                hostport = parsed.hostname or ''
-            # Декодируем userinfo (base64)
-            decoded = safe_base64_decode(userinfo).decode('utf-8')
-            if ':' in decoded:
-                method, password = decoded.split(':', 1)
-            else:
-                return None
-            data = {
-                'protocol': 'shadowsocks',
-                'method': method,
-                'password': password,
-                'server': parsed.hostname,
-                'port': parsed.port or 443,
-                'plugin': parsed.query  # может быть plugin=...
-            }
-            return data
-
-        # ----- Hysteria v1 (hysteria://) -----
-        if protocol == 'hysteria':
-            parsed = urllib.parse.urlparse(link)
-            query = urllib.parse.parse_qs(parsed.query)
-            data = {
-                'protocol': 'hysteria',
-                'server': parsed.hostname,
-                'port': parsed.port or 443,
-                'auth': query.get('auth', [''])[0] or parsed.username or '',
-                'up_mbps': int(query.get('upmbps', [10])[0]),
-                'down_mbps': int(query.get('downmbps', [50])[0]),
-                'sni': query.get('peer', [parsed.hostname])[0],
-                'insecure': query.get('insecure', ['0'])[0] == '1',
-                'alpn': query.get('alpn', ['h3'])[0],
-            }
-            return data
-
-        # ----- AnyTLS (anytls://) -----
-        if protocol == 'anytls':
-            parsed = urllib.parse.urlparse(link)
-            query = urllib.parse.parse_qs(parsed.query)
-            data = {
-                'protocol': 'anytls',
-                'server': parsed.hostname,
-                'port': parsed.port,
-                'password': parsed.password or parsed.username or '',
-                'sni': query.get('sni', [parsed.hostname])[0],
-                'insecure': query.get('insecure', ['0'])[0] == '1',
-            }
-            return data
-
-        # ----- ShadowTLS (sn://) -----
-        if protocol == 'sn':
-            parsed = urllib.parse.urlparse(link)
-            query = urllib.parse.parse_qs(parsed.query)
-            data = {
-                'protocol': 'shadowtls',
-                'server': parsed.hostname,
-                'port': parsed.port,
-                'password': parsed.username or '',
-                'sni': query.get('sni', [parsed.hostname])[0],
-                'insecure': query.get('insecure', ['0'])[0] == '1',
-                'version': int(query.get('version', [3])[0]),  # ShadowTLS version
-            }
-            return data
-
-        # ----- SOCKS5 / SOCKS4 -----
-        if protocol in ('socks5', 'socks4', 'socks4a'):
-            parsed = urllib.parse.urlparse(link)
-            data = {
-                'protocol': protocol,  # 'socks5', 'socks4', 'socks4a'
-                'server': parsed.hostname,
-                'port': parsed.port or 1080,
-                'username': parsed.username,
-                'password': parsed.password,
-            }
-            return data
-
-        # ----- HTTP / HTTPS прокси -----
-        if protocol in ('http', 'https'):
-            parsed = urllib.parse.urlparse(link)
-            data = {
-                'protocol': 'http',
-                'server': parsed.hostname,
-                'port': parsed.port or (443 if parsed.scheme == 'https' else 80),
-                'username': parsed.username,
-                'password': parsed.password,
-                'tls': parsed.scheme == 'https',
-            }
-            return data
-
         return None
-    except Exception as e:
-        if DEBUG: print(f"Parse exception: {e}")
+    except Exception:
         return None
 
-# ========== ГЕНЕРАЦИЯ КОНФИГА (расширенная) ==========
-def generate_singbox_config(data, local_port):
+# ========== ГЕНЕРАЦИЯ КОНФИГА (только основные протоколы) ==========
+def generate_singbox_config(data, local_port, gateway=None):
+    """
+    gateway: (host, port) if not None, then the outbound will use detour to this gateway
+    """
     config = {
         "log": {"disabled": True},
         "inbounds": [{"type": "mixed","tag": "in","listen": "127.0.0.1","listen_port": local_port,"set_system_proxy": False}],
         "outbounds": []
     }
+
+    # Если есть gateway, добавляем его как отдельный outbound
+    if gateway:
+        gateway_host, gateway_port = gateway
+        config["outbounds"].append({
+            "tag": "gateway",
+            "type": "socks",
+            "server": gateway_host,
+            "server_port": gateway_port
+        })
+
     outbound = {"tag": "proxy"}
 
     proto = data['protocol']
@@ -581,92 +501,13 @@ def generate_singbox_config(data, local_port):
         })
         outbound["tls"] = {"enabled": True, "server_name": data.get('sni', data['server']), "alpn": ["h3"]}
 
-    # ----- Shadowsocks -----
-    elif proto == 'shadowsocks':
-        outbound.update({
-            "type": "shadowsocks",
-            "server": data['server'],
-            "server_port": int(data['port']),
-            "method": data['method'],
-            "password": data['password']
-        })
-        if data.get('plugin'):
-            outbound["plugin"] = data['plugin']
-
-    # ----- Hysteria v1 -----
-    elif proto == 'hysteria':
-        outbound.update({
-            "type": "hysteria",
-            "server": data['server'],
-            "server_port": int(data['port']),
-            "up_mbps": data['up_mbps'],
-            "down_mbps": data['down_mbps'],
-            "auth": data['auth'],
-            "tls": {
-                "enabled": True,
-                "server_name": data['sni'],
-                "insecure": data['insecure'],
-                "alpn": [data['alpn']]
-            }
-        })
-
-    # ----- AnyTLS -----
-    elif proto == 'anytls':
-        outbound.update({
-            "type": "anytls",
-            "server": data['server'],
-            "server_port": int(data['port']),
-            "password": data['password'],
-            "tls": {
-                "enabled": True,
-                "server_name": data['sni'],
-                "insecure": data['insecure']
-            }
-        })
-
-    # ----- ShadowTLS -----
-    elif proto == 'shadowtls':
-        outbound.update({
-            "type": "shadowtls",
-            "server": data['server'],
-            "server_port": int(data['port']),
-            "password": data['password'],
-            "version": data['version'],
-            "tls": {
-                "enabled": True,
-                "server_name": data['sni'],
-                "insecure": data['insecure']
-            }
-        })
-
-    # ----- SOCKS -----
-    elif proto in ('socks5', 'socks4', 'socks4a'):
-        outbound.update({
-            "type": "socks",
-            "server": data['server'],
-            "server_port": int(data['port']),
-            "version": proto.replace('socks', '')
-        })
-        if data.get('username') and data.get('password'):
-            outbound["username"] = data['username']
-            outbound["password"] = data['password']
-
-    # ----- HTTP -----
-    elif proto == 'http':
-        outbound.update({
-            "type": "http",
-            "server": data['server'],
-            "server_port": int(data['port'])
-        })
-        if data.get('username') and data.get('password'):
-            outbound["username"] = data['username']
-            outbound["password"] = data['password']
-        if data.get('tls'):
-            outbound["tls"] = {"enabled": True, "server_name": data['server']}
-
     else:
         if DEBUG: print(f"Unknown protocol: {proto}")
         return None
+
+    # Если есть gateway, добавляем detour
+    if gateway:
+        outbound["detour"] = "gateway"
 
     # Добавляем транспорт для тех протоколов, где он нужен
     if proto in ['vmess', 'vless', 'trojan'] and data.get('network') in ['ws', 'grpc']:
@@ -684,7 +525,7 @@ def generate_singbox_config(data, local_port):
     config["outbounds"].append(outbound)
     return json.dumps(config)
 
-# ========== ПРОВЕРКА (с диагностикой) ==========
+# ========== ПРОВЕРКА (оригинальная) ==========
 seen_proxies = set()
 error_counter = 0
 entry_ip_country_cache = {}
@@ -697,13 +538,11 @@ def check_proxy(link):
         data = parse_proxy_link(link)
         if not data:
             reject_stats['parse_failed'] += 1
-            if DEBUG: print(f"Parse failed for {link[:100]}")
             return None
 
         server_address = data.get('server')
         if not server_address:
             reject_stats['no_server'] += 1
-            if DEBUG: print(f"No server in data for {link[:100]}")
             return None
 
         entry_ip = None
@@ -712,14 +551,12 @@ def check_proxy(link):
                 entry_ip = socket.gethostbyname(server_address)
             except:
                 reject_stats['other_error'] += 1
-                if DEBUG: print(f"DNS failed for {server_address}")
                 return None
         else:
             entry_ip = server_address
 
         if not entry_ip or is_ip_banned(entry_ip):
             reject_stats['ip_banned'] += 1
-            if DEBUG: print(f"IP banned: {entry_ip}")
             return None
 
         identifier = f"{data.get('server')}:{data.get('port')}"
@@ -732,7 +569,6 @@ def check_proxy(link):
         conf_str = generate_singbox_config(data, local_port)
         if not conf_str:
             reject_stats['singbox_failed'] += 1
-            if DEBUG: print(f"Config generation failed for {link[:100]}")
             return None
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as config_file:
@@ -743,7 +579,6 @@ def check_proxy(link):
         time.sleep(1.5)
         if proc.poll() is not None:
             reject_stats['singbox_failed'] += 1
-            if DEBUG: print(f"Sing-box failed to start for {link[:100]}")
             return None
 
         proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
@@ -754,7 +589,6 @@ def check_proxy(link):
             ping = int((time.time() - st) * 1000)
         except Exception as e:
             reject_stats['test_failed'] += 1
-            if DEBUG: print(f"Test request failed for {link[:100]}: {e}")
             return None
 
         api_data = {}
@@ -783,7 +617,6 @@ def check_proxy(link):
 
         if not api_data:
             reject_stats['api_failed'] += 1
-            if DEBUG: print(f"IP API failed for {link[:100]}")
             return None
 
         exit_ip = api_data.get('ip')
@@ -792,7 +625,6 @@ def check_proxy(link):
         BANNED_EXIT_COUNTRIES = {'RU', 'BY', 'HK', 'CN'}
         if exit_country in BANNED_EXIT_COUNTRIES:
             reject_stats['exit_country_banned'] += 1
-            if DEBUG: print(f"Exit country banned: {exit_country}")
             return None
 
         is_russian_entry = False
@@ -803,7 +635,6 @@ def check_proxy(link):
 
         if entry_country == 'RU' and exit_country != 'RU':
             is_russian_entry = True
-            if DEBUG: print(f"[Info] Russian entry {entry_ip} -> Foreign exit {exit_ip}. Bypassing Cheburcheck.")
 
         if not is_russian_entry:
             if cheburcheck_is_blocked(exit_ip):
@@ -819,7 +650,6 @@ def check_proxy(link):
         isp_clean = re.sub(r'^AS\d+\s+', '', isp)
         if re.search(BANNED_ISP_REGEX, isp_clean):
             reject_stats['isp_banned'] += 1
-            if DEBUG: print(f"ISP banned: {isp_clean}")
             return None
 
         gpt_ok = False
@@ -842,18 +672,6 @@ def check_proxy(link):
             proto_tag = "[HY2] "
         elif proto == 'tuic':
             proto_tag = "[TUIC] "
-        elif proto == 'shadowsocks':
-            proto_tag = "[SS] "
-        elif proto == 'hysteria':
-            proto_tag = "[HY1] "
-        elif proto == 'anytls':
-            proto_tag = "[AnyTLS] "
-        elif proto == 'shadowtls':
-            proto_tag = "[ShadowTLS] "
-        elif proto in ('socks5', 'socks4', 'socks4a'):
-            proto_tag = f"[{proto.upper()}] "
-        elif proto == 'http':
-            proto_tag = "[HTTP] "
 
         base_name = f"{proto_tag}{flag} {exit_country} - {city} ◈ {isp_clean} | 🎵YT_Music{yt_ico} ✨Gemini{gemini_ico} 🤖ChatGPT{gpt_ico}"
         name = f"⚠️ Anti-Whitelist 🇷🇺 RU -> {base_name}" if is_russian_entry else base_name
@@ -862,13 +680,12 @@ def check_proxy(link):
         link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
 
         reject_stats['success'] += 1
-        return (ping, new_link, link_hash)
+        return (ping, new_link, link_hash, data, is_russian_entry)  # возвращаем больше данных
 
     except Exception as e:
         if error_counter < 5:
             error_counter += 1
         reject_stats['other_error'] += 1
-        if DEBUG: print(f"Unexpected error for {link[:100]}: {e}")
         return None
     finally:
         if proc:
@@ -919,6 +736,105 @@ def rebuild_link(original_link, data, new_name):
             pass
     base = original_link.split('#')[0]
     return f"{base}#{urllib.parse.quote(new_name)}"
+
+# ========== ФИНАЛЬНАЯ ПРОВЕРКА ЧЕРЕЗ GATEWAY ==========
+def check_proxy_via_gateway(link, data, gateway_host, gateway_port):
+    """
+    Проверяет прокси, используя gateway как первый hop.
+    Возвращает (ping, new_link, link_hash) или None.
+    """
+    proc = None
+    config_filename = None
+    try:
+        local_port = get_free_port()
+        conf_str = generate_singbox_config(data, local_port, gateway=(gateway_host, gateway_port))
+        if not conf_str:
+            return None
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as config_file:
+            config_file.write(conf_str)
+            config_filename = config_file.name
+
+        proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", config_filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(1.5)
+        if proc.poll() is not None:
+            return None
+
+        proxies = {'http': f'socks5://127.0.0.1:{local_port}', 'https': f'socks5://127.0.0.1:{local_port}'}
+
+        # Тест
+        try:
+            st = time.time()
+            requests.get(TEST_URL, proxies=proxies, timeout=GATEWAY_CHECK_TIMEOUT)
+            ping = int((time.time() - st) * 1000)
+        except Exception:
+            return None
+
+        # API
+        api_data = {}
+        for _ in range(API_RETRIES):
+            try:
+                r = requests.get(IP_API_URL, proxies=proxies, timeout=GATEWAY_CHECK_TIMEOUT)
+                if r.status_code == 200 and 'ip' in r.json():
+                    api_data = r.json()
+                    break
+            except:
+                pass
+
+        if not api_data:
+            try:
+                r = requests.get(IP_API_FALLBACK_URL, proxies=proxies, timeout=GATEWAY_CHECK_TIMEOUT)
+                if r.status_code == 200:
+                    d = r.json()
+                    api_data = {
+                        'ip': d.get('query'),
+                        'country': d.get('countryCode'),
+                        'city': d.get('city'),
+                        'org': d.get('isp')
+                    }
+            except:
+                pass
+
+        if not api_data:
+            return None
+
+        # Здесь можно было бы добавить дополнительную проверку (страна и т.д.), но мы просто фиксируем работоспособность
+        # Возвращаем те же данные, что и в основной проверке
+        exit_country = api_data.get('country', 'XX')
+        flag = country_flag(exit_country)
+        city = api_data.get('city', 'Unknown')
+        isp = api_data.get('org', 'Unknown')
+        isp_clean = re.sub(r'^AS\d+\s+', '', isp)
+
+        proto = data['protocol']
+        proto_tag = ""
+        if proto == 'hysteria2':
+            proto_tag = "[HY2] "
+        elif proto == 'tuic':
+            proto_tag = "[TUIC] "
+
+        base_name = f"{proto_tag}{flag} {exit_country} - {city} ◈ {isp_clean}"
+        # Обновим имя, добавив отметку о проверке через gateway (опционально)
+        name = f"✅ GATEWAY: {base_name}"
+
+        new_link = rebuild_link(link, data, name)
+        link_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
+
+        return (ping, new_link, link_hash)
+    except Exception:
+        return None
+    finally:
+        if proc:
+            try:
+                proc.terminate()
+                proc.wait(timeout=1)
+            except:
+                proc.kill()
+        if config_filename and os.path.exists(config_filename):
+            try:
+                os.remove(config_filename)
+            except:
+                pass
 
 def deploy(links_content, pings_content):
     if not all([GH_TOKEN, GIST_ID, VERCEL_TOKEN, PROJ_ID]):
@@ -989,6 +905,7 @@ def main():
     results = []
     seen_proxies.clear()
 
+    # Первичная проверка (как раньше)
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHECK) as exe:
         futures = {exe.submit(check_proxy, l): l for l in all_raw}
         for f in tqdm(as_completed(futures), total=len(all_raw), desc="Checking"):
@@ -996,53 +913,122 @@ def main():
             if res:
                 results.append(res)
 
-    print(f"\nWorking: {len(results)}")
-
-    # Вывод статистики отказов
-    print("\nRejection statistics:")
-    total_rejects = sum(v for k,v in reject_stats.items() if k != 'success')
+    print(f"\nWorking after first pass: {len(results)}")
+    print("\nRejection statistics (first pass):")
+    total_rejects = sum(v for k,v in reject_stats.items() if k not in ('success', 'gateway_filtered'))
     print(f"Total processed: {len(all_raw)}, Success: {reject_stats['success']}, Rejects: {total_rejects}")
     for reason, count in reject_stats.items():
         if count > 0:
             print(f"  {reason}: {count}")
 
-    if results:
-        results.sort(key=lambda x: x[0])
+    if not results:
+        print("No working proxies after first pass.")
+        return
 
-        final_links = []
-        pings_map = {}
+    # ========== ФИНАЛЬНАЯ ПРОВЕРКА ЧЕРЕЗ GATEWAY ==========
+    print("\nStarting final gateway check...")
 
-        print("Assigning numbers...")
-        for idx, (ping, link, old_hash) in enumerate(results):
-            try:
-                if link.startswith('vmess://'):
-                    b64 = link[8:]
-                    data = json.loads(safe_base64_decode(b64).decode('utf-8'))
-                    old_name = data.get('ps', '')
-                    data['ps'] = f"{idx+1}. {old_name}"
-                    new_b64 = base64.b64encode(json.dumps(data).encode('utf-8')).decode('utf-8')
-                    new_link = f"vmess://{new_b64}"
-                else:
-                    parts = link.split('#')
-                    base = parts[0]
-                    old_name = urllib.parse.unquote(parts[1]) if len(parts) > 1 else ""
-                    new_name = f"{idx+1} - {old_name}"
-                    new_link = f"{base}#{urllib.parse.quote(new_name)}"
-
-                final_links.append(new_link)
-                new_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
-                pings_map[new_hash] = ping
-
-            except Exception as e:
-                print(f"Error numbering link {idx+1}: {e}")
-                final_links.append(link)
-                pings_map[old_hash] = ping
-
-        links_str = "\n".join(final_links)
-        pings_json = json.dumps(pings_map)
-        deploy(links_str, pings_json)
+    # Выбираем лучший antiwhitelist прокси (с наименьшим пингом и пометкой)
+    # Сортируем results по пингу, ищем первый с is_russian_entry=True
+    gateway_result = None
+    for res in sorted(results, key=lambda x: x[0]):  # x[0] - ping
+        if res[4]:  # is_russian_entry
+            gateway_result = res
+            break
+    if not gateway_result:
+        # Если нет antiwhitelist, берём самый быстрый
+        gateway_result = min(results, key=lambda x: x[0])
+        print("No anti-whitelist proxy found, using fastest proxy as gateway.")
     else:
-        print("No working proxies.")
+        print(f"Selected gateway: ping={gateway_result[0]} ms, link={gateway_result[1][:100]}...")
+
+    # Запускаем gateway
+    gateway_ping, gateway_link, gateway_hash, gateway_data, gateway_is_russian = gateway_result
+    gateway_port = get_free_port()
+    gateway_conf = generate_singbox_config(gateway_data, gateway_port)
+    if not gateway_conf:
+        print("Failed to generate gateway config!")
+        return
+
+    gateway_config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+    gateway_config_file.write(gateway_conf)
+    gateway_config_file.close()
+    gateway_proc = subprocess.Popen([SING_BOX_PATH, "run", "-c", gateway_config_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(2)
+    if gateway_proc.poll() is not None:
+        print("Gateway failed to start!")
+        os.unlink(gateway_config_file.name)
+        return
+
+    print(f"Gateway started on port {gateway_port}")
+
+    # Проверяем остальные прокси через gateway
+    final_results = []
+    # Исключаем сам gateway из повторной проверки, но добавляем его в финальный список
+    other_results = [r for r in results if r != gateway_result]
+
+    def check_one(r):
+        ping, link, link_hash, data, is_russian = r
+        # Пропускаем проверку через gateway для прокси с российским entry (они и так работают напрямую)
+        # но для единообразия проверим все
+        res = check_proxy_via_gateway(link, data, "127.0.0.1", gateway_port)
+        if res:
+            return res
+        else:
+            reject_stats['gateway_filtered'] += 1
+            return None
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS_FINAL) as exe:
+        futures = {exe.submit(check_one, r): r for r in other_results}
+        for f in tqdm(as_completed(futures), total=len(other_results), desc="Gateway check"):
+            res = f.result()
+            if res:
+                final_results.append(res)
+
+    # Останавливаем gateway
+    gateway_proc.terminate()
+    gateway_proc.wait(timeout=5)
+    os.unlink(gateway_config_file.name)
+
+    # Добавляем сам gateway в финальный список (он уже рабочий)
+    # Пересобираем ссылку с новым номером позже, пока просто сохраняем
+    final_results.append((gateway_ping, gateway_link, gateway_hash))
+
+    print(f"\nWorking after gateway check: {len(final_results)} (filtered out {reject_stats['gateway_filtered']})")
+
+    # Сортируем по пингу
+    final_results.sort(key=lambda x: x[0])
+
+    # Присваиваем номера
+    final_links = []
+    pings_map = {}
+    for idx, (ping, link, old_hash) in enumerate(final_results):
+        try:
+            if link.startswith('vmess://'):
+                b64 = link[8:]
+                data = json.loads(safe_base64_decode(b64).decode('utf-8'))
+                old_name = data.get('ps', '')
+                data['ps'] = f"{idx+1}. {old_name}"
+                new_b64 = base64.b64encode(json.dumps(data).encode('utf-8')).decode('utf-8')
+                new_link = f"vmess://{new_b64}"
+            else:
+                parts = link.split('#')
+                base = parts[0]
+                old_name = urllib.parse.unquote(parts[1]) if len(parts) > 1 else ""
+                new_name = f"{idx+1} - {old_name}"
+                new_link = f"{base}#{urllib.parse.quote(new_name)}"
+
+            final_links.append(new_link)
+            new_hash = hashlib.md5(new_link.encode('utf-8')).hexdigest()
+            pings_map[new_hash] = ping
+        except Exception as e:
+            print(f"Error numbering link {idx+1}: {e}")
+            final_links.append(link)
+            pings_map[old_hash] = ping
+
+    links_str = "\n".join(final_links)
+    pings_json = json.dumps(pings_map)
+    deploy(links_str, pings_json)
 
 if __name__ == "__main__":
     main()
