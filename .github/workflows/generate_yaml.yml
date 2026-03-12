@@ -1,7 +1,7 @@
 name: Generate Clash YAML Profile
 on:
   workflow_run:
-    workflows: ["SingBox Proxy Updater"]
+    workflows: ["SingBox Proxy Updater V2"]
     types:
       - completed
   workflow_dispatch:
