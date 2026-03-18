@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Второй проход: читает gistfile1.txt из Gist, применяет фильтрацию,
-создаёт gistfile2.txt и pings2.json, опционально обновляет Gist.
+создаёт gistfile2.txt и pings2.json и загружает их обратно в тот же Gist.
 """
 
 import os
@@ -14,7 +14,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-# Импортируем оригинальный скрипт как модуль (должен лежать рядом)
+# Импортируем оригинальный скрипт (main_v2.py)
 import main_v2 as orig
 
 
@@ -54,14 +54,13 @@ def update_gist(gist_id, token, files_dict):
 
 
 def main():
-    # Проверяем наличие необходимых секретов
     gh_token = os.environ.get("GH_TOKEN")
     gist_id = os.environ.get("GIST_ID")
     if not gh_token or not gist_id:
         print("Ошибка: не заданы GH_TOKEN или GIST_ID")
         sys.exit(1)
 
-    # Читаем gistfile1.txt из Gist
+    # Загружаем gistfile1.txt из Gist
     print("Загружаем gistfile1.txt из Gist...")
     content = fetch_gist_file(gist_id, orig.GIST_FILENAME, gh_token)
     if content is None:
@@ -70,7 +69,7 @@ def main():
     links = [line.strip() for line in content.splitlines() if line.strip()]
     print(f"Загружено {len(links)} ссылок")
 
-    # Загружаем RKN списки (нужно для проверки IP)
+    # Загружаем RKN списки
     print("Загружаем RKN списки...")
     orig.load_rkn_lists()
 
@@ -89,6 +88,7 @@ def main():
         for future in tqdm(as_completed(futures), total=len(links), desc="Проверка"):
             res = future.result()
             if res:
+                # Ожидаем кортеж из 7 элементов: ping, new_link, link_hash, data, is_russian_entry, is_russian_exit, speed_mbps
                 results.append(res)
 
     # Статистика
@@ -104,8 +104,8 @@ def main():
         return
 
     # Применяем фильтрацию
-    antiwhitelist = []
-    regular = []
+    antiwhitelist = []      # (ping, link, link_hash, speed_mbps)
+    regular = []            # (ping, link, link_hash, speed_mbps)
     vless_reality_count = 0
     other_protocols_count = 0
 
@@ -138,7 +138,7 @@ def main():
     print(f"Найдено VLESS reality: {vless_reality_count}")
     print(f"Найдено других протоколов (кроме SS): {other_protocols_count}")
 
-    # Сортируем regular по убыванию скорости
+    # Сортируем regular по убыванию скорости (если нет скорости, ставим 0)
     regular.sort(key=lambda x: x[3] if x[3] is not None else 0, reverse=True)
 
     # Берём первые 200 regular
@@ -147,7 +147,7 @@ def main():
     # Объединяем: все antiwhitelist + топ regular
     combined = antiwhitelist + top_regular
 
-    # Сортируем объединённый список по пингу
+    # Финальная сортировка по пингу
     combined.sort(key=lambda x: x[0])
     final_results = [(ping, link, link_hash) for ping, link, link_hash, _ in combined]
 
@@ -184,21 +184,19 @@ def main():
             final_links.append(link)
             pings_map[old_hash] = ping
 
-    # Сохраняем локально
-    with open("gistfile2.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(final_links))
-    with open("pings2.json", "w", encoding="utf-8") as f:
-        json.dump(pings_map, f, indent=2)
+    # Подготавливаем содержимое для загрузки в Gist
+    files_to_upload = {
+        "gistfile2.txt": "\n".join(final_links),
+        "pings2.json": json.dumps(pings_map, indent=2)
+    }
 
-    print("Файлы сохранены локально: gistfile2.txt, pings2.json")
-
-    # Опционально: загружаем обратно в Gist (как отдельные файлы)
-    # Раскомментируйте, если хотите обновлять Gist
-    # files_to_upload = {
-    #     "gistfile2.txt": "\n".join(final_links),
-    #     "pings2.json": json.dumps(pings_map)
-    # }
-    # update_gist(gist_id, gh_token, files_to_upload)
+    # Загружаем в Gist
+    print("Загружаем результаты в Gist...")
+    if update_gist(gist_id, gh_token, files_to_upload):
+        print("Готово! Файлы gistfile2.txt и pings2.json обновлены в Gist.")
+    else:
+        print("Не удалось обновить Gist.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
