@@ -58,9 +58,10 @@ jobs:
       run: python process.py
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: results
         path: |
           gistfile2.txt
           pings2.json
+        overwrite: true
