@@ -1,0 +1,43 @@
+name: Process
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Download Sing-box (Latest)
+      run: |
+        LATEST_TAG=$(curl -sL https://api.github.com/repos/SagerNet/sing-box/releases/latest | jq -r '.tag_name')
+        echo "Downloading sing-box version: $LATEST_TAG"
+        FILENAME="sing-box-${LATEST_TAG#v}-linux-amd64.tar.gz"
+        URL="https://github.com/SagerNet/sing-box/releases/download/${LATEST_TAG}/${FILENAME}"
+        wget -q "$URL" -O sing-box.tar.gz
+        tar -xzf sing-box.tar.gz
+        mv sing-box-*/sing-box ./sing-box
+        chmod +x ./sing-box
+        ./sing-box version
+
+    - name: Process
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        PROJ_ID: ${{ secrets.PROJ_ID }}
+      run: python process.py
