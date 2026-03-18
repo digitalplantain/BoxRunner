@@ -2,7 +2,7 @@ name: Process Second Pass
 
 on:
   schedule:
-    - cron: '30 */4 * * *'   # можно задать своё расписание
+    - cron: '30 */4 * * *'   # по желанию
   workflow_dispatch:
 
 jobs:
@@ -39,12 +39,3 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         GIST_ID: ${{ secrets.GIST_ID }}
       run: python process.py
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: second-pass-results
-        path: |
-          gistfile2.txt
-          pings2.json
-        overwrite: true
