@@ -1,20 +1,20 @@
-name: Process
+name: Process Second Pass
 
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '30 */4 * * *'   # можно задать своё расписание
   workflow_dispatch:
 
 jobs:
-  run-update:
+  process-second:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
         cache: 'pip'
@@ -34,24 +34,7 @@ jobs:
         chmod +x ./sing-box
         ./sing-box version
 
-    - name: First pass (main_v2.py)
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        GIST_ID: ${{ secrets.GIST_ID }}
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        PROJ_ID: ${{ secrets.PROJ_ID }}
-      run: python main_v2.py
-
-    - name: Download gistfile1.txt from Gist
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        GIST_ID: ${{ secrets.GIST_ID }}
-      run: |
-        curl -L -H "Authorization: token $GH_TOKEN" \
-          "https://api.github.com/gists/$GIST_ID" | \
-          jq -r '.files["gistfile1.txt"].content' > gistfile1.txt
-
-    - name: Second pass (process.py)
+    - name: Run second pass
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         GIST_ID: ${{ secrets.GIST_ID }}
@@ -60,7 +43,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: results
+        name: second-pass-results
         path: |
           gistfile2.txt
           pings2.json
