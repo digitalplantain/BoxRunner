@@ -1,9 +1,9 @@
 name: Process Second Pass
 
 on:
-  schedule:
-    - cron: '30 */4 * * *'   # по желанию
-  workflow_dispatch:
+  #schedule:
+  #  - cron: '30 */4 * * *'   # по желанию
+  #workflow_dispatch:
 
 jobs:
   process-second:
