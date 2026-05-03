@@ -4,3 +4,4 @@ tqdm
 py-radix
 beautifulsoup4
 lxml
+maxminddb
