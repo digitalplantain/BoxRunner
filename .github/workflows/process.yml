@@ -1,9 +1,9 @@
 name: Process Second Pass
 
 on:
-  #schedule:
-  #  - cron: '30 */4 * * *'   # по желанию
-  #workflow_dispatch:
+  # schedule:                 # автоматический запуск отключён
+  #   - cron: '30 */4 * * *'
+  workflow_dispatch:         # ручной запуск через интерфейс GitHub
 
 jobs:
   process-second:
