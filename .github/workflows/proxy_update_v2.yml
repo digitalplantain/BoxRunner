@@ -18,6 +18,12 @@ jobs:
       with:
         python-version: '3.10'
         cache: 'pip'
+    
+    - name: Cache GeoIP Databases
+      uses: actions/cache@v3
+      with:
+        path: geo_dbs
+        key: geoip-mmdb-v1  # Меняйте ключ (например, v2), если нужно принудительно обновить базы
 
     - name: Install dependencies
       run: pip install -r requirements.txt
