@@ -59,10 +59,12 @@ jobs:
         path: ./sing-box
         key: sing-box-${{ steps.getRelease.outputs.tag }}
     
-    - name: Download and extract sing-box (if not cached)
-      # Условие: если кэш не найден ИЛИ файл отсутствует (на всякий случай)
-      if: steps.cache-sing-box.outputs.cache-hit != 'true' || !(hashFiles('./sing-box') != '')
+    - name: Download and extract sing-box (if missing)
       run: |
+        if [ -f ./sing-box ]; then
+          echo "sing-box already exists, skipping download"
+          exit 0
+        fi
         TAG="${{ steps.getRelease.outputs.tag }}"
         FILENAME="sing-box-${TAG#v}-linux-amd64.tar.gz"
         URL="https://github.com/SagerNet/sing-box/releases/download/${TAG}/${FILENAME}"
