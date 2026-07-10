@@ -5,3 +5,4 @@ py-radix
 beautifulsoup4
 lxml
 maxminddb
+pyyaml
