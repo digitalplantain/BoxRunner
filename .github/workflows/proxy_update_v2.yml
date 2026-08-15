@@ -5,6 +5,11 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+# Следующий запуск ожидает завершения предыдущего, не перезаписывая его результаты.
+concurrency:
+  group: singbox-proxy-updater
+  cancel-in-progress: false
+
 jobs:
   run-update:
     runs-on: ubuntu-latest
@@ -21,7 +26,7 @@ jobs:
           cache: 'pip'
 
       - name: Cache GeoIP Databases
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: geo_dbs
           key: geoip-mmdb-v1
@@ -53,7 +58,7 @@ jobs:
 
       - name: Cache sing-box binary
         id: cache-sing-box
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./sing-box
           key: sing-box-${{ steps.getRelease.outputs.tag }}
