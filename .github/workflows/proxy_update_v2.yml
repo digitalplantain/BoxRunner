@@ -31,6 +31,18 @@ jobs:
           path: geo_dbs
           key: geoip-mmdb-v1
 
+      - name: Cache reputation registries
+        uses: actions/cache@v4
+        with:
+          path: |
+            bad_reputation_cache.txt
+            reputation_last_update.txt
+          # Новый ключ сохраняет состояние текущего запуска; restore-keys берёт
+          # последнее доступное. Сам скрипт использует кэш не более 24 часов.
+          key: reputation-lists-${{ github.run_id }}
+          restore-keys: |
+            reputation-lists-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
